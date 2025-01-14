@@ -56,16 +56,37 @@ enum Role {
 }
 
 model Client {
-  id       Int       @id @default(autoincrement())
-  name     String
-  email    String    @unique
-  phone    String
+  id              Int           @id @default(autoincrement())
+  serialNumber    Int           @default(autoincrement())
+  name            String
+  nameEnglish     String?
+  email           String        @unique
+  phone           String
+  secondaryPhone  String?
+  logo            String?
+  openingDate     DateTime?
+  address         String?
+  city            String?
+  postalCode      String?
+  licenseNumber   String?
+  licenseExpiry   DateTime?
+  businessGovId   String?
+  fax             String?
+  accountantPhone String?
+  status          ClientStatus?
+  note            String?
+
   workers  Worker[]
   fields   Field[]
   managers Manager[]
 
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
+}
+
+enum ClientStatus {
+  ACTIVE
+  INACTIVE
 }
 
 model Worker {
