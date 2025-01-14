@@ -25,6 +25,7 @@ body {
 }
 
 * {
+  direction: rtl;
   box-sizing: border-box;
   padding: 0;
   margin: 0;
@@ -34,6 +35,39 @@ a {
   color: inherit;
   text-decoration: none;
 }
+
+input,
+button,
+select,
+textarea {
+  outline: none;
+}
+
+button {
+  transition: all 250ms ease-in-out;
+  cursor: pointer;
+
+  &:hover {
+    opacity: 0.9;
+  }
+
+  &:disabled {
+    opacity: 0.8;
+    cursor: not-allowed;
+  }
+}
+
+input::-webkit-outer-spin-button,
+input::-webkit-inner-spin-button {
+  -webkit-appearance: none;
+  margin: 0;
+}
+
+/* Firefox */
+input[type="number"] {
+  -moz-appearance: textfield;
+}
+
 
 @media (prefers-color-scheme: dark) {
   html {

@@ -1,0 +1,18 @@
+@keyframes spin {
+  from {
+    transform: rotate(0deg);
+  }
+
+  to {
+    transform: rotate(360deg);
+  }
+}
+
+.container {
+  animation: spin 1s linear infinite;
+  border-radius: 50% !important;
+  border-left-color: "transparent";
+  border-bottom-color: "transparent";
+  position: "relative";
+  border: 1px solid transparent;
+}
