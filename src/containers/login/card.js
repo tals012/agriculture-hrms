@@ -3,7 +3,7 @@
 import { useEffect, useState } from "react";
 import { useRouter } from "next/navigation";
 import Spinner from "@/components/spinner";
-// import { login } from "@/actions/auth/login";
+import { login } from "@/app/(backend)/actions/auth/login";
 import { toast } from "react-toastify";
 import { getCookie } from "@/lib/getCookie";
 import styles from "@/styles/containers/login/card.module.scss";
@@ -14,38 +14,38 @@ export default function Card() {
   const [username, setUsername] = useState("");
   const [password, setPassword] = useState("");
 
-//   useEffect(() => {
-//     let token = getCookie("token");
-//     if (token) {
-//       router.push("/home");
-//     }
-//   }, []);
+  useEffect(() => {
+    let token = getCookie("token");
+    if (token) {
+      router.push("/clients");
+    }
+  }, []);
 
   const handleSubmit = async (e) => {
-    // e.preventDefault();
+    e.preventDefault();
 
-    // try {
-    //   setLoading(true);
-    //   const res = await login({ username, password });
+    try {
+      setLoading(true);
+      const res = await login({ username, password });
 
-    //   if (!res.ok) {
-    //     return toast.error(res.message, {
-    //       position: "top-center",
-    //       autoClose: 3000,
-    //     });
-    //   } else {
-    //     document.cookie = `token=${res.token}; Path=/; HttpOnly`;
-    //     toast.success(res.message, {
-    //       position: "top-center",
-    //       autoClose: 3000,
-    //     });
-    //     router.push("/home");
-    //   }
-    // } catch (error) {
-    //   console.log(error);
-    // } finally {
-    //   setLoading(false);
-    // }
+      if (!res.ok) {
+        return toast.error(res.message, {
+          position: "top-center",
+          autoClose: 3000,
+        });
+      } else {
+        document.cookie = `token=${res.token}; Path=/; HttpOnly`;
+        toast.success(res.message, {
+          position: "top-center",
+          autoClose: 3000,
+        });
+        router.push("/clients");
+      }
+    } catch (error) {
+      console.log(error);
+    } finally {
+      setLoading(false);
+    }
   };
   return (
     <div className={styles.container}>
