@@ -13,12 +13,15 @@
     "@prisma/client": "^6.2.1",
     "@vercel/postgres": "^0.10.0",
     "bcrypt": "^5.1.1",
+    "date-fns": "^4.1.0",
     "jose": "^5.9.6",
     "next": "15.1.4",
     "react": "^19.0.0",
     "react-dom": "^19.0.0",
+    "react-select": "^5.9.0",
     "react-toastify": "^11.0.2",
-    "sass": "^1.83.1"
+    "sass": "^1.83.1",
+    "zod": "^3.24.1"
   },
   "devDependencies": {
     "@eslint/eslintrc": "^3",

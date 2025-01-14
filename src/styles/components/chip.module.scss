@@ -1,0 +1,17 @@
+.container {
+  width: fit-content;
+  height: auto;
+  padding: 1px 10px;
+  border-radius: 6px;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  background-color: transparent;
+  p {
+    font-size: 12px;
+    font-weight: 600;
+    line-height: 16px;
+    letter-spacing: -0.01em;
+    color: #020608;
+  }
+}

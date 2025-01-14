@@ -66,7 +66,6 @@ model Client {
   logo            String?
   openingDate     DateTime?
   address         String?
-  city            String?
   postalCode      String?
   licenseNumber   String?
   licenseExpiry   DateTime?
@@ -79,6 +78,8 @@ model Client {
   workers  Worker[]
   fields   Field[]
   managers Manager[]
+  city     City?     @relation(fields: [cityId], references: [id])
+  cityId   String?
 
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
@@ -90,15 +91,23 @@ enum ClientStatus {
 }
 
 model Worker {
-  id             Int            @id @default(autoincrement())
-  name           String
-  email          String         @unique
-  phone          String
-  workerNumber   String         @unique
-  clientId       Int
-  client         Client         @relation(fields: [clientId], references: [id], onDelete: Cascade)
+  id           Int    @id @default(autoincrement())
+  name         String
+  email        String @unique
+  phone        String
+  workerNumber String @unique
+
+  clientId Int
+  client   Client @relation(fields: [clientId], references: [id], onDelete: Cascade)
+
   harvestEntries HarvestEntry[]
   groups         Group[]
+
+  country   Country? @relation(fields: [countryId], references: [id])
+  countryId String?
+
+  city   City?   @relation(fields: [cityId], references: [id])
+  cityId String?
 
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
@@ -169,6 +178,31 @@ model Group {
   groupName    String
   schedule     String
   workers      Worker[]
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+}
+
+model Country {
+  id            String  @id @default(cuid())
+  nameInHebrew  String
+  nameInEnglish String?
+  code          String
+
+  workers Worker[]
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+}
+
+model City {
+  id            String  @id @default(cuid())
+  cityCode      String
+  nameInHebrew  String
+  nameInEnglish String?
+
+  clients Client[]
+  worker  Worker[]
 
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt

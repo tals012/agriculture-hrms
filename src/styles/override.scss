@@ -1,0 +1,85 @@
+/* =============== DATE PICKER =============== */
+.react-datepicker-wrapper {
+  width: 100%;
+  z-index: 9999999;
+}
+
+.react-datepicker-popper {
+  z-index: 999999999 !important;
+}
+
+.react-date-picker__wrapper {
+  border: none;
+}
+
+.calendar-icon {
+  position: absolute;
+  left: 0px;
+  top: 50%;
+  transform: translateY(-50%);
+}
+
+.feesDatepicker {
+  border: 1px solid #000;
+  width: 100px;
+  height: 28px;
+  border-radius: 6px;
+  border: 1px solid #ebe9e9;
+  background-color: #ffffff;
+  font-size: 14px;
+  padding: 0px 5px;
+}
+
+/* =============== DATE PICKER =============== */
+
+/* =============== REACT-SELECT =============== */
+.reactSelect {
+  width: 100%;
+  height: 54px;
+  border-radius: 6px;
+  border: none;
+  background-color: transparent;
+  transition: all 250ms ease-in-out;
+  // z-index: 999999;
+}
+
+.reactSelect .css-13cymwt-control {
+  height: 54px;
+  border: 1px solid #ebe9e9 !important;
+  background-color: #ffffff !important;
+  padding-right: 7px !important;
+}
+
+.reactSelect .css-t3ipsp-control {
+  height: 54px;
+  border: 1px solid #ebe9e9 !important;
+  background-color: #ffffff !important;
+  padding-right: 7px !important;
+}
+
+.reactSelect .css-1u9des2-indicatorSeparator {
+  display: none;
+}
+
+/* =============== REACT-SELECT =============== */
+
+.react-time-picker__clear-button {
+  display: none !important;
+}
+
+.react-time-picker__clock-button {
+  display: none !important;
+}
+
+.react-time-picker__inputGroup {
+  // display: flex !important;
+  font-size: 16px !important;
+  width: fit-content !important;
+  direction: ltr !important;
+}
+
+.css-b62m3t-container {
+  z-index: 999 !important;
+}
+
+// @ used for overriding third party component styles
