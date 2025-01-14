@@ -1,0 +1,105 @@
+// This is your Prisma schema file,
+// learn more about it in the docs: https://pris.ly/d/prisma-schema
+
+// Looking for ways to speed up your queries, or scale easily with your serverless or edge functions?
+// Try Prisma Accelerate: https://pris.ly/cli/accelerate-init
+
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+model Client {
+  id        Int       @id @default(autoincrement())
+  name      String
+  email     String    @unique
+  phone     String
+  createdAt DateTime  @default(now())
+  updatedAt DateTime  @updatedAt
+  workers   Worker[]
+  fields    Field[]
+  managers  Manager[]
+}
+
+model Worker {
+  id               Int             @id @default(autoincrement())
+  name             String
+  email            String          @unique
+  phone            String
+  workerNumber     String          @unique
+  clientId         Int
+  client           Client          @relation(fields: [clientId], references: [id], onDelete: Cascade)
+  harvestEntries   HarvestEntry[]
+  createdAt        DateTime        @default(now())
+  updatedAt        DateTime        @updatedAt
+  workAssignments  WorkAssignment[] @relation("WorkGroup")
+}
+
+model Field {
+  id            Int       @id @default(autoincrement())
+  name          String
+  location      String
+  size          Float
+  typeOfProduct String
+  clientId      Int
+  client        Client    @relation(fields: [clientId], references: [id], onDelete: Cascade)
+  harvests      Harvest[]
+  createdAt     DateTime  @default(now())
+  updatedAt     DateTime  @updatedAt
+}
+
+model Harvest {
+  id          Int            @id @default(autoincrement())
+  fieldId     Int
+  field       Field          @relation(fields: [fieldId], references: [id], onDelete: Cascade)
+  harvestType String
+  species     String
+  price       Float
+  entries     HarvestEntry[]
+  createdAt   DateTime       @default(now())
+  updatedAt   DateTime       @updatedAt
+}
+
+model HarvestEntry {
+  id                    Int      @id @default(autoincrement())
+  workerId              Int
+  worker                Worker   @relation(fields: [workerId], references: [id], onDelete: Cascade)
+  harvestId             Int
+  harvest               Harvest  @relation(fields: [harvestId], references: [id], onDelete: Cascade)
+  entryTime             DateTime
+  exitTime              DateTime
+  containersFilled      Int
+  productivityIndicator Int
+  bonus                 Float
+  verificationPhoto     String?
+  createdAt             DateTime @default(now())
+  updatedAt             DateTime @updatedAt
+}
+
+model Manager {
+  id              Int              @id @default(autoincrement())
+  name            String
+  email           String           @unique
+  phone           String
+  role            String 
+  clientId        Int
+  client          Client           @relation(fields: [clientId], references: [id], onDelete: Cascade)
+  workAssignments WorkAssignment[]
+  createdAt       DateTime         @default(now())
+  updatedAt       DateTime         @updatedAt
+}
+
+model WorkAssignment {
+  id           Int      @id @default(autoincrement())
+  supervisorId Int
+  supervisor   Manager  @relation(fields: [supervisorId], references: [id], onDelete: Cascade)
+  groupName    String
+  schedule     String
+  workers      Worker[] @relation("WorkGroup")
+  createdAt    DateTime @default(now())
+  updatedAt    DateTime @updatedAt
+}
