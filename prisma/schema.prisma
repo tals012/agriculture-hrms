@@ -9,34 +9,76 @@ generator client {
 }
 
 datasource db {
-  provider = "postgresql"
-  url      = env("DATABASE_URL_URL")
+  provider  = "postgresql"
+  url       = env("DATABASE_URL_PRISMA_URL") // uses connection pooling
+  directUrl = env("DATABASE_URL_URL_NON_POOLING") // uses a direct connection
+}
+
+model Organization {
+  id String @id @default(cuid())
+
+  name                   String
+  email                  String  @unique
+  phone                  String?
+  address                String?
+  city                   String?
+  zip                    String?
+  internalOrganizationId String?
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+}
+
+model User {
+  id String @id @default(cuid())
+
+  name     String
+  username String  @unique
+  password String
+  email    String  @unique
+  phone    String?
+  role     Role?
+
+  licenseNumber String?
+
+  signature Bytes?
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+}
+
+enum Role {
+  ADMIN
+  FIELD_MANAGER
+  FOREIGN_WORKER
 }
 
 model Client {
-  id        Int       @id @default(autoincrement())
-  name      String
-  email     String    @unique
-  phone     String
-  createdAt DateTime  @default(now())
-  updatedAt DateTime  @updatedAt
-  workers   Worker[]
-  fields    Field[]
-  managers  Manager[]
+  id       Int       @id @default(autoincrement())
+  name     String
+  email    String    @unique
+  phone    String
+  workers  Worker[]
+  fields   Field[]
+  managers Manager[]
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
 }
 
 model Worker {
-  id               Int             @id @default(autoincrement())
-  name             String
-  email            String          @unique
-  phone            String
-  workerNumber     String          @unique
-  clientId         Int
-  client           Client          @relation(fields: [clientId], references: [id], onDelete: Cascade)
-  harvestEntries   HarvestEntry[]
-  createdAt        DateTime        @default(now())
-  updatedAt        DateTime        @updatedAt
-  workAssignments  WorkAssignment[] @relation("WorkGroup")
+  id             Int            @id @default(autoincrement())
+  name           String
+  email          String         @unique
+  phone          String
+  workerNumber   String         @unique
+  clientId       Int
+  client         Client         @relation(fields: [clientId], references: [id], onDelete: Cascade)
+  harvestEntries HarvestEntry[]
+  groups         Group[]
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
 }
 
 model Field {
@@ -48,8 +90,9 @@ model Field {
   clientId      Int
   client        Client    @relation(fields: [clientId], references: [id], onDelete: Cascade)
   harvests      Harvest[]
-  createdAt     DateTime  @default(now())
-  updatedAt     DateTime  @updatedAt
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
 }
 
 model Harvest {
@@ -60,8 +103,9 @@ model Harvest {
   species     String
   price       Float
   entries     HarvestEntry[]
-  createdAt   DateTime       @default(now())
-  updatedAt   DateTime       @updatedAt
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
 }
 
 model HarvestEntry {
@@ -76,30 +120,33 @@ model HarvestEntry {
   productivityIndicator Int
   bonus                 Float
   verificationPhoto     String?
-  createdAt             DateTime @default(now())
-  updatedAt             DateTime @updatedAt
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
 }
 
 model Manager {
-  id              Int              @id @default(autoincrement())
-  name            String
-  email           String           @unique
-  phone           String
-  role            String 
-  clientId        Int
-  client          Client           @relation(fields: [clientId], references: [id], onDelete: Cascade)
-  workAssignments WorkAssignment[]
-  createdAt       DateTime         @default(now())
-  updatedAt       DateTime         @updatedAt
+  id       Int     @id @default(autoincrement())
+  name     String
+  email    String  @unique
+  phone    String
+  role     String
+  clientId Int
+  client   Client  @relation(fields: [clientId], references: [id], onDelete: Cascade)
+  groups   Group[]
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
 }
 
-model WorkAssignment {
+model Group {
   id           Int      @id @default(autoincrement())
   supervisorId Int
   supervisor   Manager  @relation(fields: [supervisorId], references: [id], onDelete: Cascade)
   groupName    String
   schedule     String
-  workers      Worker[] @relation("WorkGroup")
-  createdAt    DateTime @default(now())
-  updatedAt    DateTime @updatedAt
+  workers      Worker[]
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
 }
