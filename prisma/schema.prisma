@@ -68,7 +68,9 @@ model Client {
   address         String?
   postalCode      String?
   licenseNumber   String?
-  licenseExpiry   DateTime?
+  licenseExist    Boolean?
+  licenseFromDate DateTime?
+  licenseToDate   DateTime?
   businessGovId   String?
   fax             String?
   accountantPhone String?
@@ -91,11 +93,46 @@ enum ClientStatus {
 }
 
 model Worker {
-  id           Int    @id @default(autoincrement())
-  name         String
-  email        String @unique
-  phone        String
-  workerNumber String @unique
+  id         Int     @id @default(autoincrement())
+  workerCode String?
+
+  name                String?
+  surname             String?
+  fatherName          String?
+  motherName          String?
+  nameSpouse          String?
+  nameHe              String?
+  surnameHe           String?
+  primaryPhone        String?
+  secondaryPhone      String?
+  email               String?
+  address             String?
+  sex                 Gender?
+  birthday            DateTime?
+  maritalStatus       MaritalStatus?
+  primaryLanguage     String?
+  primaryLanguages    String[]
+  secondaryLanguage   String?
+  secondaryLanguages  String[]
+  additionalLanguages String[]
+  countryArea         String?
+  religion            String?
+  workerStatus        WorkerStatus?  @default(ACTIVE)
+  company             String?
+  metapelCode         String?
+
+  passport         String?
+  passportValidity DateTime?
+  visa             String?
+  visaValidity     DateTime?
+  inscriptionDate  DateTime?
+  entryDate        DateTime?
+
+  favoritePlace String?
+  favoriteSex   String?
+  partnerPlace  String?
+
+  note String?
 
   clientId Int
   client   Client @relation(fields: [clientId], references: [id], onDelete: Cascade)
@@ -111,6 +148,28 @@ model Worker {
 
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
+}
+
+enum WorkerStatus {
+  ACTIVE
+  INACTIVE
+  FREEZE
+  COMMITTEE
+  HIDDEN
+  IN_TRANSIT
+  ALL
+}
+
+enum MaritalStatus {
+  SINGLE
+  MARRIED
+  DIVORCED
+  WIDOWED
+}
+
+enum Gender {
+  MALE
+  FEMALE
 }
 
 model Field {
