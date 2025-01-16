@@ -1,4 +1,5 @@
 import { IBM_Plex_Sans_Hebrew } from "next/font/google";
+import "react-datepicker/dist/react-datepicker.css";
 import "@/styles/globals.scss";
 import "@/styles/override.scss";
 

@@ -26,7 +26,6 @@ const getClientById = async ({ payload }) => {
         city: true,
       },
     });
-
     if (!client) {
       return {
         status: 404,

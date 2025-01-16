@@ -1,0 +1,113 @@
+.container {
+  width: 100%;
+  margin-top: 32px;
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+  .noData {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+  }
+  .card {
+    display: flex;
+    align-items: center;
+    width: 100%;
+    height: 96px;
+    padding: 24px;
+    border-radius: 16px;
+    border: 1px solid #ebebeb;
+
+    .firstBlock {
+      flex-grow: 2.5;
+      display: flex;
+      flex-direction: column;
+      gap: 2px;
+      h4 {
+        font-size: 15px;
+        font-weight: 600;
+        line-height: 24px;
+        letter-spacing: -0.005em;
+      }
+      p {
+        font-size: 13px;
+        font-weight: 500;
+        line-height: 20px;
+        letter-spacing: 0.01em;
+        color: #959595;
+      }
+    }
+
+    .block {
+      flex-grow: 1;
+      display: flex;
+      flex-direction: column;
+      gap: 2px;
+
+      h5 {
+        font-size: 13px;
+        font-weight: 500;
+        line-height: 20px;
+        letter-spacing: 0.01em;
+        color: #959595;
+      }
+      p {
+        font-size: 15px;
+        font-weight: 500;
+        line-height: 24px;
+        letter-spacing: -0.005em;
+        color: #020608;
+      }
+
+      .chip {
+        margin-top: 2px;
+        width: fit-content;
+        height: 24px;
+        padding: 4px 6px;
+        border-radius: 6px;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        p {
+          font-size: 12px;
+          font-weight: 600;
+          line-height: 16px;
+          letter-spacing: -0.01em;
+        }
+      }
+    }
+
+    .btns {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      button:nth-child(1) {
+        width: 102px;
+        height: 48px;
+        border-radius: 6px;
+        border: 1px solid #2b85ff;
+        background-color: transparent;
+        font-size: 13px;
+        font-weight: 600;
+        line-height: 16px;
+        letter-spacing: -0.01em;
+        text-align: center;
+        color: #2b85ff;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        gap: 5px;
+      }
+      button:nth-child(2) {
+        width: 50px;
+        height: 48px;
+        border-radius: 6px;
+        background: #FF0000;
+        border: 1px solid #FF0000;
+        display: flex;
+        justify-content: center;
+        align-items: center;
+      }
+    }
+  }
+}

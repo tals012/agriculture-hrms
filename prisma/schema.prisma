@@ -56,7 +56,7 @@ enum Role {
 }
 
 model Client {
-  id              Int           @id @default(autoincrement())
+  id              String        @id @default(cuid())
   serialNumber    Int           @default(autoincrement())
   name            String
   nameEnglish     String?
@@ -93,7 +93,7 @@ enum ClientStatus {
 }
 
 model Worker {
-  id         Int     @id @default(autoincrement())
+  id         String  @id @default(cuid())
   workerCode String?
 
   name                String?
@@ -134,7 +134,7 @@ model Worker {
 
   note String?
 
-  clientId Int
+  clientId String
   client   Client @relation(fields: [clientId], references: [id], onDelete: Cascade)
 
   harvestEntries HarvestEntry[]
@@ -178,7 +178,7 @@ model Field {
   location      String
   size          Float
   typeOfProduct String
-  clientId      Int
+  clientId      String
   client        Client    @relation(fields: [clientId], references: [id], onDelete: Cascade)
   harvests      Harvest[]
 
@@ -201,7 +201,7 @@ model Harvest {
 
 model HarvestEntry {
   id                    Int      @id @default(autoincrement())
-  workerId              Int
+  workerId              String
   worker                Worker   @relation(fields: [workerId], references: [id], onDelete: Cascade)
   harvestId             Int
   harvest               Harvest  @relation(fields: [harvestId], references: [id], onDelete: Cascade)
@@ -217,12 +217,12 @@ model HarvestEntry {
 }
 
 model Manager {
-  id       Int     @id @default(autoincrement())
+  id       String  @id @default(cuid())
   name     String
   email    String  @unique
   phone    String
   role     String
-  clientId Int
+  clientId String
   client   Client  @relation(fields: [clientId], references: [id], onDelete: Cascade)
   groups   Group[]
 
@@ -231,8 +231,8 @@ model Manager {
 }
 
 model Group {
-  id           Int      @id @default(autoincrement())
-  supervisorId Int
+  id           String   @id @default(cuid())
+  supervisorId String
   supervisor   Manager  @relation(fields: [supervisorId], references: [id], onDelete: Cascade)
   groupName    String
   schedule     String

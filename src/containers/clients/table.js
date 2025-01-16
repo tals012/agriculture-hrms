@@ -4,7 +4,7 @@ import Chip from "@/components/chip";
 import InitialsCircle from "@/components/initialsCircle";
 import styles from "@/styles/containers/clients/table.module.scss";
 
-const Table = ({ setModalOpen, data }) => {
+const Table = ({ data, setClientId }) => {
   return (
     <div className={styles.container}>
       <div className={styles.wrapper}>
@@ -38,7 +38,12 @@ const Table = ({ setModalOpen, data }) => {
                   <td>
                     <input type="checkbox" />
                   </td>
-                  <td onClick={() => setModalOpen(item.id)}>
+                  <td
+                    onClick={() => {
+                      setClientId(item.id);
+                      console.log(item.id);
+                    }}
+                  >
                     <div className={styles.user}>
                       {/* <Image
                         src="/assets/icons/avatar-1.png"
@@ -70,18 +75,18 @@ const Table = ({ setModalOpen, data }) => {
                   <td>
                     <p>
                       {item.openingDate
-                        ? format(new Date(item.licenseExpiry), "dd-MM-yyyy")
+                        ? format(new Date(item.openingDate), "dd-MM-yyyy")
                         : "-"}
                     </p>
                   </td>
                   <td>
                     <p>
-                      {item.licenseExpiry
-                        ? format(new Date(item.licenseExpiry), "dd-MM-yyyy")
+                      {item.licenseToDate
+                        ? format(new Date(item.licenseToDate), "dd-MM-yyyy")
                         : "-"}
                     </p>
                   </td>
-                  <td onClick={() => setModalOpen(item.id)}>
+                  <td onClick={() => setClientId(item.id)}>
                     <Image
                       src="/assets/icons/menu-2.svg"
                       alt="menu"

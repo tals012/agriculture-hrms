@@ -4,36 +4,50 @@ import prisma from "@/lib/prisma";
 import { z } from "zod";
 
 const updateClientSchema = z.object({
-  id: z.number(),
+  id: z.string(),
   name: z.string().optional(),
-  nameEnglish: z.string().optional(),
-  email: z.string().email().optional(),
-  phone: z.string().optional(),
-  secondaryPhone: z.string().optional(),
-  logo: z.string().optional(),
-  openingDate: z.date().optional(),
-  address: z.string().optional(),
-  postalCode: z.string().optional(),
-  licenseNumber: z.string().optional(),
-  licenseExist: z.boolean().optional(),
-  licenseFromDate: z.date().optional(),
-  licenseToDate: z.date().optional(),
-  businessGovId: z.string().optional(),
-  fax: z.string().optional(),
-  accountantPhone: z.string().optional(),
-  status: z.enum(["ACTIVE", "INACTIVE"]).optional(),
-  note: z.string().optional(),
-  cityId: z.string().optional(),
-  note: z.string().optional(),
+  nameEnglish: z.string().optional().nullable(),
+  email: z.string().email().optional().nullable(),
+  phone: z.string().optional().nullable(),
+  secondaryPhone: z.string().optional().nullable(),
+  logo: z.string().optional().nullable(),
+  openingDate: z.date().optional().nullable(),
+  address: z.string().optional().nullable(),
+  postalCode: z.string().optional().nullable(),
+  licenseNumber: z.string().optional().nullable(),
+  licenseExist: z.boolean().optional().nullable(),
+  licenseFromDate: z.date().optional().nullable(),
+  licenseToDate: z.date().optional().nullable(),
+  businessGovId: z.string().optional().nullable(),
+  fax: z.string().optional().nullable(),
+  accountantPhone: z.string().optional().nullable(),
+  status: z.enum(["ACTIVE", "INACTIVE"]).optional().nullable(),
+  note: z.string().optional().nullable(),
+  cityId: z.string().optional().nullable(),
 });
 
 const updateClient = async ({ payload }) => {
   try {
-    const parsedData = updateClientSchema.safeParse(payload);
-    if (!parsedData.success) {
+    if (!payload) {
       return {
         status: 400,
-        message: parsedData.error.errors.map((e) => e.message).join(", "),
+        message: "No payload provided",
+        data: null,
+      };
+    }
+
+    const parsedData = updateClientSchema.safeParse(payload);
+    
+    if (!parsedData.success) {
+      const formattedErrors = parsedData.error.issues.map(issue => ({
+        field: issue.path.join('.'),
+        message: issue.message
+      }));
+
+      return {
+        status: 400,
+        message: "Validation failed",
+        errors: formattedErrors,
         data: null,
       };
     }
@@ -67,10 +81,19 @@ const updateClient = async ({ payload }) => {
       data: updatedClient,
     };
   } catch (error) {
+    if (error.code === 'P2002') {
+      return {
+        status: 409,
+        message: "A unique constraint would be violated. Check email or other unique fields.",
+        data: null,
+      };
+    }
+
     console.error("Error updating client:", error);
     return {
       status: 500,
       message: "Internal server error",
+      error: error.message,
       data: null,
     };
   }

@@ -2,44 +2,51 @@
 
 import prisma from "@/lib/prisma";
 
-const getClients = async ({ payload }) => {
-  try {
-    const { name, status, phone, search } = payload;
+const getClients = async (filters = {}) => {
+  console.log("Filters received:", filters);
 
-    const where = {
-      AND: [
-        search
-          ? {
-              OR: [
-                { name: { contains: search, mode: "insensitive" } },
-                { phone: { contains: search, mode: "insensitive" } },
-                { secondaryPhone: { contains: search, mode: "insensitive" } },
-                { serialNumber: { contains: search, mode: "insensitive" } },
-              ],
-            }
-          : {},
-        name
-          ? {
-              OR: [
-                { name: { contains: name, mode: "insensitive" } },
-                { nameEnglish: { contains: name, mode: "insensitive" } },
-              ],
-            }
-          : {},
-        phone
-          ? {
-              OR: [
-                { phone: { contains: phone, mode: "insensitive" } },
-                { secondaryPhone: { contains: phone, mode: "insensitive" } },
-              ],
-            }
-          : {},
-        status ? { status: { equals: status } } : {},
-      ],
-    };
+  try {
+    const where = { AND: [] };
+
+    // Search filter
+    if (filters?.search?.trim()) {
+      where.AND.push({
+        OR: [
+          { serialNumber: { contains: filters.search, mode: "insensitive" } },
+          { name: { contains: filters.search, mode: "insensitive" } },
+          { nameEnglish: { contains: filters.search, mode: "insensitive" } },
+          { phone: { contains: filters.search, mode: "insensitive" } },
+        ],
+      });
+    }
+
+    // Name filter
+    if (filters?.name?.trim()) {
+      where.AND.push({
+        OR: [
+          { name: { contains: filters.name, mode: "insensitive" } },
+          { nameEnglish: { contains: filters.name, mode: "insensitive" } },
+        ],
+      });
+    }
+
+    // Phone filter
+    if (filters?.phone?.trim()) {
+      where.AND.push({
+        OR: [
+          { phone: { contains: filters.phone, mode: "insensitive" } },
+          { secondaryPhone: { contains: filters.phone, mode: "insensitive" } },
+        ],
+      });
+    }
+
+    // Status filter
+    if (filters?.status) {
+      where.AND.push({ status: filters.status });
+    }
 
     const clients = await prisma.client.findMany({
-      where,
+      where: where.AND.length > 0 ? where : {},
       select: {
         id: true,
         serialNumber: true,
@@ -51,16 +58,20 @@ const getClients = async ({ payload }) => {
         logo: true,
         openingDate: true,
         address: true,
-        city: true,
         postalCode: true,
         licenseNumber: true,
-        licenseExpiry: true,
         businessGovId: true,
         fax: true,
         accountantPhone: true,
         status: true,
         note: true,
         createdAt: true,
+        city: {
+          select: {
+            id: true,
+            nameInHebrew: true,
+          },
+        },
       },
       orderBy: {
         serialNumber: "asc",
@@ -77,7 +88,7 @@ const getClients = async ({ payload }) => {
     return {
       status: 500,
       message: "Internal server error",
-      data: null,
+      data: [],
     };
   }
 };
