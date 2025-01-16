@@ -173,22 +173,46 @@ enum Gender {
 }
 
 model Field {
-  id            Int       @id @default(autoincrement())
-  name          String
-  location      String
-  size          Float
-  typeOfProduct String
-  clientId      String
-  client        Client    @relation(fields: [clientId], references: [id], onDelete: Cascade)
-  harvests      Harvest[]
+  id           String @id @default(cuid())
+  serialNumber Int    @default(autoincrement())
+
+  name                     String         @default("")
+  typeOfProduct            String
+  contactPhone             String?
+  contactPersonName        String?
+  additionalPhone          String?
+  withholdingAccountNumber String?
+  address                  String?
+  fieldTax                 String?
+  fieldCode                String?
+  size                     Float?
+  status                   ProjectStatus? @default(ACTIVE)
+  latitude                 Float?
+  longitude                Float?
+  fieldOpenTime            Float?         @default(480)
+  fieldCloseTime           Float?         @default(1020)
+  note                     String?
+
+  city      City?     @relation(fields: [cityId], references: [id])
+  cityId    String?
+  clientId  String
+  client    Client    @relation(fields: [clientId], references: [id], onDelete: Cascade)
+  harvests  Harvest[]
+  managerId String?
+  manager   Manager?  @relation(fields: [managerId], references: [id])
 
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
 }
 
+enum ProjectStatus {
+  ACTIVE
+  INACTIVE
+}
+
 model Harvest {
-  id          Int            @id @default(autoincrement())
-  fieldId     Int
+  id          String         @id @default(cuid())
+  fieldId     String
   field       Field          @relation(fields: [fieldId], references: [id], onDelete: Cascade)
   harvestType String
   species     String
@@ -200,10 +224,10 @@ model Harvest {
 }
 
 model HarvestEntry {
-  id                    Int      @id @default(autoincrement())
+  id                    String   @id @default(cuid())
   workerId              String
   worker                Worker   @relation(fields: [workerId], references: [id], onDelete: Cascade)
-  harvestId             Int
+  harvestId             String
   harvest               Harvest  @relation(fields: [harvestId], references: [id], onDelete: Cascade)
   entryTime             DateTime
   exitTime              DateTime
@@ -224,6 +248,7 @@ model Manager {
   clientId String
   client   Client  @relation(fields: [clientId], references: [id], onDelete: Cascade)
   groups   Group[]
+  fields   Field[]
 
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
@@ -260,7 +285,8 @@ model City {
   nameInEnglish String?
 
   clients Client[]
-  worker  Worker[]
+  workers Worker[]
+  fields  Field[]
 
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt

@@ -8,7 +8,9 @@ import getClientById from "@/app/(backend)/actions/clients/getClientById";
 import Spinner from "@/components/spinner";
 import Image from "next/image";
 import CreateManager from "@/smallModals/client/createManager";
+import CreateField from "@/smallModals/client/createField";
 import Managers from "./tabs/managers";
+import Fields from "./tabs/fields";
 import styles from "@/styles/bigModals/client/index.module.scss";
 
 const Client = ({ isOpen, onClose }) => {
@@ -43,9 +45,10 @@ const Client = ({ isOpen, onClose }) => {
     updatedAt: null,
   });
 
-  const [isCreateManagerModalOpen, setIsCreateManagerModalOpen] =
-    useState(false);
+  const [isCreateManagerModalOpen, setIsCreateManagerModalOpen] = useState(false);
   const [createManagerStatus, setCreateManagerStatus] = useState(null);
+  const [isCreateFieldModalOpen, setIsCreateFieldModalOpen] = useState(false);
+  const [createFieldStatus, setCreateFieldStatus] = useState(null);
 
   useEffect(() => {
     if (isOpen === false) return;
@@ -144,6 +147,12 @@ const Client = ({ isOpen, onClose }) => {
                 width: 24.83,
                 height: 32.5,
               },
+              {
+                icon: "/assets/icons/apartments-1.svg",
+                title: "שדות",
+                width: 24.83,
+                height: 32.5,
+              },
             ]}
             activeTab={activeTab}
             setActiveTab={setActiveTab}
@@ -160,6 +169,13 @@ const Client = ({ isOpen, onClose }) => {
               setIsCreateManagerModalOpen={setIsCreateManagerModalOpen}
               createManagerStatus={createManagerStatus}
               setCreateManagerStatus={setCreateManagerStatus}
+              clientId={isOpen}
+            />
+          ) : activeTab === 2 ? (
+            <Fields
+              setIsCreateFieldModalOpen={setIsCreateFieldModalOpen}
+              createFieldStatus={createFieldStatus}
+              setCreateFieldStatus={setCreateFieldStatus}
               clientId={isOpen}
             />
           ) : null}
@@ -193,6 +209,13 @@ const Client = ({ isOpen, onClose }) => {
         <CreateManager
           setModalOpen={setIsCreateManagerModalOpen}
           setCreateStatus={setCreateManagerStatus}
+          clientId={isOpen}
+        />
+      )}
+      {isCreateFieldModalOpen && (
+        <CreateField
+          setModalOpen={setIsCreateFieldModalOpen}
+          setCreateStatus={setCreateFieldStatus}
           clientId={isOpen}
         />
       )}

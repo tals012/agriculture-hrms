@@ -1,6 +1,7 @@
 "use client";
 import { useState } from "react";
 import ManagersTable from "@/containers/bigModals/client/managers/managersTable";
+import AssignFields from "@/containers/bigModals/client/managers/assignFields";
 import styles from "@/styles/bigModals/client/tabs/managers.module.scss";
 
 const Managers = ({
@@ -42,7 +43,9 @@ const Managers = ({
           setCreateManagerStatus={setCreateManagerStatus}
           clientId={clientId}
         />
-      ) : activeTab === 1 ? null : null}
+      ) : activeTab === 1 ? (
+        <AssignFields clientId={clientId} />
+      ) : null}
     </div>
   );
 };
