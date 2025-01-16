@@ -43,7 +43,7 @@ const ManagersTable = ({
     }
   };
 
-  const debouncedFetchData = useCallback(debounce(fetchData, 300), []);
+  const debouncedFetchData = useCallback(debounce(fetchData, 300), [clientId]);
 
   useEffect(() => {
     setCreateManagerStatus(null);
@@ -136,7 +136,6 @@ const ManagersTable = ({
               <th>שם</th>
               <th>אימייל</th>
               <th>טלפון</th>
-              <th>תפקיד</th>
               <th>קבוצות</th>
               <th>פעולות</th>
             </tr>
@@ -145,7 +144,7 @@ const ManagersTable = ({
           <tbody>
             {data.length === 0 && (
               <tr>
-                <td colSpan="6" style={{ textAlign: "center" }}>
+                <td colSpan="5" style={{ textAlign: "center" }}>
                   <p>אין מנהלים</p>
                 </td>
               </tr>
@@ -160,9 +159,6 @@ const ManagersTable = ({
                 </td>
                 <td>
                   <p>{manager.phone}</p>
-                </td>
-                <td>
-                  <p>{manager.role}</p>
                 </td>
                 <td>
                   <p>{manager.groups?.length || 0} קבוצות</p>

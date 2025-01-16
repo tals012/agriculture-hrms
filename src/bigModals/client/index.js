@@ -7,8 +7,9 @@ import SideDetails from "./sideDetails";
 import getClientById from "@/app/(backend)/actions/clients/getClientById";
 import Spinner from "@/components/spinner";
 import Image from "next/image";
-import styles from "@/styles/bigModals/client/index.module.scss";
+import CreateManager from "@/smallModals/client/createManager";
 import Managers from "./tabs/managers";
+import styles from "@/styles/bigModals/client/index.module.scss";
 
 const Client = ({ isOpen, onClose }) => {
   const [activeTab, setActiveTab] = useState(0);
@@ -182,6 +183,19 @@ const Client = ({ isOpen, onClose }) => {
           />
         </div>
       </div>
+
+      {/*
+       // * ================================
+       // * MODALS =========================
+       // * ================================
+       */}
+      {isCreateManagerModalOpen && (
+        <CreateManager
+          setModalOpen={setIsCreateManagerModalOpen}
+          setCreateStatus={setCreateManagerStatus}
+          clientId={isOpen}
+        />
+      )}
     </div>
   );
 };

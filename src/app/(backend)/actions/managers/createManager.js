@@ -7,11 +7,10 @@ const createManagerSchema = z.object({
   name: z.string().min(1, "Name is required"),
   email: z.string().email("Invalid email format"),
   phone: z.string().min(1, "Phone is required"),
-  role: z.string().min(1, "Role is required"),
   clientId: z.string().min(1, "Client ID is required"),
 });
 
-const createManager = async (payload) => {
+const createManager = async ({ payload }) => {
   try {
     if (!payload) {
       return {
@@ -68,7 +67,6 @@ const createManager = async (payload) => {
         name: true,
         email: true,
         phone: true,
-        role: true,
         clientId: true,
         createdAt: true,
         updatedAt: true,

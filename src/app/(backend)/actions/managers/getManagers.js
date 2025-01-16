@@ -38,7 +38,6 @@ const getManagers = async (filters = {}) => {
           { name: { contains: parsedFilters.data.search, mode: "insensitive" } },
           { email: { contains: parsedFilters.data.search, mode: "insensitive" } },
           { phone: { contains: parsedFilters.data.search, mode: "insensitive" } },
-          { role: { contains: parsedFilters.data.search, mode: "insensitive" } },
         ],
       });
     }
@@ -50,7 +49,6 @@ const getManagers = async (filters = {}) => {
         name: true,
         email: true,
         phone: true,
-        role: true,
         clientId: true,
         createdAt: true,
         updatedAt: true,
