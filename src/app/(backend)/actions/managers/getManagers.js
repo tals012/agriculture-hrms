@@ -5,6 +5,7 @@ import { z } from "zod";
 
 const getManagersSchema = z.object({
   clientId: z.string().optional(),
+  search: z.string().optional(),
 });
 
 const getManagers = async (filters = {}) => {
@@ -25,13 +26,25 @@ const getManagers = async (filters = {}) => {
       };
     }
 
-    const where = {};
+    const where = { AND: [] };
+
     if (parsedFilters.data.clientId) {
-      where.clientId = parsedFilters.data.clientId;
+      where.AND.push({ clientId: parsedFilters.data.clientId });
+    }
+
+    if (parsedFilters.data.search?.trim()) {
+      where.AND.push({
+        OR: [
+          { name: { contains: parsedFilters.data.search, mode: "insensitive" } },
+          { email: { contains: parsedFilters.data.search, mode: "insensitive" } },
+          { phone: { contains: parsedFilters.data.search, mode: "insensitive" } },
+          { role: { contains: parsedFilters.data.search, mode: "insensitive" } },
+        ],
+      });
     }
 
     const managers = await prisma.manager.findMany({
-      where,
+      where: where.AND.length > 0 ? where : {},
       select: {
         id: true,
         name: true,

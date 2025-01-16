@@ -8,6 +8,7 @@ import getClientById from "@/app/(backend)/actions/clients/getClientById";
 import Spinner from "@/components/spinner";
 import Image from "next/image";
 import styles from "@/styles/bigModals/client/index.module.scss";
+import Managers from "./tabs/managers";
 
 const Client = ({ isOpen, onClose }) => {
   const [activeTab, setActiveTab] = useState(0);
@@ -40,6 +41,10 @@ const Client = ({ isOpen, onClose }) => {
     createdAt: null,
     updatedAt: null,
   });
+
+  const [isCreateManagerModalOpen, setIsCreateManagerModalOpen] =
+    useState(false);
+  const [createManagerStatus, setCreateManagerStatus] = useState(null);
 
   useEffect(() => {
     if (isOpen === false) return;
@@ -147,6 +152,13 @@ const Client = ({ isOpen, onClose }) => {
             <General
               personalData={personalData}
               setPersonalData={setPersonalData}
+              clientId={isOpen}
+            />
+          ) : activeTab === 1 ? (
+            <Managers
+              setIsCreateManagerModalOpen={setIsCreateManagerModalOpen}
+              createManagerStatus={createManagerStatus}
+              setCreateManagerStatus={setCreateManagerStatus}
               clientId={isOpen}
             />
           ) : null}

@@ -1,41 +1,43 @@
 "use client";
 import Image from "next/image";
 import { Plus } from "@/svgs/plus";
-import getClientMedicalHistory from "@/actions/clients/getClientMedicalHistory";
 import { useCallback, useEffect, useState } from "react";
 import Spinner from "@/components/spinner";
-import deleteClientMedicalHistory from "@/actions/clients/deleteClientMedicalHistory";
 import { toast } from "react-toastify";
-import { format } from "date-fns";
 import { Trash } from "@/svgs/trash";
 import { debounce } from "@/lib/debounce";
-import styles from "@/styles/containers/bigModals/client/medical/sickHistoryTable.module.scss";
+import getManagers from "@/app/(backend)/actions/managers/getManagers";
+import deleteManager from "@/app/(backend)/actions/managers/deleteManager";
+import styles from "@/styles/containers/bigModals/client/managers/managersTable.module.scss";
 
 const ManagersTable = ({
-  setIsCreateMedicalHistoryModalOpen,
-  createMedicalHistoryStatus,
-  setCreateMedicalHistoryStatus,
+  setIsCreateManagerModalOpen,
+  createManagerStatus,
+  setCreateManagerStatus,
   clientId,
 }) => {
   const [data, setData] = useState([]);
   const [loading, setLoading] = useState(true);
   const [search, setSearch] = useState("");
 
-  // * fetch medical history
   const fetchData = async (searchQuery) => {
     try {
       setLoading(true);
-      let payload = { clientId };
-      if (searchQuery) {
-        payload.search = searchQuery;
-      }
-      const res = await getClientMedicalHistory({ payload });
-      const { data, status } = res;
-      if (status === 200) {
-        setData(data);
+      const filters = {
+        clientId,
+        ...(searchQuery && { search: searchQuery })
+      };
+      
+      const res = await getManagers(filters);
+      if (res?.status === 200) {
+        setData(res.data);
+      } else {
+        console.error("Error fetching managers:", res?.message);
+        setData([]);
       }
     } catch (error) {
-      console.log(error);
+      console.error("Error fetching managers:", error);
+      setData([]);
     } finally {
       setLoading(false);
     }
@@ -44,9 +46,9 @@ const ManagersTable = ({
   const debouncedFetchData = useCallback(debounce(fetchData, 300), []);
 
   useEffect(() => {
-    setCreateMedicalHistoryStatus(null);
+    setCreateManagerStatus(null);
     debouncedFetchData(search);
-  }, [search, createMedicalHistoryStatus, debouncedFetchData, clientId]);
+  }, [search, createManagerStatus, debouncedFetchData, clientId]);
 
   if (loading) {
     return (
@@ -68,7 +70,7 @@ const ManagersTable = ({
           </div>
           <button className={styles.button}>
             <Plus color="#ffffff" />
-            הוספה מצב רפואי
+            הוספת מנהל
           </button>
         </div>
         <div className={styles.loading}>
@@ -78,22 +80,27 @@ const ManagersTable = ({
     );
   }
 
-  // * delete medical history record
-  const handleDelete = async (medicalHistoryId) => {
+  const handleDelete = async (managerId) => {
     try {
-      const res = await deleteClientMedicalHistory({
-        payload: { medicalHistoryId },
+      const res = await deleteManager({
+        payload: { managerId }
       });
 
-      const { status, message } = res;
-      if (status === 200) {
-        toast.success(message, {
+      if (res?.status === 200) {
+        toast.success(res.message, {
           position: "top-center",
         });
-        setCreateMedicalHistoryStatus(true);
+        debouncedFetchData(search);
+      } else {
+        toast.error(res?.message || "Failed to delete manager", {
+          position: "top-center",
+        });
       }
     } catch (error) {
-      console.log(error);
+      console.error("Error deleting manager:", error);
+      toast.error("Failed to delete manager", {
+        position: "top-center",
+      });
     }
   };
 
@@ -116,10 +123,10 @@ const ManagersTable = ({
         </div>
         <button
           className={styles.button}
-          onClick={() => setIsCreateMedicalHistoryModalOpen(true)}
+          onClick={() => setIsCreateManagerModalOpen(true)}
         >
           <Plus color="#ffffff" />
-          הוספה מצב רפואי
+          הוספת מנהל
         </button>
       </div>
       <div className={styles.tableContainer}>
@@ -127,42 +134,43 @@ const ManagersTable = ({
           <thead>
             <tr>
               <th>שם</th>
-              <th>עלות</th>
-              <th>מתאריך</th>
-              <th>עד תאריך</th>
-              <th>הערות</th>
+              <th>אימייל</th>
+              <th>טלפון</th>
+              <th>תפקיד</th>
+              <th>קבוצות</th>
+              <th>פעולות</th>
             </tr>
           </thead>
 
           <tbody>
             {data.length === 0 && (
               <tr>
-                <td colSpan="5" style={{ textAlign: "center" }}>
-                  <p>אין תוצאות</p>
+                <td colSpan="6" style={{ textAlign: "center" }}>
+                  <p>אין מנהלים</p>
                 </td>
               </tr>
             )}
-            {data.map((item, index) => (
-              <tr key={index}>
+            {data.map((manager) => (
+              <tr key={manager.id}>
                 <td>
-                  <p>{item.name}</p>
+                  <p>{manager.name}</p>
                 </td>
                 <td>
-                  <p>{item.cost}</p>
+                  <p>{manager.email}</p>
                 </td>
                 <td>
-                  <p>{format(new Date(item.fromDate), "dd-MM-yyyy")}</p>
+                  <p>{manager.phone}</p>
                 </td>
                 <td>
-                  <p>{format(new Date(item.toDate), "dd-MM-yyyy")}</p>
+                  <p>{manager.role}</p>
                 </td>
                 <td>
-                  <p>{item.note}</p>
+                  <p>{manager.groups?.length || 0} קבוצות</p>
                 </td>
                 <td>
                   <div className={styles.icons}>
                     <div
-                      onClick={() => handleDelete(item.id)}
+                      onClick={() => handleDelete(manager.id)}
                       style={{ cursor: "pointer" }}
                     >
                       <Trash color="red" />
