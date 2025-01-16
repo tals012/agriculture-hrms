@@ -132,6 +132,12 @@ const Client = ({ isOpen, onClose }) => {
                 width: 24.83,
                 height: 32.5,
               },
+              {
+                icon: "/assets/icons/user-1.svg",
+                title: "מנהלים",
+                width: 24.83,
+                height: 32.5,
+              },
             ]}
             activeTab={activeTab}
             setActiveTab={setActiveTab}
