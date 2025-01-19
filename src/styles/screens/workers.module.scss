@@ -1,0 +1,94 @@
+.container {
+  .wrapper {
+    display: flex;
+    flex-direction: column;
+    min-height: calc(100vh - 60px);
+
+    .screenFilterWrapper {
+      width: 100%;
+      position: relative;
+
+      .filterBox {
+        position: absolute;
+        right: 60px;
+        width: 353px;
+        height: auto;
+        padding-bottom: 25px;
+        border-radius: 6px;
+        background: #ffffff;
+        box-shadow: -10px 0px 106.9px 0px #00000033;
+
+        .fields {
+          padding: 0px 35px;
+          display: flex;
+          flex-direction: column;
+          gap: 22px;
+
+          input {
+            width: 100%;
+            height: 44px;
+            border: 1px solid #E6E6E6;
+            border-radius: 6px;
+            padding: 0 10px;
+            outline: none;
+            font-size: 14px;
+            color: #000;
+
+            &::placeholder {
+              color: #999FA5;
+            }
+          }
+        }
+
+        .btns {
+          padding: 0px 35px;
+          margin-top: 22px;
+          display: flex;
+          align-items: center;
+          justify-content: space-between;
+          gap: 10px;
+
+          button {
+            flex: 1;
+            height: 44px;
+            border-radius: 6px;
+            font-size: 15px;
+            font-weight: 600;
+            line-height: 24px;
+            letter-spacing: -0.005em;
+            cursor: pointer;
+            transition: background-color 0.2s ease;
+
+            &:first-child {
+              background: transparent;
+              border: 1px solid #E6E6E6;
+              color: #999FA5;
+
+              &:hover {
+                background: #F5F5F5;
+              }
+            }
+
+            &:last-child {
+              background: #2b85ff;
+              border: none;
+              color: white;
+
+              &:hover {
+                background: #1a75e8;
+              }
+            }
+          }
+        }
+      }
+    }
+
+    .loader {
+      width: 100%;
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      height: 150px;
+    }
+  }
+} 

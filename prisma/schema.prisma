@@ -25,7 +25,9 @@ model Organization {
   zip                    String?
   internalOrganizationId String?
 
-  users User[]
+  users        User[]
+  species      Species[]
+  harvestTypes HarvestType[]
 
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
@@ -74,14 +76,18 @@ model Client {
   businessGovId   String?
   fax             String?
   accountantPhone String?
-  status          ClientStatus?
+  status          ClientStatus? @default(ACTIVE)
   note            String?
 
-  workers  Worker[]
-  fields   Field[]
-  managers Manager[]
-  city     City?     @relation(fields: [cityId], references: [id])
-  cityId   String?
+  fields         Field[] // Client's agricultural fields
+  managers       Manager[] // Field managers employed by the client
+  currentWorkers Worker[]              @relation("CurrentWorkers") // Currently employed foreign workers
+  workerHistory  WorkerClientHistory[] // Historical record of all workers
+
+  city   City?   @relation(fields: [cityId], references: [id])
+  cityId String?
+
+  clientPricingCombination ClientPricingCombination[]
 
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
@@ -134,8 +140,9 @@ model Worker {
 
   note String?
 
-  clientId String
-  client   Client @relation(fields: [clientId], references: [id], onDelete: Cascade)
+  currentClientId String?
+  currentClient   Client?               @relation("CurrentWorkers", fields: [currentClientId], references: [id])
+  clientHistory   WorkerClientHistory[]
 
   harvestEntries HarvestEntry[]
   groups         Group[]
@@ -173,11 +180,10 @@ enum Gender {
 }
 
 model Field {
-  id           String @id @default(cuid())
-  serialNumber Int    @default(autoincrement())
-
+  id                       String         @id @default(cuid())
+  serialNumber             Int            @default(autoincrement())
   name                     String         @default("")
-  typeOfProduct            String
+  typeOfProduct            String // Type of crop or product grown in this field
   contactPhone             String?
   contactPersonName        String?
   additionalPhone          String?
@@ -193,13 +199,16 @@ model Field {
   fieldCloseTime           Float?         @default(1020)
   note                     String?
 
-  city      City?     @relation(fields: [cityId], references: [id])
-  cityId    String?
-  clientId  String
-  client    Client    @relation(fields: [clientId], references: [id], onDelete: Cascade)
-  harvests  Harvest[]
+  clientId String
+  client   Client @relation(fields: [clientId], references: [id], onDelete: Cascade)
+
   managerId String?
   manager   Manager?  @relation(fields: [managerId], references: [id])
+  groups    Group[] // Groups working in this field
+  harvests  Harvest[] // Harvest records for this field
+
+  city   City?   @relation(fields: [cityId], references: [id])
+  cityId String?
 
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
@@ -211,13 +220,19 @@ enum ProjectStatus {
 }
 
 model Harvest {
-  id          String         @id @default(cuid())
-  fieldId     String
-  field       Field          @relation(fields: [fieldId], references: [id], onDelete: Cascade)
-  harvestType String
-  species     String
-  price       Float
-  entries     HarvestEntry[]
+  id   String   @id @default(cuid())
+  date DateTime @default(now())
+
+  fieldId String
+  field   Field  @relation(fields: [fieldId], references: [id], onDelete: Cascade)
+
+  speciesId String
+  species   Species @relation(fields: [speciesId], references: [id])
+
+  harvestTypeId String
+  harvestType   HarvestType @relation(fields: [harvestTypeId], references: [id])
+
+  entries HarvestEntry[]
 
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
@@ -241,26 +256,32 @@ model HarvestEntry {
 }
 
 model Manager {
-  id       String  @id @default(cuid())
-  name     String
-  email    String  @unique
-  phone    String
+  id    String @id @default(cuid())
+  name  String
+  email String @unique
+  phone String
+
   clientId String
   client   Client  @relation(fields: [clientId], references: [id], onDelete: Cascade)
-  groups   Group[]
-  fields   Field[]
+  fields   Field[] // Fields managed by this manager
+  groups   Group[] // Groups created by this manager
 
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
 }
 
 model Group {
-  id           String   @id @default(cuid())
-  supervisorId String
-  supervisor   Manager  @relation(fields: [supervisorId], references: [id], onDelete: Cascade)
-  groupName    String
-  schedule     String
-  workers      Worker[]
+  id          String  @id @default(cuid())
+  name        String
+  description String?
+
+  fieldId   String
+  field     Field    @relation(fields: [fieldId], references: [id], onDelete: Cascade)
+  managerId String
+  manager   Manager  @relation(fields: [managerId], references: [id], onDelete: Cascade)
+  workers   Worker[]
+
+  clientPricingCombination ClientPricingCombination[]
 
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
@@ -287,6 +308,78 @@ model City {
   clients Client[]
   workers Worker[]
   fields  Field[]
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+}
+
+model WorkerClientHistory {
+  id        String    @id @default(cuid())
+  workerId  String
+  clientId  String
+  startDate DateTime  @default(now())
+  endDate   DateTime?
+  note      String?
+
+  worker Worker @relation(fields: [workerId], references: [id])
+  client Client @relation(fields: [clientId], references: [id])
+
+  @@index([workerId])
+  @@index([clientId])
+}
+
+// Species = Product = Crop eg: Tomato, Orange, Apple, etc.
+model Species {
+  id          String  @id @default(cuid())
+  name        String
+  description String?
+
+  organizationId String
+  organization   Organization @relation(fields: [organizationId], references: [id], onDelete: Cascade)
+
+  harvests Harvest[] // Harvests of this species
+
+  clientPricingCombination ClientPricingCombination[]
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+}
+
+model HarvestType {
+  id          String  @id @default(cuid())
+  name        String
+  description String?
+
+  organizationId String
+  organization   Organization @relation(fields: [organizationId], references: [id], onDelete: Cascade)
+
+  harvests Harvest[] // Harvests of this type
+
+  clientPricingCombination ClientPricingCombination[]
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+}
+
+model ClientPricingCombination {
+  id String @id @default(cuid())
+
+  name String?
+
+  harvestTypeId String
+  harvestType   HarvestType @relation(fields: [harvestTypeId], references: [id])
+
+  speciesId String
+  species   Species @relation(fields: [speciesId], references: [id])
+
+  price Float
+
+  containerNorm Float?
+
+  clientId String
+  client   Client @relation(fields: [clientId], references: [id])
+
+  groups Group[]
 
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt

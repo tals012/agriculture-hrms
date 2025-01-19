@@ -1,0 +1,131 @@
+.container {
+  padding: 0px 50px;
+  width: 100%;
+  margin-top: 20px;
+
+  .wrapper {
+    width: 100%;
+
+    .tableContainer {
+      width: 100%;
+      overflow-x: auto;
+
+      table {
+        width: 100%;
+        min-width: 1200px;
+        border-spacing: 0px;
+
+        thead {
+          text-align: right;
+
+          tr {
+            th {
+              border-top: 1px solid #f3f2f1;
+              border-bottom: 1px solid #f3f2f1;
+              border-left: 1px solid #f3f2f1;
+              font-size: 13px;
+              font-weight: 500;
+              line-height: 20px;
+              letter-spacing: 0.01em;
+              color: #959595;
+              text-align: right;
+              height: 44px;
+              padding: 0px 15px;
+
+              &:nth-child(1) {
+                border-right: 1px solid #f3f2f1;
+                text-align: center;
+                padding: 0px 0px;
+
+                input {
+                  width: 16px;
+                  height: 16px;
+                  border-radius: 2px;
+                  border: 1px solid #b1b1b1;
+                }
+              }
+            }
+          }
+        }
+
+        tbody {
+          tr {
+            &:hover {
+              background-color: #f5f5f5;
+            }
+
+            td {
+              height: 60px;
+              border-bottom: 1px solid #f3f2f1;
+              border-left: 1px solid #f3f2f1;
+              padding: 0px 15px;
+
+              p {
+                font-size: 15px;
+                font-weight: 500;
+                line-height: 24px;
+                letter-spacing: -0.005em;
+                color: #020608;
+              }
+
+              span {
+                font-size: 12px;
+                color: #999FA5;
+                margin-top: 4px;
+                display: block;
+              }
+
+              &:nth-child(1) {
+                border-right: 1px solid #f3f2f1;
+                text-align: center;
+                padding: 0px 0px;
+
+                input {
+                  width: 16px;
+                  height: 16px;
+                  border-radius: 2px;
+                  border: 1px solid #b1b1b1;
+                }
+              }
+
+              &:nth-child(2),
+              &:last-child {
+                text-align: center;
+                padding: 0px 0px;
+                cursor: pointer;
+              }
+
+              .user {
+                display: flex;
+                align-items: center;
+                gap: 12px;
+                padding: 0 15px;
+
+                .name {
+                  display: flex;
+                  flex-direction: column;
+                  gap: 4px;
+                  text-align: right;
+
+                  p {
+                    font-size: 15px;
+                    font-weight: 500;
+                    line-height: 24px;
+                    letter-spacing: -0.005em;
+                    color: #020608;
+                  }
+                }
+              }
+            }
+          }
+        }
+      }
+    }
+  }
+}
+
+.phones {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+} 
