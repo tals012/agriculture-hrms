@@ -14,8 +14,6 @@ const createWorkerSchema = z.object({
   primaryPhone: z.string().min(1, "טלפון ראשי הוא שדה חובה"),
   passport: z.string().min(1, "דרכון הוא שדה חובה"),
   countryId: z.string().min(1, "מדינה היא שדה חובה"),
-  cityId: z.string().min(1, "עיר היא שדה חובה"),
-  clientId: z.string().min(1, "לקוח הוא שדה חובה"),
 });
 
 const createWorker = async ({ payload }) => {
@@ -34,17 +32,6 @@ const createWorker = async ({ payload }) => {
       return {
         status: 400,
         message: errors[0].message,
-      };
-    }
-
-    const client = await prisma.client.findUnique({
-      where: { id: payload.clientId },
-    });
-
-    if (!client) {
-      return {
-        status: 400,
-        message: "הלקוח לא נמצא",
       };
     }
 

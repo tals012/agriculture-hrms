@@ -21,9 +21,9 @@ export async function getHarvestTypes() {
       },
     });
 
-    return { data: harvestTypes };
+    return { data: harvestTypes, status: 200 };
   } catch (error) {
     console.error("Error getting harvest types:", error);
-    return { error: error.message };
+    return { error: error.message, status: 500 };
   }
 }

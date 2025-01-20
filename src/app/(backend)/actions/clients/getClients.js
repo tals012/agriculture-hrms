@@ -84,7 +84,7 @@ const getClients = async (filters = {}) => {
       data: clients,
     };
   } catch (error) {
-    console.error("Error fetching clients:", error);
+    console.error("Error fetching clients:", error.stack);
     return {
       status: 500,
       message: "Internal server error",

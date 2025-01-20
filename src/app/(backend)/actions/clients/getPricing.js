@@ -3,14 +3,14 @@
 import prisma from "@/lib/prisma";
 import { z } from "zod";
 
-const getManagersSchema = z.object({
-  clientId: z.string().optional(),
+const getPricingSchema = z.object({
+  clientId: z.string().min(1, "Client ID is required"),
   search: z.string().optional(),
 });
 
-const getManagers = async (filters = {}) => {
+export const getPricing = async (filters = {}) => {
   try {
-    const parsedFilters = getManagersSchema.safeParse(filters);
+    const parsedFilters = getPricingSchema.safeParse(filters);
     
     if (!parsedFilters.success) {
       const formattedErrors = parsedFilters.error.issues.map(issue => ({
@@ -36,28 +36,41 @@ const getManagers = async (filters = {}) => {
       where.AND.push({
         OR: [
           { name: { contains: parsedFilters.data.search, mode: "insensitive" } },
-          { email: { contains: parsedFilters.data.search, mode: "insensitive" } },
-          { phone: { contains: parsedFilters.data.search, mode: "insensitive" } },
+          { species: { name: { contains: parsedFilters.data.search, mode: "insensitive" } } },
+          { harvestType: { name: { contains: parsedFilters.data.search, mode: "insensitive" } } },
+          { price: { equals: parseFloat(parsedFilters.data.search) || undefined } },
+          { containerNorm: { equals: parseFloat(parsedFilters.data.search) || undefined } },
         ],
       });
     }
 
-    const managers = await prisma.manager.findMany({
+    const pricing = await prisma.clientPricingCombination.findMany({
       where: where.AND.length > 0 ? where : {},
       select: {
         id: true,
         name: true,
-        email: true,
-        phone: true,
-        clientId: true,
-        createdAt: true,
-        updatedAt: true,
+        price: true,
+        containerNorm: true,
+        harvestType: {
+          select: {
+            id: true,
+            name: true,
+          }
+        },
+        species: {
+          select: {
+            id: true,
+            name: true,
+          }
+        },
         groups: {
           select: {
             id: true,
             name: true,
           }
-        }
+        },
+        createdAt: true,
+        updatedAt: true,
       },
       orderBy: {
         createdAt: 'desc'
@@ -66,12 +79,12 @@ const getManagers = async (filters = {}) => {
 
     return {
       status: 200,
-      message: "Managers fetched successfully",
-      data: managers
+      message: "Pricing combinations fetched successfully",
+      data: pricing
     };
 
   } catch (error) {
-    console.error("Error fetching managers:", error.stack);
+    console.error("Error fetching pricing combinations:", error);
     return {
       status: 500,
       message: "Internal server error",
@@ -79,6 +92,6 @@ const getManagers = async (filters = {}) => {
       data: []
     };
   }
-};
+}; 
 
-export default getManagers;
+export default getPricing;

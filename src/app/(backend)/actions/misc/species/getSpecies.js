@@ -21,9 +21,9 @@ export async function getSpecies() {
       },
     });
 
-    return { data: species };
+    return { data: species, status: 200 };
   } catch (error) {
     console.error("Error getting species:", error);
-    return { error: error.message };
+    return { error: error.message, status: 500 };
   }
 }

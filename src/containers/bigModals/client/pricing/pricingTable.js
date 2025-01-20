@@ -6,16 +6,15 @@ import Spinner from "@/components/spinner";
 import { toast } from "react-toastify";
 import { Trash } from "@/svgs/trash";
 import { debounce } from "@/lib/debounce";
-import getFields from "@/app/(backend)/actions/fields/getFields";
-import deleteField from "@/app/(backend)/actions/fields/deleteField";
+import getPricing from "@/app/(backend)/actions/clients/getPricing";
+import deletePricing from "@/app/(backend)/actions/clients/deletePricing";
 import styles from "@/styles/containers/bigModals/client/managers/managersTable.module.scss";
 
-const FieldsTable = ({
-  setIsCreateFieldModalOpen,
-  createFieldStatus,
-  setCreateFieldStatus,
+const PricingTable = ({
+  setIsCreatePricingModalOpen,
+  createPricingStatus,
+  setCreatePricingStatus,
   clientId,
-  setFields
 }) => {
   const [data, setData] = useState([]);
   const [loading, setLoading] = useState(true);
@@ -29,30 +28,27 @@ const FieldsTable = ({
         ...(searchQuery && { search: searchQuery })
       };
       
-      const res = await getFields(filters);
+      const res = await getPricing(filters);
       if (res?.status === 200) {
         setData(res.data);
-        setFields?.(res.data);
       } else {
-        console.error("Error fetching fields:", res?.message);
+        console.error("Error fetching pricing combinations:", res?.message);
         setData([]);
-        setFields?.([]);
       }
     } catch (error) {
-      console.error("Error fetching fields:", error);
+      console.error("Error fetching pricing combinations:", error);
       setData([]);
-      setFields?.([]);
     } finally {
       setLoading(false);
     }
   };
 
-  const debouncedFetchData = useCallback(debounce(fetchData, 300), [clientId, setFields]);
+  const debouncedFetchData = useCallback(debounce(fetchData, 300), [clientId]);
 
   useEffect(() => {
-    setCreateFieldStatus(null);
+    setCreatePricingStatus(null);
     debouncedFetchData(search);
-  }, [search, createFieldStatus, debouncedFetchData, clientId]);
+  }, [search, createPricingStatus, debouncedFetchData, clientId]);
 
   if (loading) {
     return (
@@ -74,7 +70,7 @@ const FieldsTable = ({
           </div>
           <button className={styles.button}>
             <Plus color="#ffffff" />
-            הוספת שדה
+            הוספת שמחור
           </button>
         </div>
         <div className={styles.loading}>
@@ -84,10 +80,11 @@ const FieldsTable = ({
     );
   }
 
-  const handleDelete = async (fieldId) => {
+  const handleDelete = async (id) => {
     try {
-      const res = await deleteField({
-        payload: { fieldId }
+      const res = await deletePricing({
+        id,
+        clientId
       });
 
       if (res?.status === 200) {
@@ -96,13 +93,13 @@ const FieldsTable = ({
         });
         debouncedFetchData(search);
       } else {
-        toast.error(res?.message || "Failed to delete field", {
+        toast.error(res?.message || "Failed to delete pricing combination", {
           position: "top-center",
         });
       }
     } catch (error) {
-      console.error("Error deleting field:", error);
-      toast.error("Failed to delete field", {
+      console.error("Error deleting pricing combination:", error);
+      toast.error("Failed to delete pricing combination", {
         position: "top-center",
       });
     }
@@ -127,66 +124,54 @@ const FieldsTable = ({
         </div>
         <button
           className={styles.button}
-          onClick={() => setIsCreateFieldModalOpen(true)}
+          onClick={() => setIsCreatePricingModalOpen(true)}
         >
           <Plus color="#ffffff" />
-          הוספת שדה
+          הוספת שמחור
         </button>
       </div>
       <div className={styles.tableContainer}>
         <table>
           <thead>
             <tr>
-              <th>מס׳</th>
-              <th>שם</th>
-              <th>סוג תוצרת</th>
-              <th>איש קשר</th>
-              <th>טלפון</th>
-              <th>כתובת</th>
-              <th>גודל</th>
-              <th>סטטוס</th>
-              <th>פעולות</th>
+              <th>Name</th>
+              <th>Species</th>
+              <th>Harvest Type</th>
+              <th>Price</th>
+              <th>Container Norm</th>
+              <th>Actions</th>
             </tr>
           </thead>
 
           <tbody>
             {data.length === 0 && (
               <tr>
-                <td colSpan="9" style={{ textAlign: "center" }}>
-                  <p>אין שדות</p>
+                <td colSpan="6" style={{ textAlign: "center" }}>
+                  <p>No pricing combinations found</p>
                 </td>
               </tr>
             )}
-            {data.map((field) => (
-              <tr key={field.id}>
+            {data.map((pricing) => (
+              <tr key={pricing.id}>
                 <td>
-                  <p>{field.serialNumber}</p>
+                  <p>{pricing.name}</p>
                 </td>
                 <td>
-                  <p>{field.name}</p>
+                  <p>{pricing.species.name}</p>
                 </td>
                 <td>
-                  <p>{field.typeOfProduct}</p>
+                  <p>{pricing.harvestType.name}</p>
                 </td>
                 <td>
-                  <p>{field.contactPersonName}</p>
+                  <p>{pricing.price}</p>
                 </td>
                 <td>
-                  <p>{field.contactPhone}</p>
-                </td>
-                <td>
-                  <p>{field.address}</p>
-                </td>
-                <td>
-                  <p>{field.size ? `${field.size} דונם` : "-"}</p>
-                </td>
-                <td>
-                  <p>{field.status === "ACTIVE" ? "פעיל" : "לא פעיל"}</p>
+                  <p>{pricing.containerNorm}</p>
                 </td>
                 <td>
                   <div className={styles.icons}>
                     <div
-                      onClick={() => handleDelete(field.id)}
+                      onClick={() => handleDelete(pricing.id)}
                       style={{ cursor: "pointer" }}
                     >
                       <Trash color="red" />
@@ -202,4 +187,4 @@ const FieldsTable = ({
   );
 };
 
-export default FieldsTable; 
+export default PricingTable; 

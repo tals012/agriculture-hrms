@@ -1,3 +1,5 @@
+@use 'sass:color';
+
 .overlay {
   position: fixed;
   top: 0;
@@ -128,6 +130,6 @@
   color: white;
 
   &:hover {
-    background-color: darken(#2b85ff, 5%);
+    background-color: color.scale(#2b85ff, $lightness: -5%);
   }
 }

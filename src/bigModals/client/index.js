@@ -12,6 +12,9 @@ import CreateField from "@/smallModals/client/createField";
 import Managers from "./tabs/managers";
 import Fields from "./tabs/fields";
 import styles from "@/styles/bigModals/client/index.module.scss";
+import Pricing from "./tabs/pricing";
+import CreatePricing from "@/smallModals/client/createPricing";
+import WorkerHistory from "./tabs/workerHistory";
 
 const Client = ({ isOpen, onClose }) => {
   const [activeTab, setActiveTab] = useState(0);
@@ -49,6 +52,8 @@ const Client = ({ isOpen, onClose }) => {
   const [createManagerStatus, setCreateManagerStatus] = useState(null);
   const [isCreateFieldModalOpen, setIsCreateFieldModalOpen] = useState(false);
   const [createFieldStatus, setCreateFieldStatus] = useState(null);
+  const [isCreatePricingModalOpen, setIsCreatePricingModalOpen] = useState(false);
+  const [createPricingStatus, setCreatePricingStatus] = useState(null);
 
   useEffect(() => {
     if (isOpen === false) return;
@@ -153,6 +158,18 @@ const Client = ({ isOpen, onClose }) => {
                 width: 24.83,
                 height: 32.5,
               },
+              {
+                icon: "/assets/icons/money-1.svg",
+                title: "תמחור",
+                width: 24.83,
+                height: 32.5,
+              },
+              {
+                icon: "/assets/icons/user-1.svg",
+                title: "היסטוריית עובדים",
+                width: 24.83,
+                height: 32.5,
+              },
             ]}
             activeTab={activeTab}
             setActiveTab={setActiveTab}
@@ -178,6 +195,15 @@ const Client = ({ isOpen, onClose }) => {
               setCreateFieldStatus={setCreateFieldStatus}
               clientId={isOpen}
             />
+          ) : activeTab === 3 ? (
+            <Pricing
+              setIsCreatePricingModalOpen={setIsCreatePricingModalOpen}
+              createPricingStatus={createPricingStatus}
+              setCreatePricingStatus={setCreatePricingStatus}
+              clientId={isOpen}
+            />
+          ) : activeTab === 4 ? (
+            <WorkerHistory clientId={isOpen} />
           ) : null}
 
           <Image
@@ -216,6 +242,13 @@ const Client = ({ isOpen, onClose }) => {
         <CreateField
           setModalOpen={setIsCreateFieldModalOpen}
           setCreateStatus={setCreateFieldStatus}
+          clientId={isOpen}
+        />
+      )}
+      {isCreatePricingModalOpen && (
+        <CreatePricing
+          setModalOpen={setIsCreatePricingModalOpen}
+          setCreateStatus={setCreatePricingStatus}
           clientId={isOpen}
         />
       )}

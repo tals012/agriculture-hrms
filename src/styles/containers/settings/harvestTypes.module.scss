@@ -1,3 +1,5 @@
+@use 'sass:color';
+
 .loadingContainer {
   display: flex;
   justify-content: center;
@@ -66,7 +68,7 @@
   transition: all 0.2s;
 
   &:hover {
-    background: darken(#2b85ff, 5%);
+    background: color.scale(#2b85ff, $lightness: -5%);
   }
 
   svg {

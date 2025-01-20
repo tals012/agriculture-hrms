@@ -7,7 +7,6 @@ import TextField from "@/components/textField";
 import DateField from "@/components/dateField";
 import getCities from "@/app/(backend)/actions/misc/getCities";
 import getCountries from "@/app/(backend)/actions/misc/getCountries";
-import getClients from "@/app/(backend)/actions/clients/getClients";
 import createWorker from "@/app/(backend)/actions/workers/createWorker";
 import Spinner from "@/components/spinner";
 import styles from "@/styles/smallModals/worker/createWorker.module.scss";
@@ -32,7 +31,6 @@ const CreateWorker = ({ setModalOpen, setCreateStatus }) => {
   const [loading, setLoading] = useState(false);
   const [cities, setCities] = useState(null);
   const [countries, setCountries] = useState(null);
-  const [clients, setClients] = useState(null);
   const [data, setData] = useState({
     nameHe: "",
     surnameHe: "",
@@ -41,17 +39,14 @@ const CreateWorker = ({ setModalOpen, setCreateStatus }) => {
     primaryPhone: "",
     passport: "",
     countryId: "",
-    cityId: "",
-    clientId: "",
   });
 
   useEffect(() => {
     const fetchData = async () => {
       try {
-        const [citiesRes, countriesRes, clientsRes] = await Promise.all([
+        const [citiesRes, countriesRes] = await Promise.all([
           getCities(),
           getCountries(),
-          getClients(),
         ]);
 
         if (citiesRes.status === 200) {
@@ -59,9 +54,6 @@ const CreateWorker = ({ setModalOpen, setCreateStatus }) => {
         }
         if (countriesRes.status === 200) {
           setCountries(countriesRes.data);
-        }
-        if (clientsRes.status === 200) {
-          setClients(clientsRes.data);
         }
       } catch (error) {
         console.log(error);
@@ -211,71 +203,6 @@ const CreateWorker = ({ setModalOpen, setCreateStatus }) => {
                     setData({
                       ...data,
                       countryId: option ? option.value : "",
-                    })
-                  }
-                  menuPortalTarget={document.body}
-                  menuPosition={"fixed"}
-                  styles={selectStyle}
-                />
-              </div>
-              <div style={{ width: "48.3%" }}>
-                <ReactSelect
-                  options={
-                    cities?.map((city) => ({
-                      value: city.id,
-                      label: city.nameInHebrew,
-                    })) || []
-                  }
-                  components={{
-                    IndicatorSeparator: () => null,
-                  }}
-                  placeholder="עיר"
-                  value={
-                    data.cityId && cities
-                      ? {
-                          value: data.cityId,
-                          label:
-                            cities.find((c) => c.id === data.cityId)
-                              ?.nameInHebrew || "",
-                        }
-                      : null
-                  }
-                  onChange={(option) =>
-                    setData({
-                      ...data,
-                      cityId: option ? option.value : "",
-                    })
-                  }
-                  menuPortalTarget={document.body}
-                  menuPosition={"fixed"}
-                  styles={selectStyle}
-                />
-              </div>
-              <div style={{ width: "48.3%" }}>
-                <ReactSelect
-                  options={
-                    clients?.map((client) => ({
-                      value: client.id,
-                      label: client.name,
-                    })) || []
-                  }
-                  components={{
-                    IndicatorSeparator: () => null,
-                  }}
-                  placeholder="לקוח"
-                  value={
-                    data.clientId && clients
-                      ? {
-                          value: data.clientId,
-                          label:
-                            clients.find((c) => c.id === data.clientId)?.name || "",
-                        }
-                      : null
-                  }
-                  onChange={(option) =>
-                    setData({
-                      ...data,
-                      clientId: option ? option.value : "",
                     })
                   }
                   menuPortalTarget={document.body}
