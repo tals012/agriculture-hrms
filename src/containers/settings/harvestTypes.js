@@ -1,68 +1,68 @@
 "use client";
 
-import styles from "@/styles/containers/settings/species.module.scss";
+import styles from "@/styles/containers/settings/harvestTypes.module.scss";
 import { useState, useEffect } from "react";
 import { IoSearch, IoAdd } from "react-icons/io5";
-import CreateSpecies from "./createSpecies";
-import { getSpecies } from "@/app/(backend)/actions/misc/species/getSpecies";
-import { deleteSpecies } from "@/app/(backend)/actions/misc/species/deleteSpecies";
+import CreateHarvestType from "./createHarvestType";
+import { getHarvestTypes } from "@/app/(backend)/actions/misc/harvestTypes/getHarvestTypes";
+import { deleteHarvestType } from "@/app/(backend)/actions/misc/harvestTypes/deleteHarvestType";
 import { toast } from "react-toastify";
 import Spinner from "@/components/spinner";
 
-const Species = () => {
+const HarvestTypes = () => {
   const [searchQuery, setSearchQuery] = useState("");
   const [showCreateModal, setShowCreateModal] = useState(false);
-  const [editingSpecies, setEditingSpecies] = useState(null);
-  const [species, setSpecies] = useState([]);
+  const [editingType, setEditingType] = useState(null);
+  const [harvestTypes, setHarvestTypes] = useState([]);
   const [loading, setLoading] = useState(true);
   const [deleteLoading, setDeleteLoading] = useState(null);
 
-  const fetchSpecies = async () => {
+  const fetchHarvestTypes = async () => {
     setLoading(true);
-    const response = await getSpecies();
+    const response = await getHarvestTypes();
     if (response.error) {
       toast.error(response.error, {
         rtl: true,
       });
     } else {
-      setSpecies(response.data);
+      setHarvestTypes(response.data);
     }
     setLoading(false);
   };
 
   useEffect(() => {
-    fetchSpecies();
+    fetchHarvestTypes();
   }, []);
 
   const handleCreateSubmit = async (data) => {
     setShowCreateModal(false);
-    await fetchSpecies();
+    await fetchHarvestTypes();
   };
 
   const handleEditSubmit = async (data) => {
-    setEditingSpecies(null);
-    await fetchSpecies();
+    setEditingType(null);
+    await fetchHarvestTypes();
   };
 
   const handleDelete = async (id) => {
-    if (!confirm("האם אתה בטוח שברצונך למחוק מין זה?")) return;
+    if (!confirm("האם אתה בטוח שברצונך למחוק סוג קטיף זה?")) return;
 
     setDeleteLoading(id);
-    const response = await deleteSpecies({ id });
+    const response = await deleteHarvestType({ id });
     if (response.error) {
       toast.error(response.error, {
         rtl: true,
       });
     } else {
-      toast.success("המין נמחק בהצלחה", {
+      toast.success("סוג הקטיף נמחק בהצלחה", {
         rtl: true,
       });
-      await fetchSpecies();
+      await fetchHarvestTypes();
     }
     setDeleteLoading(null);
   };
 
-  const filteredSpecies = species.filter((item) =>
+  const filteredHarvestTypes = harvestTypes.filter((item) =>
     item.name.toLowerCase().includes(searchQuery.toLowerCase())
   );
 
@@ -81,14 +81,14 @@ const Species = () => {
           <IoSearch className={styles.searchIcon} />
           <input
             type="text"
-            placeholder="חיפוש מינים..."
+            placeholder="חיפוש סוגי קטיף..."
             value={searchQuery}
             onChange={(e) => setSearchQuery(e.target.value)}
           />
         </div>
         <button className={styles.addButton} onClick={() => setShowCreateModal(true)}>
           <IoAdd />
-          הוסף מין חדש
+          הוסף סוג קטיף חדש
         </button>
       </div>
 
@@ -101,14 +101,14 @@ const Species = () => {
             </tr>
           </thead>
           <tbody>
-            {filteredSpecies.map((item) => (
+            {filteredHarvestTypes.map((item) => (
               <tr key={item.id}>
                 <td>{item.name}</td>
                 <td>
                   <div className={styles.actions}>
                     <button 
                       className={styles.editButton}
-                      onClick={() => setEditingSpecies(item)}
+                      onClick={() => setEditingType(item)}
                     >
                       ערוך
                     </button>
@@ -132,17 +132,17 @@ const Species = () => {
       </div>
 
       {showCreateModal && (
-        <CreateSpecies
+        <CreateHarvestType
           onClose={() => setShowCreateModal(false)}
           onSubmit={handleCreateSubmit}
         />
       )}
 
-      {editingSpecies && (
-        <CreateSpecies
+      {editingType && (
+        <CreateHarvestType
           isEdit
-          initialData={editingSpecies}
-          onClose={() => setEditingSpecies(null)}
+          initialData={editingType}
+          onClose={() => setEditingType(null)}
           onSubmit={handleEditSubmit}
         />
       )}
@@ -150,4 +150,4 @@ const Species = () => {
   );
 };
 
-export default Species;
+export default HarvestTypes;

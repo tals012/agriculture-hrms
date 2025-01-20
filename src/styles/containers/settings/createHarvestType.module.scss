@@ -1,0 +1,133 @@
+.overlay {
+  position: fixed;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background-color: rgba(0, 0, 0, 0.5);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  z-index: 1000;
+}
+
+.modal {
+  background: white;
+  border-radius: 12px;
+  width: 100%;
+  max-width: 500px;
+  box-shadow: 0 20px 25px -5px rgba(0, 0, 0, 0.1), 0 10px 10px -5px rgba(0, 0, 0, 0.04);
+  overflow: hidden;
+}
+
+.header {
+  padding: 20px 24px;
+  border-bottom: 1px solid #e2e8f0;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+
+  h2 {
+    margin: 0;
+    font-size: 18px;
+    font-weight: 600;
+    color: #1e293b;
+  }
+}
+
+.closeButton {
+  background: none;
+  border: none;
+  color: #64748b;
+  cursor: pointer;
+  padding: 8px;
+  border-radius: 6px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  transition: all 0.2s;
+
+  &:hover {
+    background-color: #f1f5f9;
+    color: #475569;
+  }
+
+  svg {
+    font-size: 20px;
+  }
+}
+
+.content {
+  padding: 24px;
+}
+
+.field {
+  margin-bottom: 20px;
+
+  label {
+    display: block;
+    margin-bottom: 8px;
+    font-size: 14px;
+    font-weight: 500;
+    color: #475569;
+  }
+
+  input {
+    width: 100%;
+    padding: 10px 16px;
+    border: 1px solid #e2e8f0;
+    border-radius: 6px;
+    font-size: 14px;
+    transition: all 0.2s;
+    direction: rtl;
+
+    &:focus {
+      outline: none;
+      border-color: #2b85ff;
+      box-shadow: 0 0 0 3px rgba(43, 133, 255, 0.1);
+    }
+
+    &::placeholder {
+      color: #94a3b8;
+    }
+  }
+}
+
+.footer {
+  padding: 20px 24px;
+  background-color: #f8fafc;
+  border-top: 1px solid #e2e8f0;
+  display: flex;
+  justify-content: flex-end;
+  gap: 12px;
+}
+
+.cancelButton, .submitButton {
+  padding: 8px 16px;
+  border-radius: 6px;
+  font-size: 14px;
+  font-weight: 500;
+  cursor: pointer;
+  transition: all 0.2s;
+}
+
+.cancelButton {
+  background-color: white;
+  border: 1px solid #e2e8f0;
+  color: #64748b;
+
+  &:hover {
+    background-color: #f8fafc;
+    border-color: #cbd5e1;
+  }
+}
+
+.submitButton {
+  background-color: #2b85ff;
+  border: 1px solid transparent;
+  color: white;
+
+  &:hover {
+    background-color: darken(#2b85ff, 5%);
+  }
+}

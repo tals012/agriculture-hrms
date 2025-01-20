@@ -9,9 +9,9 @@ const SideBox = () => {
   const tab = searchParams.get("tab") || "organization";
 
   const items = [
-    { id: "organization", label: "Organization" },
-    { id: "species", label: "Species" },
-    { id: "harvest-types", label: "Harvest Types" },
+    { id: "organization", label: "ארגון" },
+    { id: "species", label: "מינים" },
+    { id: "harvest-types", label: "סוגי קטיף" },
   ];
 
   const handleTabChange = (tabId) => {

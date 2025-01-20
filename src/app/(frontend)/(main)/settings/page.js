@@ -3,6 +3,7 @@
 import ScreenHead from "@/components/screenHead";
 import SideBox from "@/containers/settings/sideBox";
 import Species from "@/containers/settings/species";
+import HarvestTypes from "@/containers/settings/harvestTypes";
 import styles from "@/styles/screens/settings.module.scss";
 import { useSearchParams } from "next/navigation";
 
@@ -17,7 +18,7 @@ export default function Settings() {
       case "species":
         return <Species />;
       case "harvest-types":
-        return <div>Harvest Types Settings Content</div>;
+        return <HarvestTypes />;
       default:
         return <div>Organization Settings Content</div>;
     }
