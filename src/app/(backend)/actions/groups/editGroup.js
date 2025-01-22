@@ -8,8 +8,6 @@ const editGroupSchema = z.object({
   name: z.string().min(1, "Name is required"),
   description: z.string().optional(),
   fieldId: z.string().min(1, "Field ID is required"),
-  managerId: z.string().min(1, "Manager ID is required"),
-  workerIds: z.array(z.string()).optional(),
 });
 
 export const editGroup = async (input) => {
@@ -29,7 +27,7 @@ export const editGroup = async (input) => {
       };
     }
 
-    const { id, name, description, fieldId, managerId, workerIds } = parsedData.data;
+    const { id, name, description, fieldId } = parsedData.data;
 
     // Check if group exists
     const existingGroup = await prisma.group.findUnique({
@@ -63,21 +61,6 @@ export const editGroup = async (input) => {
       };
     }
 
-    // Check if manager exists and belongs to the client
-    const manager = await prisma.manager.findFirst({
-      where: { 
-        id: managerId,
-        clientId: existingGroup.field.clientId
-      }
-    });
-
-    if (!manager) {
-      return {
-        status: 404,
-        message: "Manager not found or does not belong to this client"
-      };
-    }
-
     // Update the group
     const group = await prisma.group.update({
       where: { id },
@@ -85,12 +68,6 @@ export const editGroup = async (input) => {
         name,
         description,
         fieldId,
-        managerId,
-        ...(workerIds && {
-          workers: {
-            set: workerIds.map(id => ({ id }))
-          }
-        })
       },
       include: {
         field: {
@@ -99,17 +76,6 @@ export const editGroup = async (input) => {
             name: true,
           }
         },
-        manager: {
-          select: {
-            id: true,
-            name: true,
-          }
-        },
-        workers: {
-          select: {
-            id: true,
-          }
-        }
       }
     });
 

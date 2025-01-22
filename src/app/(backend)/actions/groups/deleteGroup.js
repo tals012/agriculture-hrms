@@ -50,12 +50,12 @@ export const deleteGroup = async (input) => {
     }
 
     // Check if group is being used in any pricing combinations
-    if (group.clientPricingCombination.length > 0) {
-      return {
-        status: 400,
-        message: "Cannot delete group as it is being used in pricing combinations"
-      };
-    }
+    // if (group.clientPricingCombination.length > 0) {
+    //   return {
+    //     status: 400,
+    //     message: "Cannot delete group as it is being used in pricing combinations"
+    //   };
+    // }
 
     // Delete the group
     await prisma.group.delete({

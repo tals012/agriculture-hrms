@@ -52,12 +52,6 @@ const getManagers = async (filters = {}) => {
         clientId: true,
         createdAt: true,
         updatedAt: true,
-        groups: {
-          select: {
-            id: true,
-            name: true,
-          }
-        }
       },
       orderBy: {
         createdAt: 'desc'

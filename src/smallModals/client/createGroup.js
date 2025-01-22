@@ -1,7 +1,7 @@
 "use client";
 
 import { useState } from "react";
-import { createGroup } from "@/app/(backend)/actions/clients/createGroup";
+import { createGroup } from "@/app/(backend)/actions/groups/createGroup";
 import { toast } from "react-toastify";
 import Image from "next/image";
 import TextField from "@/components/textField";
@@ -14,7 +14,6 @@ export default function CreateGroup({
   setCreateStatus, 
   clientId, 
   fields = [], 
-  managers = [],
   workers = [],
   pricingCombinations = []
 }) {
@@ -51,9 +50,12 @@ export default function CreateGroup({
   const [name, setName] = useState("");
   const [description, setDescription] = useState("");
   const [fieldId, setFieldId] = useState("");
-  const [managerId, setManagerId] = useState("");
+  const [leaderWorkerId, setLeaderWorkerId] = useState("");
   const [selectedWorkers, setSelectedWorkers] = useState([]);
   const [selectedPricingCombinations, setSelectedPricingCombinations] = useState([]);
+
+  // Filter out leader worker from workers dropdown options
+  const availableWorkers = workers.filter(worker => worker.id !== leaderWorkerId);
 
   const handleCreate = async () => {
     try {
@@ -73,8 +75,8 @@ export default function CreateGroup({
         return;
       }
 
-      if (!managerId) {
-        toast.error("יש לבחור מנהל", {
+      if (!leaderWorkerId) {
+        toast.error("יש לבחור מנהל קבוצה", {
           position: "top-center",
           autoClose: 3000,
         });
@@ -86,8 +88,7 @@ export default function CreateGroup({
         name,
         description,
         fieldId,
-        managerId,
-        clientId,
+        leaderWorkerId,
         workerIds: selectedWorkers.map(w => w.value),
         clientPricingCombinationIds: selectedPricingCombinations.map(p => p.value)
       });
@@ -178,24 +179,28 @@ export default function CreateGroup({
 
             <div style={{ width: "48.3%" }}>
               <ReactSelect
-                options={managers.map(manager => ({
-                  value: manager.id,
-                  label: manager.name
+                options={workers.map(worker => ({
+                  value: worker.id,
+                  label: worker.nameHe
                 }))}
                 components={{
                   IndicatorSeparator: () => null,
                 }}
-                placeholder="מנהל"
-                name="managerId"
+                placeholder="מנהל קבוצה"
+                name="leaderWorkerId"
                 value={
-                  managerId
+                  leaderWorkerId
                     ? {
-                        value: managerId,
-                        label: managers.find((i) => i.id === managerId).name,
+                        value: leaderWorkerId,
+                        label: workers.find((w) => w.id === leaderWorkerId).nameHe,
                       }
                     : null
                 }
-                onChange={(option) => setManagerId(option ? option.value : null)}
+                onChange={(option) => {
+                  setLeaderWorkerId(option ? option.value : null);
+                  // Remove the leader from selected workers if present
+                  setSelectedWorkers(prev => prev.filter(w => w.value !== option?.value));
+                }}
                 styles={selectStyle}
                 menuPortalTarget={document.body}
                 menuPosition="fixed"
@@ -205,7 +210,7 @@ export default function CreateGroup({
             <div style={{ width: "48.3%" }}>
               <ReactSelect
                 isMulti
-                options={workers.map(worker => ({
+                options={availableWorkers.map(worker => ({
                   value: worker.id,
                   label: worker.nameHe
                 }))}
@@ -251,7 +256,7 @@ export default function CreateGroup({
 
             <button
               onClick={handleCreate}
-              disabled={loading || !name || !fieldId || !managerId}
+              disabled={loading || !name || !fieldId || !leaderWorkerId}
             >
               {loading ? <Spinner color="#ffffff" /> : "יצירה"}
             </button>

@@ -86,7 +86,6 @@ const Fields = ({ clientId }) => {
           setCreateStatus={setCreateGroupStatus}
           clientId={clientId}
           fields={fields}
-          managers={managers}
           workers={workers}
           pricingCombinations={pricingCombinations}
         />

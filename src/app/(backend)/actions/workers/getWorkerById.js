@@ -39,7 +39,7 @@ const getWorkerById = async ({ payload }) => {
             cityCode: true,
           },
         },
-        client: {
+        currentClient: {
           select: {
             id: true,
             name: true,
@@ -48,9 +48,8 @@ const getWorkerById = async ({ payload }) => {
         groups: {
           select: {
             id: true,
-            groupName: true,
-            schedule: true,
-            supervisor: {
+            name: true,
+            manager: {
               select: {
                 id: true,
                 name: true,
@@ -72,7 +71,6 @@ const getWorkerById = async ({ payload }) => {
                 id: true,
                 harvestType: true,
                 species: true,
-                price: true,
                 field: {
                   select: {
                     id: true,
@@ -104,7 +102,7 @@ const getWorkerById = async ({ payload }) => {
       data: worker,
     };
   } catch (error) {
-    console.error("Error fetching worker:", error);
+    console.error("Error fetching worker:", error.stack);
     return {
       status: 500,
       message: "Internal server error",

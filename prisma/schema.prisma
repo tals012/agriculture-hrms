@@ -145,7 +145,7 @@ model Worker {
   clientHistory   WorkerClientHistory[]
 
   harvestEntries HarvestEntry[]
-  groups         Group[]
+  groups         GroupMember[]
 
   country   Country? @relation(fields: [countryId], references: [id])
   countryId String?
@@ -264,7 +264,6 @@ model Manager {
   clientId String
   client   Client  @relation(fields: [clientId], references: [id], onDelete: Cascade)
   fields   Field[] // Fields managed by this manager
-  groups   Group[] // Groups created by this manager
 
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
@@ -275,13 +274,28 @@ model Group {
   name        String
   description String?
 
-  fieldId   String
-  field     Field    @relation(fields: [fieldId], references: [id], onDelete: Cascade)
-  managerId String
-  manager   Manager  @relation(fields: [managerId], references: [id], onDelete: Cascade)
-  workers   Worker[]
-
+  fieldId                  String
+  field                    Field                      @relation(fields: [fieldId], references: [id], onDelete: Cascade)
+  members                  GroupMember[]
   clientPricingCombination ClientPricingCombination[]
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+}
+
+model GroupMember {
+  id String @id @default(cuid())
+
+  groupId String
+  group   Group  @relation(fields: [groupId], references: [id])
+
+  workerId String
+  worker   Worker @relation(fields: [workerId], references: [id])
+
+  isGroupLeader Boolean?
+
+  startDate DateTime  @default(now())
+  endDate   DateTime?
 
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt

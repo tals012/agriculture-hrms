@@ -7,8 +7,8 @@ import Spinner from "@/components/spinner";
 import { toast } from "react-toastify";
 import { BsPencil, BsTrash } from "react-icons/bs";
 import { debounce } from "@/lib/debounce";
-import { getGroups } from "@/app/(backend)/actions/clients/getGroups";
-import { deleteGroup } from "@/app/(backend)/actions/clients/deleteGroup";
+import { getGroups } from "@/app/(backend)/actions/groups/getGroups";
+import { deleteGroup } from "@/app/(backend)/actions/groups/deleteGroup";
 import getManagers from "@/app/(backend)/actions/managers/getManagers";
 import ReactSelect from "react-select";
 import styles from "@/styles/containers/bigModals/client/managers/managersTable.module.scss";
@@ -67,6 +67,7 @@ const GroupsTable = ({
       };
 
       const res = await getGroups(filters);
+      console.log(res, "res");
       if (res?.status === 200) {
         setData(res.data);
       } else {
@@ -252,7 +253,7 @@ const GroupsTable = ({
             <tr>
               <th>שם הקבוצה</th>
               <th>שדה</th>
-              <th>מנהל</th>
+              {/* <th>מנהל</th> */}
               <th>מספר עובדים</th>
               <th>תיאור</th>
               <th>פעולות</th>
@@ -274,23 +275,23 @@ const GroupsTable = ({
                   <td>
                     <p>{group.field.name}</p>
                   </td>
-                  <td>
+                  {/* <td>
                     <p>{group.manager.name}</p>
-                  </td>
+                  </td> */}
                   <td>
-                    <p>{group.workers.length}</p>
+                    <p>{group.members.length}</p>
                   </td>
                   <td>
                     <p>{group.description || "-"}</p>
                   </td>
                   <td>
                     <div className={styles.icons}>
-                      <div
+                      {/* <div
                         onClick={() => setIsEditGroupModalOpen(group)}
                         style={{ cursor: "pointer" }}
                       >
                         <BsPencil size={16} color="#666666" />
-                      </div>
+                      </div> */}
                       <div
                         onClick={() => handleDelete(group.id)}
                         style={{ cursor: "pointer" }}

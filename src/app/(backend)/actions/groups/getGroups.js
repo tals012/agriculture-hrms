@@ -4,7 +4,7 @@ import prisma from "@/lib/prisma";
 import { z } from "zod";
 
 const getGroupsSchema = z.object({
-  clientId: z.string().min(1, "Client ID is required"),
+  clientId: z.string().optional(),
   fieldId: z.string().optional(),
   search: z.string().optional(),
 });
@@ -14,38 +14,37 @@ export const getGroups = async (input) => {
     const parsedData = getGroupsSchema.safeParse(input);
 
     if (!parsedData.success) {
-      const formattedErrors = parsedData.error.issues.map(issue => ({
-        field: issue.path.join('.'),
-        message: issue.message
+      const formattedErrors = parsedData.error.issues.map((issue) => ({
+        field: issue.path.join("."),
+        message: issue.message,
       }));
 
       return {
         status: 400,
         message: "Invalid data provided",
         errors: formattedErrors,
-        data: []
+        data: [],
       };
     }
 
     const { clientId, fieldId, search } = parsedData.data;
 
-    // Build the where clause
-    const where = {
-      field: {
-        clientId
-      }
-    };
+    const where = {};
 
-    // Add field filter if provided
+    if (clientId) {
+      where.field = {
+        clientId,
+      };
+    }
+
     if (fieldId) {
       where.fieldId = fieldId;
     }
 
-    // Add search filter if provided
     if (search?.trim()) {
       where.OR = [
         { name: { contains: search, mode: "insensitive" } },
-        { description: { contains: search, mode: "insensitive" } }
+        { description: { contains: search, mode: "insensitive" } },
       ];
     }
 
@@ -56,38 +55,40 @@ export const getGroups = async (input) => {
           select: {
             id: true,
             name: true,
-          }
+          },
         },
-        manager: {
+        members: {
           select: {
             id: true,
-            name: true,
-          }
+            workerId: true,
+            startDate: true,
+            endDate: true,
+            worker: {
+              select: {
+                id: true,
+                name: true,
+              },
+            },
+          },
         },
-        workers: {
-          select: {
-            id: true,
-          }
-        }
       },
       orderBy: {
-        createdAt: 'desc'
-      }
+        createdAt: "desc",
+      },
     });
 
     return {
       status: 200,
       message: "Groups fetched successfully",
-      data: groups
+      data: groups,
     };
-
   } catch (error) {
     console.error("Error fetching groups:", error);
     return {
       status: 500,
       message: "Internal server error",
       error: error.message,
-      data: []
+      data: [],
     };
   }
-}; 
+};

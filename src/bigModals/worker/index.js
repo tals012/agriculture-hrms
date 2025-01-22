@@ -152,12 +152,6 @@ const Worker = ({ isOpen, onClose }) => {
                 width: 24.83,
                 height: 32.5,
               },
-              {
-                icon: "/assets/icons/harvest.svg",
-                title: "רשומות קטיף",
-                width: 24.83,
-                height: 32.5,
-              },
             ]}
             activeTab={activeTab}
             setActiveTab={setActiveTab}
