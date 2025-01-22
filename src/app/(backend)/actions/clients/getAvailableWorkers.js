@@ -26,20 +26,25 @@ export const getAvailableWorkers = async (input = {}) => {
       };
     }
 
-    // Get all workers that are not currently assigned to this client
+    // Get workers that are not currently assigned to any client
     const workers = await prisma.worker.findMany({
       where: {
         AND: [
           {
+            // No active client assignments
             NOT: {
               clientHistory: {
                 some: {
-                  clientId: parsedData.data.clientId,
-                  endDate: null, // Currently active
+                  endDate: null, // Currently active assignment
                 },
               },
             },
           },
+          // Worker should be in ACTIVE status
+          {
+            workerStatus: "ACTIVE",
+          },
+          // Search filter if provided
           parsedData.data.search
             ? {
                 OR: [
@@ -60,9 +65,10 @@ export const getAvailableWorkers = async (input = {}) => {
         primaryPhone: true,
         passport: true,
       },
-      orderBy: {
-        nameHe: "asc",
-      },
+      orderBy: [
+        { nameHe: "asc" },
+        { surnameHe: "asc" },
+      ],
     });
 
     return {
@@ -80,3 +86,4 @@ export const getAvailableWorkers = async (input = {}) => {
     };
   }
 };
+

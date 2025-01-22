@@ -48,8 +48,7 @@ const getWorkerById = async ({ payload }) => {
         groups: {
           select: {
             id: true,
-            name: true,
-            manager: {
+            group: {
               select: {
                 id: true,
                 name: true,
