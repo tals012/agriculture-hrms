@@ -33,7 +33,7 @@ const getAvailableWorkers = async (input) => {
         NOT: { groups: { some: { groupId } } },
       },
     });
-
+    
     return {
       status: 200,
       message: "Available workers fetched successfully",
