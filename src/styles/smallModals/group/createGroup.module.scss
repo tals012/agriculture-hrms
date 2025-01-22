@@ -18,6 +18,7 @@
     width: 100%;
     max-width: 633px;
     height: auto;
+    max-height: 90vh;
     overflow-y: auto;
     border-radius: 8px;
     display: flex;
@@ -63,6 +64,80 @@
         flex-wrap: wrap;
         gap: 19.5px;
         width: 100%;
+
+        .workersSection {
+          width: 100%;
+          margin-top: 10px;
+
+          .searchInput {
+            width: 100%;
+            height: 44px;
+            border: 1px solid #E6E6E6;
+            border-radius: 6px;
+            padding: 0 15px;
+            font-size: 14px;
+            color: #333;
+            margin-bottom: 10px;
+
+            &::placeholder {
+              color: #999FA5;
+            }
+          }
+
+          .workersList {
+            width: 100%;
+            max-height: 200px;
+            overflow-y: auto;
+            border: 1px solid #E6E6E6;
+            border-radius: 6px;
+            padding: 10px;
+
+            .workerItem {
+              display: flex;
+              align-items: center;
+              padding: 8px 10px;
+              border-bottom: 1px solid #F5F5F5;
+              cursor: pointer;
+
+              &:last-child {
+                border-bottom: none;
+              }
+
+              &:hover {
+                background-color: #F5F5F5;
+              }
+
+              input[type="checkbox"] {
+                margin-right: 10px;
+                cursor: pointer;
+              }
+
+              .workerName {
+                margin-right: 10px;
+                font-size: 14px;
+                color: #333;
+              }
+            }
+
+            &::-webkit-scrollbar {
+              width: 6px;
+            }
+
+            &::-webkit-scrollbar-track {
+              background: #F5F5F5;
+              border-radius: 3px;
+            }
+
+            &::-webkit-scrollbar-thumb {
+              background: #E6E6E6;
+              border-radius: 3px;
+
+              &:hover {
+                background: #D1D1D1;
+              }
+            }
+          }
+        }
 
         button {
           width: 100%;

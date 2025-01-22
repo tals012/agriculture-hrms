@@ -2,19 +2,19 @@
   padding: 0px 50px;
   width: 100%;
   margin-top: 20px;
-  
+
   .wrapper {
     width: 100%;
-    
+
     .tableContainer {
       width: 100%;
       overflow-x: auto;
-      
+
       table {
         width: 100%;
         min-width: 1200px;
         border-spacing: 0px;
-        
+
         thead {
           text-align: right;
           tr {
@@ -78,9 +78,11 @@
 
               &:nth-child(2),
               &:nth-child(8) {
-                text-align: center;
-                padding: 0px 0px;
                 cursor: pointer;
+              }
+              &:nth-child(8) {
+                padding: 0px 0px;
+                text-align: center;
               }
 
               .name {
@@ -88,7 +90,7 @@
                 align-items: center;
                 gap: 12px;
                 padding: 0 15px;
-                
+
                 p {
                   font-size: 15px;
                   font-weight: 500;
@@ -103,4 +105,4 @@
       }
     }
   }
-} 
+}

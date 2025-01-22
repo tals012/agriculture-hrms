@@ -7,72 +7,20 @@
     .screenFilterWrapper {
       width: 100%;
       position: relative;
+    }
 
-      .filterBox {
-        position: absolute;
-        right: 60px;
-        width: 353px;
-        // height: 643px;
-        height: auto;
-        padding-bottom: 25px;
-        border-radius: 6px;
-        background: #ffffff;
-        box-shadow: -10px 0px 106.9px 0px #00000033;
+    .filterRow {
+      display: flex;
+      gap: 15px;
+      padding: 20px 50px;
+      background: white;
+      border-radius: 12px;
+      margin: 20px 0;
+      box-shadow: 0 2px 4px rgba(0, 0, 0, 0.03);
 
-        .header {
-          width: 100%;
-          display: flex;
-          align-items: center;
-          justify-content: space-between;
-          padding: 15px;
-          margin-bottom: 15px;
-          .right {
-            display: flex;
-            align-items: center;
-            gap: 15px;
-            h2 {
-              font-size: 24px;
-              font-weight: 600;
-              line-height: 36px;
-              letter-spacing: -0.01em;
-              color: #020608;
-            }
-            p {
-              font-size: 14px;
-              font-weight: 600;
-              line-height: 36px;
-              letter-spacing: -0.01em;
-              color: #2b85ff;
-              text-decoration: underline;
-              cursor: pointer;
-            }
-          }
-          img {
-            cursor: pointer;
-          }
-        }
-
-        .fields {
-          padding: 0px 35px;
-          display: flex;
-          flex-direction: column;
-          gap: 22px;
-
-          button {
-            width: 282px;
-            height: 48px;
-            border: none;
-            border-radius: 6px;
-            opacity: 0px;
-            background: #2b85ff;
-            font-size: 15px;
-            font-weight: 600;
-            line-height: 24px;
-            letter-spacing: -0.005em;
-            text-align: center;
-            color: #ffffff;
-          }
-        }
+      .filterField {
+        width: 250px;
+        position: relative;
       }
     }
 
