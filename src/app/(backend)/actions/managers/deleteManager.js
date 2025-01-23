@@ -9,7 +9,6 @@ const deleteManagerSchema = z.object({
 
 const deleteManager = async ({ payload }) => {
   try {
-    // Validate payload exists
     if (!payload) {
       return {
         status: 400,
@@ -18,7 +17,6 @@ const deleteManager = async ({ payload }) => {
       };
     }
 
-    // Validate the payload
     const parsedData = deleteManagerSchema.safeParse(payload);
     
     if (!parsedData.success) {
@@ -35,15 +33,14 @@ const deleteManager = async ({ payload }) => {
       };
     }
 
-    // Check if manager exists
-    const managerExists = await prisma.manager.findUnique({
+    const manager = await prisma.manager.findUnique({
       where: { id: parsedData.data.managerId },
-      include: {
-        groups: true,
-      },
+      select: {
+        userId: true
+      }
     });
 
-    if (!managerExists) {
+    if (!manager) {
       return {
         status: 404,
         message: "Manager not found",
@@ -51,14 +48,21 @@ const deleteManager = async ({ payload }) => {
       };
     }
 
-    // Delete the manager and associated groups (cascade delete will handle this)
-    await prisma.manager.delete({
-      where: { id: parsedData.data.managerId },
+    await prisma.$transaction(async (tx) => {
+      await tx.manager.delete({
+        where: { id: parsedData.data.managerId },
+      });
+
+      if (manager.userId) {
+        await tx.user.delete({
+          where: { id: manager.userId },
+        });
+      }
     });
 
     return {
       status: 200,
-      message: "Manager deleted successfully",
+      message: "Manager and associated user account deleted successfully",
       data: null,
     };
 

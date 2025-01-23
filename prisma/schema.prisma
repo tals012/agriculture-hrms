@@ -47,6 +47,9 @@ model User {
   organizationId String
   organization   Organization @relation(fields: [organizationId], references: [id])
 
+  manager Manager? 
+  worker  Worker? 
+
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
 }
@@ -54,6 +57,7 @@ model User {
 enum Role {
   ADMIN
   FIELD_MANAGER
+  GROUP_LEADER
   FOREIGN_WORKER
 }
 
@@ -126,6 +130,9 @@ model Worker {
   workerStatus        WorkerStatus?  @default(ACTIVE)
   company             String?
   metapelCode         String?
+
+  userId String? @unique
+  user   User?   @relation(fields: [userId], references: [id])
 
   passport         String?
   passportValidity DateTime?
@@ -260,6 +267,9 @@ model Manager {
   name  String
   email String @unique
   phone String
+
+  userId String? @unique
+  user   User?   @relation(fields: [userId], references: [id])
 
   clientId String
   client   Client  @relation(fields: [clientId], references: [id], onDelete: Cascade)

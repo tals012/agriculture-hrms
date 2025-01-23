@@ -82,6 +82,11 @@ const Header = () => {
                     הגדרות
                   </li>
                 </Link>
+                <Link href="/groups">
+                  <li className={pathname === "/groups" ? styles.active : ""}>
+                    קבוצות
+                  </li>
+                </Link>
               </ul>
             ) : (
               <ul className={styles.ulMobile}>

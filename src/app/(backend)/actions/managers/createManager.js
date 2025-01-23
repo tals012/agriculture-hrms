@@ -2,6 +2,9 @@
 
 import prisma from "@/lib/prisma";
 import { z } from "zod";
+import bcrypt from "bcrypt";
+
+const SALT_ROUNDS = 10;
 
 const createManagerSchema = z.object({
   name: z.string().min(1, "Name is required"),
@@ -36,11 +39,18 @@ const createManager = async ({ payload }) => {
       };
     }
 
-    const clientExists = await prisma.client.findUnique({
+    const client = await prisma.client.findUnique({
       where: { id: parsedData.data.clientId },
+      include: {
+        managers: {
+          include: {
+            user: true
+          }
+        }
+      }
     });
 
-    if (!clientExists) {
+    if (!client) {
       return {
         status: 404,
         message: "Client not found",
@@ -60,23 +70,67 @@ const createManager = async ({ payload }) => {
       };
     }
 
-    const newManager = await prisma.manager.create({
-      data: parsedData.data,
-      select: {
-        id: true,
-        name: true,
-        email: true,
-        phone: true,
-        clientId: true,
-        createdAt: true,
-        updatedAt: true,
-      },
+    const firstName = parsedData.data.name.split(' ')[0].toLowerCase();
+
+    let username = firstName;
+    let counter = 1;
+    while (true) {
+      const existingUser = await prisma.user.findUnique({
+        where: { username }
+      });
+      if (!existingUser) break;
+      username = `${firstName}${counter}`;
+      counter++;
+    }
+
+    const organization = await prisma.organization.findFirst();
+    if (!organization) {
+      return {
+        status: 404,
+        message: "No organization exists",
+        data: null,
+      };
+    }
+
+    const hashedPassword = await bcrypt.hash("systempassword123", SALT_ROUNDS);
+
+    const result = await prisma.$transaction(async (tx) => {
+      const user = await tx.user.create({
+        data: {
+          name: parsedData.data.name,
+          username,
+          email: parsedData.data.email,
+          password: hashedPassword,
+          phone: parsedData.data.phone,
+          role: "FIELD_MANAGER",
+          organizationId: organization.id,
+        },
+      });
+
+      const manager = await tx.manager.create({
+        data: {
+          ...parsedData.data,
+          userId: user.id,
+        },
+        select: {
+          id: true,
+          name: true,
+          email: true,
+          phone: true,
+          clientId: true,
+          userId: true,
+          createdAt: true,
+          updatedAt: true,
+        },
+      });
+
+      return { user, manager };
     });
 
     return {
       status: 201,
-      message: "Manager created successfully",
-      data: newManager,
+      message: "Manager and user account created successfully",
+      data: result.manager,
     };
 
   } catch (error) {
@@ -85,7 +139,7 @@ const createManager = async ({ payload }) => {
     if (error.code === 'P2002') {
       return {
         status: 409,
-        message: "A unique constraint would be violated. The email might already be in use.",
+        message: "A unique constraint would be violated. The email or username might already be in use.",
         data: null,
       };
     }

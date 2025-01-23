@@ -136,7 +136,6 @@ const ManagersTable = ({
               <th>שם</th>
               <th>אימייל</th>
               <th>טלפון</th>
-              <th>קבוצות</th>
               <th>פעולות</th>
             </tr>
           </thead>
@@ -159,9 +158,6 @@ const ManagersTable = ({
                 </td>
                 <td>
                   <p>{manager.phone}</p>
-                </td>
-                <td>
-                  <p>{manager.groups?.length || 0} קבוצות</p>
                 </td>
                 <td>
                   <div className={styles.icons}>
