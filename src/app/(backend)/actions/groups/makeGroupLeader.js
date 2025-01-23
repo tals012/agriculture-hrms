@@ -2,6 +2,9 @@
 
 import prisma from "@/lib/prisma";
 import { z } from "zod";
+import bcrypt from "bcrypt";
+
+const SALT_ROUNDS = 10;
 
 const schema = z.object({
   groupId: z.string().min(1, "Group ID is required"),
@@ -26,7 +29,15 @@ const makeGroupLeader = async (input) => {
       const group = await tx.group.findUnique({
         where: { id: groupId },
         include: {
-          members: true,
+          members: {
+            include: {
+              worker: {
+                include: {
+                  user: true
+                }
+              }
+            }
+          },
         },
       });
 
@@ -36,10 +47,22 @@ const makeGroupLeader = async (input) => {
 
       const worker = await tx.worker.findUnique({
         where: { id: workerId },
+        include: {
+          user: true
+        }
       });
 
       if (!worker) {
         throw new Error("Worker not found");
+      }
+
+      const currentLeaders = group.members.filter(member => member.isGroupLeader);
+      for (const leader of currentLeaders) {
+        if (leader.worker.userId) {
+          await tx.user.delete({
+            where: { id: leader.worker.userId }
+          });
+        }
       }
 
       await tx.groupMember.updateMany({
@@ -51,6 +74,44 @@ const makeGroupLeader = async (input) => {
           isGroupLeader: false,
         },
       });
+
+      if (!worker.userId) {
+        const organization = await tx.organization.findFirst();
+        if (!organization) {
+          throw new Error("No organization exists");
+        }
+
+        const firstName = (worker.name || worker.nameHe || "user").split(' ')[0].toLowerCase();
+        let username = firstName;
+        let counter = 1;
+        while (true) {
+          const existingUser = await tx.user.findUnique({
+            where: { username }
+          });
+          if (!existingUser) break;
+          username = `${firstName}${counter}`;
+          counter++;
+        }
+
+        const hashedPassword = await bcrypt.hash("systempassword123", SALT_ROUNDS);
+
+        const user = await tx.user.create({
+          data: {
+            name: worker.name || worker.nameHe || "",
+            username,
+            email: worker.email || `${username}@system.local`,
+            password: hashedPassword,
+            phone: worker.primaryPhone,
+            role: "GROUP_LEADER",
+            organizationId: organization.id,
+          },
+        });
+
+        await tx.worker.update({
+          where: { id: workerId },
+          data: { userId: user.id }
+        });
+      }
 
       const existingMember = group.members.find(
         (member) => member.workerId === workerId
