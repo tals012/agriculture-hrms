@@ -15,11 +15,14 @@ async function deleteAllHarvestTypes() {
       include: {
         harvests: {
           include: {
-            entries: true
+            entries: true,
+            field: {
+              include: {
+                client: true
+              }
+            }
           }
-        },
-        clientPricingCombination: true,
-        organization: true
+        }
       }
     });
 
@@ -31,21 +34,21 @@ async function deleteAllHarvestTypes() {
     const totalHarvests = harvestTypes.reduce((sum, ht) => sum + ht.harvests.length, 0);
     const totalEntries = harvestTypes.reduce((sum, ht) => 
       sum + ht.harvests.reduce((hSum, h) => hSum + h.entries.length, 0), 0);
-    const totalPricingCombinations = harvestTypes.reduce((sum, ht) => 
-      sum + ht.clientPricingCombination.length, 0);
+    const uniqueFields = new Set(
+      harvestTypes.flatMap(ht => ht.harvests.map(h => h.field.id))
+    ).size;
 
     console.log("\nFound harvest types:");
     console.log(`Total harvest types: ${harvestTypes.length}`);
     console.log("\nSummary:");
     console.log(`Total harvests: ${totalHarvests}`);
     console.log(`Total harvest entries: ${totalEntries}`);
-    console.log(`Total pricing combinations: ${totalPricingCombinations}`);
+    console.log(`Fields involved: ${uniqueFields}`);
 
     const confirm = await question('\nAre you sure you want to delete ALL harvest types? This will:\n' +
       '- Delete ALL harvest type records\n' +
-      '- Delete ALL harvests of these types\n' +
-      '- Delete ALL harvest entries\n' +
-      '- Delete ALL pricing combinations\n' +
+      '- Delete ALL associated harvests\n' +
+      '- Delete ALL associated harvest entries\n' +
       'Type "YES" to confirm: ');
 
     if (confirm !== "YES") {
@@ -53,41 +56,33 @@ async function deleteAllHarvestTypes() {
       return;
     }
 
-    await prisma.$transaction(async (tx) => {
-      await tx.harvestEntry.deleteMany({
-        where: {
-          harvest: {
-            harvestTypeId: {
-              in: harvestTypes.map(ht => ht.id)
+    // Process each harvest type in its own transaction
+    for (const harvestType of harvestTypes) {
+      await prisma.$transaction(async (tx) => {
+        // Delete harvest entries first
+        await tx.harvestEntry.deleteMany({
+          where: {
+            harvest: {
+              harvestTypeId: harvestType.id
             }
           }
-        }
+        });
+
+        // Delete harvests
+        await tx.harvest.deleteMany({
+          where: { harvestTypeId: harvestType.id }
+        });
+
+        // Delete the harvest type
+        await tx.harvestType.delete({
+          where: { id: harvestType.id }
+        });
+      }, {
+        timeout: 30000 // 30 second timeout
       });
 
-      await tx.harvest.deleteMany({
-        where: {
-          harvestTypeId: {
-            in: harvestTypes.map(ht => ht.id)
-          }
-        }
-      });
-
-      await tx.clientPricingCombination.deleteMany({
-        where: {
-          harvestTypeId: {
-            in: harvestTypes.map(ht => ht.id)
-          }
-        }
-      });
-
-      await tx.harvestType.deleteMany({
-        where: {
-          id: {
-            in: harvestTypes.map(ht => ht.id)
-          }
-        }
-      });
-    });
+      console.log(`Deleted harvest type: ${harvestType.name}`);
+    }
 
     console.log("\nAll harvest types and related records deleted successfully");
 

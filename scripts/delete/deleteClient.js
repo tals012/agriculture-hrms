@@ -74,8 +74,10 @@ async function deleteAllClients() {
       return;
     }
 
-    await prisma.$transaction(async (tx) => {
-      for (const client of clients) {
+    // Process in chunks to avoid transaction timeout
+    for (const client of clients) {
+      await prisma.$transaction(async (tx) => {
+        // Delete harvest entries and harvests for each field
         for (const field of client.fields) {
           await tx.harvestEntry.deleteMany({
             where: {
@@ -89,6 +91,7 @@ async function deleteAllClients() {
             where: { fieldId: field.id }
           });
 
+          // Delete group members and groups
           await tx.groupMember.deleteMany({
             where: {
               group: {
@@ -102,10 +105,12 @@ async function deleteAllClients() {
           });
         }
 
+        // Delete fields
         await tx.field.deleteMany({
           where: { clientId: client.id }
         });
 
+        // Delete manager user accounts and managers
         const managerUserIds = client.managers
           .filter(m => m.userId)
           .map(m => m.userId);
@@ -124,6 +129,7 @@ async function deleteAllClients() {
           where: { clientId: client.id }
         });
 
+        // Delete worker history and pricing combinations
         await tx.workerClientHistory.deleteMany({
           where: { clientId: client.id }
         });
@@ -131,25 +137,23 @@ async function deleteAllClients() {
         await tx.clientPricingCombination.deleteMany({
           where: { clientId: client.id }
         });
-      }
 
-      await tx.worker.updateMany({
-        where: {
-          currentClientId: {
-            in: clients.map(c => c.id)
-          }
-        },
-        data: { currentClientId: null }
+        // Update worker references
+        await tx.worker.updateMany({
+          where: { currentClientId: client.id },
+          data: { currentClientId: null }
+        });
+
+        // Delete the client
+        await tx.client.delete({
+          where: { id: client.id }
+        });
+      }, {
+        timeout: 30000 // 30 second timeout for each transaction
       });
 
-      await tx.client.deleteMany({
-        where: {
-          id: {
-            in: clients.map(c => c.id)
-          }
-        }
-      });
-    });
+      console.log(`Deleted client: ${client.name}`);
+    }
 
     console.log("\nAll clients and related records deleted successfully");
 

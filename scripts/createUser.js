@@ -30,7 +30,7 @@ async function createUser() {
     const phone = await question('Enter phone (press Enter to skip): ');
     const password = await question('Enter password: ');
     
-    console.log('\nAvailable roles: ADMIN, FIELD_MANAGER, FOREIGN_WORKER');
+    console.log('\nAvailable roles: ADMIN');
     const role = await question('Enter role: ');
 
     const organization = await prisma.organization.findFirst();

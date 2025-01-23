@@ -74,8 +74,10 @@ async function deleteAllFields() {
       return;
     }
 
-    await prisma.$transaction(async (tx) => {
-      for (const field of fields) {
+    // Process each field in its own transaction
+    for (const field of fields) {
+      await prisma.$transaction(async (tx) => {
+        // Delete harvest entries first
         await tx.harvestEntry.deleteMany({
           where: {
             harvest: {
@@ -84,10 +86,12 @@ async function deleteAllFields() {
           }
         });
 
+        // Delete harvests
         await tx.harvest.deleteMany({
           where: { fieldId: field.id }
         });
 
+        // Handle group leaders and their user accounts
         const groupLeaderUserIds = field.groups
           .flatMap(g => g.members)
           .filter(m => m.isGroupLeader && m.worker.userId)
@@ -103,6 +107,7 @@ async function deleteAllFields() {
           });
         }
 
+        // Delete group members
         await tx.groupMember.deleteMany({
           where: {
             group: {
@@ -111,19 +116,21 @@ async function deleteAllFields() {
           }
         });
 
+        // Delete groups
         await tx.group.deleteMany({
           where: { fieldId: field.id }
         });
-      }
 
-      await tx.field.deleteMany({
-        where: {
-          id: {
-            in: fields.map(f => f.id)
-          }
-        }
+        // Finally delete the field
+        await tx.field.delete({
+          where: { id: field.id }
+        });
+      }, {
+        timeout: 30000 // 30 second timeout
       });
-    });
+
+      console.log(`Deleted field: ${field.name} (Client: ${field.client.name})`);
+    }
 
     console.log("\nAll fields and related records deleted successfully");
 
