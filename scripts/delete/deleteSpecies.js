@@ -9,38 +9,43 @@ const rl = readline.createInterface({
 
 const question = (query) => new Promise((resolve) => rl.question(query, resolve));
 
-async function deleteSpecies() {
+async function deleteAllSpecies() {
   try {
-    const speciesId = await question('Enter species ID to delete: ');
-
-    const species = await prisma.species.findUnique({
-      where: { id: speciesId },
+    const species = await prisma.species.findMany({
       include: {
         harvests: {
           include: {
             entries: true
           }
         },
-        clientPricingCombination: true
+        clientPricingCombination: true,
+        organization: true
       }
     });
 
-    if (!species) {
-      console.log("Species not found");
+    if (species.length === 0) {
+      console.log("No species found in the database");
       return;
     }
 
-    console.log("\nSpecies found:");
-    console.log(`Name: ${species.name}`);
-    console.log(`Description: ${species.description || 'No description'}`);
-    console.log(`Total Harvests: ${species.harvests.length}`);
-    console.log(`Total Harvest Entries: ${species.harvests.reduce((sum, h) => sum + h.entries.length, 0)}`);
-    console.log(`Pricing Combinations: ${species.clientPricingCombination.length}`);
-    
-    const confirm = await question('\nAre you sure you want to delete this species? This will also delete:\n' +
-      '- All harvests of this species\n' +
-      '- All harvest entries\n' +
-      '- All pricing combinations\n' +
+    const totalHarvests = species.reduce((sum, s) => sum + s.harvests.length, 0);
+    const totalEntries = species.reduce((sum, s) => 
+      sum + s.harvests.reduce((hSum, h) => hSum + h.entries.length, 0), 0);
+    const totalPricingCombinations = species.reduce((sum, s) => 
+      sum + s.clientPricingCombination.length, 0);
+
+    console.log("\nFound species:");
+    console.log(`Total species: ${species.length}`);
+    console.log("\nSummary:");
+    console.log(`Total harvests: ${totalHarvests}`);
+    console.log(`Total harvest entries: ${totalEntries}`);
+    console.log(`Total pricing combinations: ${totalPricingCombinations}`);
+
+    const confirm = await question('\nAre you sure you want to delete ALL species? This will:\n' +
+      '- Delete ALL species records\n' +
+      '- Delete ALL harvests of these species\n' +
+      '- Delete ALL harvest entries\n' +
+      '- Delete ALL pricing combinations\n' +
       'Type "YES" to confirm: ');
 
     if (confirm !== "YES") {
@@ -49,25 +54,42 @@ async function deleteSpecies() {
     }
 
     await prisma.$transaction(async (tx) => {
-      for (const harvest of species.harvests) {
-        await tx.harvestEntry.deleteMany({
-          where: { harvestId: harvest.id }
-        });
-      }
+      await tx.harvestEntry.deleteMany({
+        where: {
+          harvest: {
+            speciesId: {
+              in: species.map(s => s.id)
+            }
+          }
+        }
+      });
+
       await tx.harvest.deleteMany({
-        where: { speciesId }
+        where: {
+          speciesId: {
+            in: species.map(s => s.id)
+          }
+        }
       });
 
       await tx.clientPricingCombination.deleteMany({
-        where: { speciesId }
+        where: {
+          speciesId: {
+            in: species.map(s => s.id)
+          }
+        }
       });
 
-      await tx.species.delete({
-        where: { id: speciesId }
+      await tx.species.deleteMany({
+        where: {
+          id: {
+            in: species.map(s => s.id)
+          }
+        }
       });
     });
 
-    console.log("\nSpecies and all related records deleted successfully");
+    console.log("\nAll species and related records deleted successfully");
 
   } catch (error) {
     console.error("Error deleting species:", error);
@@ -77,4 +99,4 @@ async function deleteSpecies() {
   }
 }
 
-deleteSpecies(); 
+deleteAllSpecies(); 

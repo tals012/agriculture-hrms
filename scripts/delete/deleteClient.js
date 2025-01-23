@@ -9,14 +9,24 @@ const rl = readline.createInterface({
 
 const question = (query) => new Promise((resolve) => rl.question(query, resolve));
 
-async function deleteClient() {
+async function deleteAllClients() {
   try {
-    const clientId = await question('Enter client ID to delete: ');
-
-    const client = await prisma.client.findUnique({
-      where: { id: clientId },
+    const clients = await prisma.client.findMany({
       include: {
-        fields: true,
+        fields: {
+          include: {
+            harvests: {
+              include: {
+                entries: true
+              }
+            },
+            groups: {
+              include: {
+                members: true
+              }
+            }
+          }
+        },
         managers: {
           include: {
             user: true
@@ -28,23 +38,35 @@ async function deleteClient() {
       }
     });
 
-    if (!client) {
-      console.log("Client not found");
+    if (clients.length === 0) {
+      console.log("No clients found in the database");
       return;
     }
 
-    console.log("\nClient found:");
-    console.log(`Name: ${client.name}`);
-    console.log(`Fields: ${client.fields.length}`);
-    console.log(`Managers: ${client.managers.length}`);
-    console.log(`Current Workers: ${client.currentWorkers.length}`);
-    console.log(`Historical Records: ${client.workerHistory.length}`);
-    
-    const confirm = await question('\nAre you sure you want to delete this client? This will also delete:\n' +
-      '- All fields and their harvests\n' +
-      '- All managers and their user accounts\n' +
-      '- All worker history records\n' +
-      '- All pricing combinations\n' +
+    const totalFields = clients.reduce((sum, c) => sum + c.fields.length, 0);
+    const totalManagers = clients.reduce((sum, c) => sum + c.managers.length, 0);
+    const totalWorkers = clients.reduce((sum, c) => sum + c.currentWorkers.length, 0);
+    const totalHarvests = clients.reduce((sum, c) => 
+      sum + c.fields.reduce((fSum, f) => fSum + f.harvests.length, 0), 0);
+    const totalGroups = clients.reduce((sum, c) => 
+      sum + c.fields.reduce((fSum, f) => fSum + f.groups.length, 0), 0);
+
+    console.log("\nFound clients:");
+    console.log(`Total clients: ${clients.length}`);
+    console.log("\nSummary:");
+    console.log(`Total fields: ${totalFields}`);
+    console.log(`Total managers: ${totalManagers}`);
+    console.log(`Total current workers: ${totalWorkers}`);
+    console.log(`Total harvests: ${totalHarvests}`);
+    console.log(`Total groups: ${totalGroups}`);
+
+    const confirm = await question('\nAre you sure you want to delete ALL clients? This will:\n' +
+      '- Delete ALL client records\n' +
+      '- Delete ALL fields and their harvests\n' +
+      '- Delete ALL managers and their user accounts\n' +
+      '- Delete ALL worker history records\n' +
+      '- Delete ALL pricing combinations\n' +
+      '- Remove client references from workers\n' +
       'Type "YES" to confirm: ');
 
     if (confirm !== "YES") {
@@ -53,63 +75,90 @@ async function deleteClient() {
     }
 
     await prisma.$transaction(async (tx) => {
-      for (const field of client.fields) {
-        const harvests = await tx.harvest.findMany({
-          where: { fieldId: field.id }
-        });
-        
-        for (const harvest of harvests) {
+      for (const client of clients) {
+        for (const field of client.fields) {
           await tx.harvestEntry.deleteMany({
-            where: { harvestId: harvest.id }
+            where: {
+              harvest: {
+                fieldId: field.id
+              }
+            }
+          });
+
+          await tx.harvest.deleteMany({
+            where: { fieldId: field.id }
+          });
+
+          await tx.groupMember.deleteMany({
+            where: {
+              group: {
+                fieldId: field.id
+              }
+            }
+          });
+
+          await tx.group.deleteMany({
+            where: { fieldId: field.id }
           });
         }
-        
-        await tx.harvest.deleteMany({
-          where: { fieldId: field.id }
+
+        await tx.field.deleteMany({
+          where: { clientId: client.id }
+        });
+
+        const managerUserIds = client.managers
+          .filter(m => m.userId)
+          .map(m => m.userId);
+
+        if (managerUserIds.length > 0) {
+          await tx.user.deleteMany({
+            where: {
+              id: {
+                in: managerUserIds
+              }
+            }
+          });
+        }
+
+        await tx.manager.deleteMany({
+          where: { clientId: client.id }
+        });
+
+        await tx.workerClientHistory.deleteMany({
+          where: { clientId: client.id }
+        });
+
+        await tx.clientPricingCombination.deleteMany({
+          where: { clientId: client.id }
         });
       }
-
-      await tx.field.deleteMany({
-        where: { clientId }
-      });
-
-      for (const manager of client.managers) {
-        if (manager.userId) {
-          await tx.user.delete({
-            where: { id: manager.userId }
-          });
-        }
-      }
-      await tx.manager.deleteMany({
-        where: { clientId }
-      });
-
-      await tx.workerClientHistory.deleteMany({
-        where: { clientId }
-      });
-
-      await tx.clientPricingCombination.deleteMany({
-        where: { clientId }
-      });
 
       await tx.worker.updateMany({
-        where: { currentClientId: clientId },
+        where: {
+          currentClientId: {
+            in: clients.map(c => c.id)
+          }
+        },
         data: { currentClientId: null }
       });
 
-      await tx.client.delete({
-        where: { id: clientId }
+      await tx.client.deleteMany({
+        where: {
+          id: {
+            in: clients.map(c => c.id)
+          }
+        }
       });
     });
 
-    console.log("\nClient and all related records deleted successfully");
+    console.log("\nAll clients and related records deleted successfully");
 
   } catch (error) {
-    console.error("Error deleting client:", error);
+    console.error("Error deleting clients:", error);
   } finally {
     await prisma.$disconnect();
     rl.close();
   }
 }
 
-deleteClient(); 
+deleteAllClients(); 

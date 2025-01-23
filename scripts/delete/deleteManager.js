@@ -9,12 +9,9 @@ const rl = readline.createInterface({
 
 const question = (query) => new Promise((resolve) => rl.question(query, resolve));
 
-async function deleteManager() {
+async function deleteAllManagers() {
   try {
-    const managerId = await question('Enter manager ID to delete: ');
-
-    const manager = await prisma.manager.findUnique({
-      where: { id: managerId },
+    const managers = await prisma.manager.findMany({
       include: {
         client: true,
         fields: true,
@@ -22,22 +19,21 @@ async function deleteManager() {
       }
     });
 
-    if (!manager) {
-      console.log("Manager not found");
+    if (managers.length === 0) {
+      console.log("No managers found in the database");
       return;
     }
 
-    console.log("\nManager found:");
-    console.log(`Name: ${manager.name}`);
-    console.log(`Email: ${manager.email}`);
-    console.log(`Phone: ${manager.phone}`);
-    console.log(`Client: ${manager.client.name}`);
-    console.log(`Fields Managed: ${manager.fields.length}`);
-    console.log(`Has User Account: ${manager.user ? 'Yes' : 'No'}`);
+    console.log("\nFound managers:");
+    console.log(`Total managers: ${managers.length}`);
+    console.log("\nSummary:");
+    console.log(`Total fields managed: ${managers.reduce((sum, m) => sum + m.fields.length, 0)}`);
+    console.log(`Managers with user accounts: ${managers.filter(m => m.user).length}`);
 
-    const confirm = await question('\nAre you sure you want to delete this manager? This will also:\n' +
-      '- Unassign all managed fields\n' +
-      (manager.user ? '- Delete associated user account\n' : '') +
+    const confirm = await question('\nAre you sure you want to delete ALL managers? This will:\n' +
+      '- Delete ALL manager records\n' +
+      '- Unassign ALL managed fields\n' +
+      '- Delete associated user accounts\n' +
       'Type "YES" to confirm: ');
 
     if (confirm !== "YES") {
@@ -47,29 +43,44 @@ async function deleteManager() {
 
     await prisma.$transaction(async (tx) => {
       await tx.field.updateMany({
-        where: { managerId },
+        where: {
+          managerId: {
+            not: null
+          }
+        },
         data: { managerId: null }
       });
 
-      if (manager.userId) {
-        await tx.user.delete({
-          where: { id: manager.userId }
+      const managerIds = managers.map(m => m.id);
+      const userIds = managers.filter(m => m.userId).map(m => m.userId);
+
+      if (userIds.length > 0) {
+        await tx.user.deleteMany({
+          where: {
+            id: {
+              in: userIds
+            }
+          }
         });
       }
 
-      await tx.manager.delete({
-        where: { id: managerId }
+      await tx.manager.deleteMany({
+        where: {
+          id: {
+            in: managerIds
+          }
+        }
       });
     });
 
-    console.log("\nManager and related records deleted successfully");
+    console.log("\nAll managers and related records deleted successfully");
 
   } catch (error) {
-    console.error("Error deleting manager:", error);
+    console.error("Error deleting managers:", error);
   } finally {
     await prisma.$disconnect();
     rl.close();
   }
 }
 
-deleteManager(); 
+deleteAllManagers(); 

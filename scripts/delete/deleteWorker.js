@@ -9,37 +9,48 @@ const rl = readline.createInterface({
 
 const question = (query) => new Promise((resolve) => rl.question(query, resolve));
 
-async function deleteWorker() {
+async function deleteAllWorkers() {
   try {
-    const workerId = await question('Enter worker ID to delete: ');
-
-    const worker = await prisma.worker.findUnique({
-      where: { id: workerId },
+    const workers = await prisma.worker.findMany({
       include: {
         user: true,
         groups: {
           include: {
             group: true
           }
-        }
+        },
+        harvestEntries: true,
+        clientHistory: true,
+        currentClient: true
       }
     });
 
-    if (!worker) {
-      console.log("Worker not found");
+    if (workers.length === 0) {
+      console.log("No workers found in the database");
       return;
     }
 
-    console.log("\nWorker found:");
-    console.log(`Name: ${worker.name || worker.nameHe}`);
-    console.log(`Worker Code: ${worker.workerCode}`);
-    console.log(`Groups: ${worker.groups.length}`);
-    
-    const confirm = await question('\nAre you sure you want to delete this worker? This will also delete:\n' +
-      '- All group memberships\n' +
-      '- Work history records\n' +
-      '- Harvest entries\n' +
-      '- User account (if exists)\n' +
+    const totalGroups = workers.reduce((sum, w) => sum + w.groups.length, 0);
+    const totalHarvestEntries = workers.reduce((sum, w) => sum + w.harvestEntries.length, 0);
+    const totalHistory = workers.reduce((sum, w) => sum + w.clientHistory.length, 0);
+    const totalUserAccounts = workers.filter(w => w.user).length;
+    const totalGroupLeaders = workers.filter(w => w.groups.some(g => g.isGroupLeader)).length;
+
+    console.log("\nFound workers:");
+    console.log(`Total workers: ${workers.length}`);
+    console.log("\nSummary:");
+    console.log(`Total group memberships: ${totalGroups}`);
+    console.log(`Total harvest entries: ${totalHarvestEntries}`);
+    console.log(`Total history records: ${totalHistory}`);
+    console.log(`Workers with user accounts: ${totalUserAccounts}`);
+    console.log(`Group leaders: ${totalGroupLeaders}`);
+
+    const confirm = await question('\nAre you sure you want to delete ALL workers? This will:\n' +
+      '- Delete ALL worker records\n' +
+      '- Delete ALL group memberships\n' +
+      '- Delete ALL harvest entries\n' +
+      '- Delete ALL work history records\n' +
+      '- Delete associated user accounts\n' +
       'Type "YES" to confirm: ');
 
     if (confirm !== "YES") {
@@ -49,36 +60,60 @@ async function deleteWorker() {
 
     await prisma.$transaction(async (tx) => {
       await tx.harvestEntry.deleteMany({
-        where: { workerId }
+        where: {
+          workerId: {
+            in: workers.map(w => w.id)
+          }
+        }
       });
 
       await tx.groupMember.deleteMany({
-        where: { workerId }
+        where: {
+          workerId: {
+            in: workers.map(w => w.id)
+          }
+        }
       });
 
       await tx.workerClientHistory.deleteMany({
-        where: { workerId }
+        where: {
+          workerId: {
+            in: workers.map(w => w.id)
+          }
+        }
       });
 
-      if (worker.userId) {
-        await tx.user.delete({
-          where: { id: worker.userId }
+      const userIds = workers
+        .filter(w => w.userId)
+        .map(w => w.userId);
+
+      if (userIds.length > 0) {
+        await tx.user.deleteMany({
+          where: {
+            id: {
+              in: userIds
+            }
+          }
         });
       }
 
-      await tx.worker.delete({
-        where: { id: workerId }
+      await tx.worker.deleteMany({
+        where: {
+          id: {
+            in: workers.map(w => w.id)
+          }
+        }
       });
     });
 
-    console.log("\nWorker and related records deleted successfully");
+    console.log("\nAll workers and related records deleted successfully");
 
   } catch (error) {
-    console.error("Error deleting worker:", error);
+    console.error("Error deleting workers:", error);
   } finally {
     await prisma.$disconnect();
     rl.close();
   }
 }
 
-deleteWorker(); 
+deleteAllWorkers(); 

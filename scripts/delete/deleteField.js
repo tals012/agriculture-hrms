@@ -9,18 +9,23 @@ const rl = readline.createInterface({
 
 const question = (query) => new Promise((resolve) => rl.question(query, resolve));
 
-async function deleteField() {
+async function deleteAllFields() {
   try {
-    const fieldId = await question('Enter field ID to delete: ');
-
-    const field = await prisma.field.findUnique({
-      where: { id: fieldId },
+    const fields = await prisma.field.findMany({
       include: {
         client: true,
         manager: true,
         groups: {
           include: {
-            members: true,
+            members: {
+              include: {
+                worker: {
+                  include: {
+                    user: true
+                  }
+                }
+              }
+            },
             clientPricingCombination: true
           }
         },
@@ -32,23 +37,36 @@ async function deleteField() {
       }
     });
 
-    if (!field) {
-      console.log("Field not found");
+    if (fields.length === 0) {
+      console.log("No fields found in the database");
       return;
     }
 
-    console.log("\nField found:");
-    console.log(`Name: ${field.name}`);
-    console.log(`Client: ${field.client.name}`);
-    console.log(`Groups: ${field.groups.length}`);
-    console.log(`Harvests: ${field.harvests.length}`);
-    console.log(`Total Harvest Entries: ${field.harvests.reduce((sum, h) => sum + h.entries.length, 0)}`);
-    
-    const confirm = await question('\nAre you sure you want to delete this field? This will also delete:\n' +
-      '- All groups and their member associations\n' +
-      '- All group leader user accounts\n' +
-      '- All harvests and harvest entries\n' +
-      '- All pricing combinations linked to groups\n' +
+    const totalGroups = fields.reduce((sum, f) => sum + f.groups.length, 0);
+    const totalHarvests = fields.reduce((sum, f) => sum + f.harvests.length, 0);
+    const totalEntries = fields.reduce((sum, f) => 
+      sum + f.harvests.reduce((hSum, h) => hSum + h.entries.length, 0), 0);
+    const totalGroupMembers = fields.reduce((sum, f) => 
+      sum + f.groups.reduce((gSum, g) => gSum + g.members.length, 0), 0);
+    const totalGroupLeaders = fields.reduce((sum, f) => 
+      sum + f.groups.reduce((gSum, g) => 
+        gSum + g.members.filter(m => m.isGroupLeader).length, 0), 0);
+
+    console.log("\nFound fields:");
+    console.log(`Total fields: ${fields.length}`);
+    console.log("\nSummary:");
+    console.log(`Total groups: ${totalGroups}`);
+    console.log(`Total harvests: ${totalHarvests}`);
+    console.log(`Total harvest entries: ${totalEntries}`);
+    console.log(`Total group members: ${totalGroupMembers}`);
+    console.log(`Total group leaders: ${totalGroupLeaders}`);
+
+    const confirm = await question('\nAre you sure you want to delete ALL fields? This will:\n' +
+      '- Delete ALL field records\n' +
+      '- Delete ALL groups and their member associations\n' +
+      '- Delete ALL harvests and harvest entries\n' +
+      '- Delete group leader user accounts\n' +
+      '- Remove field references from managers\n' +
       'Type "YES" to confirm: ');
 
     if (confirm !== "YES") {
@@ -57,68 +75,64 @@ async function deleteField() {
     }
 
     await prisma.$transaction(async (tx) => {
-      for (const group of field.groups) {
-        const groupLeaders = group.members.filter(member => member.isGroupLeader);
-        for (const leader of groupLeaders) {
-          const worker = await tx.worker.findUnique({
-            where: { id: leader.workerId },
-            include: { user: true }
-          });
-          if (worker?.userId) {
-            await tx.user.delete({
-              where: { id: worker.userId }
-            });
+      for (const field of fields) {
+        await tx.harvestEntry.deleteMany({
+          where: {
+            harvest: {
+              fieldId: field.id
+            }
           }
+        });
+
+        await tx.harvest.deleteMany({
+          where: { fieldId: field.id }
+        });
+
+        const groupLeaderUserIds = field.groups
+          .flatMap(g => g.members)
+          .filter(m => m.isGroupLeader && m.worker.userId)
+          .map(m => m.worker.userId);
+
+        if (groupLeaderUserIds.length > 0) {
+          await tx.user.deleteMany({
+            where: {
+              id: {
+                in: groupLeaderUserIds
+              }
+            }
+          });
         }
 
-        await tx.clientPricingCombination.updateMany({
+        await tx.groupMember.deleteMany({
           where: {
-            groups: {
-              some: {
-                id: group.id
-              }
-            }
-          },
-          data: {
-            groups: {
-              disconnect: {
-                id: group.id
-              }
+            group: {
+              fieldId: field.id
             }
           }
         });
 
-        await tx.groupMember.deleteMany({
-          where: { groupId: group.id }
+        await tx.group.deleteMany({
+          where: { fieldId: field.id }
         });
       }
 
-      await tx.group.deleteMany({
-        where: { fieldId }
-      });
-
-      for (const harvest of field.harvests) {
-        await tx.harvestEntry.deleteMany({
-          where: { harvestId: harvest.id }
-        });
-      }
-      await tx.harvest.deleteMany({
-        where: { fieldId }
-      });
-
-      await tx.field.delete({
-        where: { id: fieldId }
+      await tx.field.deleteMany({
+        where: {
+          id: {
+            in: fields.map(f => f.id)
+          }
+        }
       });
     });
 
-    console.log("\nField and all related records deleted successfully");
+    console.log("\nAll fields and related records deleted successfully");
 
   } catch (error) {
-    console.error("Error deleting field:", error);
+    console.error("Error deleting fields:", error);
   } finally {
     await prisma.$disconnect();
     rl.close();
   }
 }
 
-deleteField(); 
+deleteAllFields(); 
