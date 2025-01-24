@@ -3,6 +3,7 @@ import { useState } from "react";
 import styles from "@/styles/containers/attendance/workersAttendance.module.scss";
 import { BsArrowLeft, BsChevronDown } from "react-icons/bs";
 import { toast } from "react-toastify";
+import TextField from "@/components/textField";
 
 const attendanceOptions = [
   { id: 'present', label: 'נוכח' },
@@ -12,6 +13,7 @@ const attendanceOptions = [
   { id: '1', label: '1 מכלים' },
   { id: '2', label: '2 מכלים' },
   { id: '2.5', label: '2.5 מכלים' },
+  { id: 'custom', label: 'מספר מכלים אחר' },
 ];
 
 export default function WorkersAttendance({ data, onUpdate, onStepChange }) {
@@ -24,6 +26,7 @@ export default function WorkersAttendance({ data, onUpdate, onStepChange }) {
 
   const [openWorkerId, setOpenWorkerId] = useState(null);
   const [workersAttendance, setWorkersAttendance] = useState(data?.workersAttendance || {});
+  const [customContainers, setCustomContainers] = useState(data?.customContainers || {});
 
   const handleWorkerClick = (workerId) => {
     setOpenWorkerId(openWorkerId === workerId ? null : workerId);
@@ -35,12 +38,36 @@ export default function WorkersAttendance({ data, onUpdate, onStepChange }) {
         ...prev,
         [workerId]: optionId
       };
-      onUpdate({ workersAttendance: newAttendance });
+      onUpdate({ 
+        workersAttendance: newAttendance,
+        customContainers
+      });
       return newAttendance;
     });
   };
 
-  const getDisplayLabel = (optionId) => {
+  const handleCustomContainers = (workerId, value) => {
+    // Only allow numbers and decimal point
+    const sanitizedValue = value.replace(/[^0-9.]/g, '');
+    
+    setCustomContainers(prev => {
+      const newCustom = {
+        ...prev,
+        [workerId]: sanitizedValue
+      };
+      onUpdate({ 
+        workersAttendance,
+        customContainers: newCustom
+      });
+      return newCustom;
+    });
+  };
+
+  const getDisplayLabel = (optionId, workerId) => {
+    if (optionId === 'custom' && customContainers[workerId]) {
+      return `${customContainers[workerId]} מכלים`;
+    }
+
     const option = attendanceOptions.find(opt => opt.id === optionId);
     if (!option) return '';
     
@@ -61,6 +88,21 @@ export default function WorkersAttendance({ data, onUpdate, onStepChange }) {
       });
       return;
     }
+
+    // Validate custom containers input if selected
+    const invalidWorker = selectedWorkers.find(workerId => 
+      workersAttendance[workerId] === 'custom' && !customContainers[workerId]
+    );
+
+    if (invalidWorker) {
+      toast.error("נא להזין מספר מכלים", {
+        position: "top-center",
+        autoClose: 3000,
+        rtl: true
+      });
+      return;
+    }
+
     onStepChange('issues');
   };
 
@@ -86,7 +128,7 @@ export default function WorkersAttendance({ data, onUpdate, onStepChange }) {
               <div className={styles.headerRight}>
                 {workersAttendance[worker.id] && (
                   <span className={styles.selectedOption}>
-                    {getDisplayLabel(workersAttendance[worker.id])}
+                    {getDisplayLabel(workersAttendance[worker.id], worker.id)}
                   </span>
                 )}
                 <BsChevronDown className={styles.chevron} />
@@ -106,6 +148,23 @@ export default function WorkersAttendance({ data, onUpdate, onStepChange }) {
                     <span>{option.label}</span>
                   </label>
                 ))}
+                {workersAttendance[worker.id] === 'custom' && (
+                  <div className={styles.customInput}>
+                    <TextField
+                      label="מספר מכלים"
+                      width="100%"
+                      value={customContainers[worker.id] || ''}
+                      onChange={(e) => handleCustomContainers(worker.id, e.target.value)}
+                      style={{
+                        backgroundColor: 'transparent',
+                        border: '1px solid #E6E6E6',
+                        borderRadius: '6px',
+                        fontSize: '14px',
+                        color: '#374151',
+                      }}
+                    />
+                  </div>
+                )}
               </div>
             )}
           </div>

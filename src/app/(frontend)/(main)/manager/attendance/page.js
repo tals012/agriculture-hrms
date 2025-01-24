@@ -6,11 +6,10 @@ import { BsArrowLeftCircleFill } from 'react-icons/bs';
 import AttendanceStepper from "@/containers/attendance/stepper";
 import General from "@/containers/attendance/general";
 import WorkersAttendance from "@/containers/attendance/workersAttendance";
-import WorkersOutput from "@/containers/attendance/workersOutput";
 import Issues from "@/containers/attendance/issues";
 import Submit from "@/containers/attendance/submit";
-import styles from "@/styles/screens/attendance.module.scss";
 import { ToastContainer } from "react-toastify";
+import styles from "@/styles/screens/attendance.module.scss";
 
 export default function AttendancePage() {
   const [isWizardStarted, setIsWizardStarted] = useState(false);
