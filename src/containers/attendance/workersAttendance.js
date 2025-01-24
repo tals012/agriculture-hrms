@@ -61,7 +61,7 @@ export default function WorkersAttendance({ data, onUpdate, onStepChange }) {
       });
       return;
     }
-    onStepChange('workers-output');
+    onStepChange('issues');
   };
 
   return (
