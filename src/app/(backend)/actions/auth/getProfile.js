@@ -29,6 +29,18 @@ const getProfile = async ({ token }) => {
         phone: true,
         role: true,
         username: true,
+        manager: {
+          select: {
+            id: true,
+            name: true,
+          },
+        },
+        worker: {
+          select: {
+            id: true,
+            name: true,
+          },
+        },
       },
     });
 

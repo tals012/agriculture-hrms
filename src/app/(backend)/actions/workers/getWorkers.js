@@ -20,6 +20,10 @@ const getWorkers = async (filters = {}) => {
       });
     }
 
+    if (filters.clientId) {
+      where.AND.push({ clientId: filters.clientId });
+    }
+
     if (filters.name?.trim()) {
       where.AND.push({
         OR: [

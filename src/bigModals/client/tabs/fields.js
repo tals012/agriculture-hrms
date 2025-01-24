@@ -7,11 +7,14 @@ import getWorkers from "@/app/(backend)/actions/workers/getWorkers";
 import { getPricing } from "@/app/(backend)/actions/clients/getPricing";
 import styles from "@/styles/bigModals/client/tabs/managers.module.scss";
 
-const Fields = ({ clientId }) => {
+const Fields = ({
+  clientId,
+  setIsCreateFieldModalOpen,
+  createFieldStatus,
+  setCreateFieldStatus,
+}) => {
   const [activeTab, setActiveTab] = useState(0);
-  const [isCreateFieldModalOpen, setIsCreateFieldModalOpen] = useState(false);
   const [isCreateGroupModalOpen, setIsCreateGroupModalOpen] = useState(false);
-  const [createFieldStatus, setCreateFieldStatus] = useState(null);
   const [createGroupStatus, setCreateGroupStatus] = useState(null);
   const [fields, setFields] = useState([]);
   const [managers, setManagers] = useState([]);
@@ -22,7 +25,7 @@ const Fields = ({ clientId }) => {
     try {
       const [workersRes, pricingRes] = await Promise.all([
         getWorkers({ clientId }),
-        getPricing({ clientId })
+        getPricing({ clientId }),
       ]);
 
       if (workersRes?.status === 200) {
@@ -42,13 +45,13 @@ const Fields = ({ clientId }) => {
       <h1>שדות וקבוצות</h1>
 
       <div className={styles.tabs}>
-        <div 
+        <div
           className={`${styles.tab} ${activeTab === 0 ? styles.active : ""}`}
           onClick={() => setActiveTab(0)}
         >
           <p>שדות</p>
         </div>
-        <div 
+        <div
           className={`${styles.tab} ${activeTab === 1 ? styles.active : ""}`}
           onClick={() => {
             setActiveTab(1);
@@ -94,4 +97,4 @@ const Fields = ({ clientId }) => {
   );
 };
 
-export default Fields; 
+export default Fields;

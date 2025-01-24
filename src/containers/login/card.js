@@ -16,8 +16,15 @@ export default function Card() {
 
   useEffect(() => {
     let token = getCookie("token");
+    let role = getCookie("role");
     if (token) {
-      router.push("/clients");
+      if (role === "GROUP_LEADER") {
+        router.push("/group-leader/my-group");
+      } else if (role === "FIELD_MANAGER") {
+        router.push("/manager/my-fields");
+      } else {
+        router.push("/admin/clients");
+      }
     }
   }, []);
 
@@ -35,11 +42,19 @@ export default function Card() {
         });
       } else {
         document.cookie = `token=${res.token}; Path=/; HttpOnly`;
+        document.cookie = `role=${res.role}; Path=/`;
+        document.cookie = `userId=${res.userId}; Path=/`;
         toast.success(res.message, {
           position: "top-center",
           autoClose: 3000,
         });
-        router.push("/clients");
+
+        // Redirect based on role
+        if (res.role === "GROUP_LEADER") {
+          router.push("/group-leader/my-group");
+        } else {
+          router.push("/admin/clients");
+        }
       }
     } catch (error) {
       console.log(error);

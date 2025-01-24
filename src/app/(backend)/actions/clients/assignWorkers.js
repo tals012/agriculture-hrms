@@ -29,38 +29,49 @@ export const assignWorkers = async (input) => {
 
     const { clientId, workerIds, startDate, note } = parsedData.data;
 
-    await prisma.$transaction(async (tx) => {
-      await Promise.all(
-        workerIds.map(workerId =>
-          tx.workerClientHistory.create({
-            data: {
-              workerId,
-              clientId,
-              startDate,
-              note: note || null
-            }
-          })
-        )
-      );
+    // Process workers in smaller chunks to avoid timeouts
+    const CHUNK_SIZE = 10;
+    for (let i = 0; i < workerIds.length; i += CHUNK_SIZE) {
+      const chunk = workerIds.slice(i, i + CHUNK_SIZE);
       
-      await Promise.all(
-        workerIds.map(workerId =>
-          tx.worker.update({
-            where: { id: workerId },
-            data: { currentClientId: clientId }
-          })
-        )
-      );
+      await prisma.$transaction(async (tx) => {
+        // Create history records for the chunk
+        await Promise.all(
+          chunk.map(workerId =>
+            tx.workerClientHistory.create({
+              data: {
+                workerId,
+                clientId,
+                startDate,
+                note: note || null
+              }
+            })
+          )
+        );
+        
+        // Update workers in the chunk
+        await Promise.all(
+          chunk.map(workerId =>
+            tx.worker.update({
+              where: { id: workerId },
+              data: { currentClientId: clientId }
+            })
+          )
+        );
 
-      await tx.client.update({
-        where: { id: clientId },
-        data: {
-          currentWorkers: {
-            connect: workerIds.map(id => ({ id }))
+        // Update client for the chunk
+        await tx.client.update({
+          where: { id: clientId },
+          data: {
+            currentWorkers: {
+              connect: chunk.map(id => ({ id }))
+            }
           }
-        }
+        });
+      }, {
+        timeout: 30000 // 30 second timeout
       });
-    });
+    }
 
     return {
       status: 201,
@@ -68,7 +79,7 @@ export const assignWorkers = async (input) => {
     };
 
   } catch (error) {
-    console.error("Error assigning workers:", error);
+    console.error("Error assigning workers:", error.stack);
     return {
       status: 500,
       message: "Internal server error",

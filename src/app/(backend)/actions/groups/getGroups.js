@@ -7,6 +7,7 @@ const getGroupsSchema = z.object({
   clientId: z.string().optional(),
   fieldId: z.string().optional(),
   search: z.string().optional(),
+  managerId: z.string().optional(),
 });
 
 export const getGroups = async (input) => {
@@ -27,7 +28,7 @@ export const getGroups = async (input) => {
       };
     }
 
-    const { clientId, fieldId, search } = parsedData.data;
+    const { clientId, fieldId, search, managerId } = parsedData.data;
 
     const where = {};
 
@@ -39,6 +40,13 @@ export const getGroups = async (input) => {
 
     if (fieldId) {
       where.fieldId = fieldId;
+    }
+
+    if (managerId) {
+      where.field = {
+        ...where.field,
+        managerId,
+      };
     }
 
     if (search?.trim()) {

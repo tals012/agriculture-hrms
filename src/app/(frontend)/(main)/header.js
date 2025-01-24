@@ -12,7 +12,8 @@ const Header = () => {
   const pathname = usePathname();
   const [isDropOpen, setIsDropOpen] = useState(false);
   const handleLogout = () => {
-    document.cookie = "token=; expires=Thu, 01 Jan 1970 00:00:00 UTC; path=/;";
+    document.cookie = "token=; Path=/; Expires=Thu, 01 Jan 1970 00:00:01 GMT;";
+    document.cookie = "role=; Path=/; Expires=Thu, 01 Jan 1970 00:00:01 GMT;";
     router.push("/login");
   };
   const [role, setRole] = useState("");
@@ -25,9 +26,6 @@ const Header = () => {
       const token = getCookie("token");
       const { data } = await getProfile({ token });
       setRole(data.role);
-      if (data.role === "FOREIGN_WORKER") {
-        router.push("/visits");
-      }
       setLoading(false);
     };
     fetchData();
@@ -51,52 +49,54 @@ const Header = () => {
             />
           </Link>
           <nav>
-            {role && role === "ADMIN" ? (
-              <ul className={styles.ulDesktop}>
-                <Link href="/home">
-                  <li className={pathname === "/home" ? styles.active : ""}>
-                    ראשי
-                  </li>
-                </Link>
+            <ul className={styles.ulDesktop}>
+              <Link href="/home">
+                <li className={pathname === "/home" ? styles.active : ""}>
+                  ראשי
+                </li>
+              </Link>
 
-                <Link href="/clients">
-                  <li className={pathname === "/clients" ? styles.active : ""}>
-                    לקוחות
-                  </li>
-                </Link>
+              <Link href="/admin/clients">
+                <li
+                  className={pathname === "/admin/clients" ? styles.active : ""}
+                >
+                  לקוחות
+                </li>
+              </Link>
 
-                <Link href="/workers">
-                  <li className={pathname === "/workers" ? styles.active : ""}>
-                    עובדים
-                  </li>
-                </Link>
+              <Link href="/admin/workers">
+                <li
+                  className={pathname === "/admin/workers" ? styles.active : ""}
+                >
+                  עובדים
+                </li>
+              </Link>
 
-                <Link href="/users">
-                  <li className={pathname === "/users" ? styles.active : ""}>
-                    משתמשים
-                  </li>
-                </Link>
+              <Link href="/admin/users">
+                <li
+                  className={pathname === "/admin/users" ? styles.active : ""}
+                >
+                  משתמשים
+                </li>
+              </Link>
 
-                <Link href="/settings">
-                  <li className={pathname === "/settings" ? styles.active : ""}>
-                    הגדרות
-                  </li>
-                </Link>
-                <Link href="/groups">
-                  <li className={pathname === "/groups" ? styles.active : ""}>
-                    קבוצות
-                  </li>
-                </Link>
-              </ul>
-            ) : (
-              <ul className={styles.ulMobile}>
-                <Link href="/visits">
-                  <li className={pathname === "/visits" ? styles.active : ""}>
-                    כניסה לעבודה
-                  </li>
-                </Link>
-              </ul>
-            )}
+              <Link href="/admin/settings">
+                <li
+                  className={
+                    pathname === "/admin/settings" ? styles.active : ""
+                  }
+                >
+                  הגדרות
+                </li>
+              </Link>
+              <Link href="/admin/groups">
+                <li
+                  className={pathname === "/admin/groups" ? styles.active : ""}
+                >
+                  קבוצות
+                </li>
+              </Link>
+            </ul>
           </nav>
         </div>
 

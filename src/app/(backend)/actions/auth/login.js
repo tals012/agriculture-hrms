@@ -51,11 +51,14 @@ export const login = async ({ username, password }) => {
     .sign(jwtConfig.secret);
 
   cookies().set("token", token);
+  cookies().set("role", user.role || "");
+  cookies().set("userId", user.id);
 
   return {
     ok: true,
     message: "Logged in successfully",
     token,
+    role: user.role || "",
+    userId: user.id,
   };
-
 };

@@ -6,6 +6,7 @@ import { z } from "zod";
 const getFieldsSchema = z.object({
   clientId: z.string().optional(),
   search: z.string().optional(),
+  managerId: z.string().optional(),
 });
 
 const getFields = async (filters = {}) => {
@@ -30,6 +31,10 @@ const getFields = async (filters = {}) => {
 
     if (parsedFilters.data.clientId) {
       where.AND.push({ clientId: parsedFilters.data.clientId });
+    }
+
+    if (parsedFilters.data.managerId) {
+      where.AND.push({ managerId: parsedFilters.data.managerId });
     }
 
     if (parsedFilters.data.search?.trim()) {
