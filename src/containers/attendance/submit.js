@@ -5,11 +5,10 @@ import { BsArrowLeft, BsCheckCircleFill } from "react-icons/bs";
 import { format } from 'date-fns';
 import { he } from 'date-fns/locale';
 import { toast } from "react-toastify";
+import submitAttendance from "@/app/(backend)/actions/attendance/submitAttendance";
 
 const attendanceOptions = {
-  'present': 'נוכח',
   'absent': 'לא נוכח',
-  'day-off': 'יום חופש',
   '0': '0 מכלים',
   '1': '1 מכלים',
   '2': '2 מכלים',
@@ -27,7 +26,7 @@ const issuesList = {
   'other': 'אחר'
 };
 
-export default function Submit({ data, onUpdate }) {
+export default function Submit({ data, onUpdate, managerId }) {
   const [isSubmitting, setIsSubmitting] = useState(false);
 
   const getDisplayLabel = (optionId, workerId) => {
@@ -40,15 +39,49 @@ export default function Submit({ data, onUpdate }) {
   const handleSubmit = async () => {
     setIsSubmitting(true);
     try {
-      // TODO: Implement API call to submit the data
-      await new Promise(resolve => setTimeout(resolve, 1500)); // Simulating API call
-      toast.success("הדיווח נשלח בהצלחה!", {
-        position: "top-center",
-        autoClose: 3000,
-        rtl: true
+      // Transform the workers attendance data
+      const workersAttendance = Object.entries(data.workersAttendance || {}).map(([workerId, status]) => {
+        let containersFilled = 0;
+        
+        if (status === 'custom') {
+          containersFilled = parseFloat(data.customContainers[workerId]) || 0;
+        } else if (status !== 'absent') {
+          containersFilled = parseFloat(status) || 0;
+        }
+
+        return {
+          workerId,
+          containersFilled,
+        };
       });
+
+      // Prepare the submission data
+      const submissionData = {
+        administratorName: data.fullName,
+        date: data.reportDate,
+        combinationId: data.selectedPricing.value,
+        issues: data.selectedIssues || [],
+        groupId: data.selectedGroup.value,
+        managerId: managerId,
+        workersAttendance,
+      };
+
+      const response = await submitAttendance(submissionData);
+
+      if (response.status === 201) {
+        toast.success("הדיווח נשלח בהצלחה!", {
+          position: "top-center",
+          autoClose: 3000,
+          rtl: true
+        });
+        // Reset form or redirect
+        window.location.reload();
+      } else {
+        throw new Error(response.message || 'Failed to submit attendance');
+      }
     } catch (error) {
-      toast.error("שגיאה בשליחת הדיווח", {
+      console.error('Error submitting attendance:', error);
+      toast.error(error.message || "שגיאה בשליחת הדיווח", {
         position: "top-center",
         autoClose: 3000,
         rtl: true
@@ -82,7 +115,7 @@ export default function Submit({ data, onUpdate }) {
             </div>
             <div className={styles.field}>
               <span className={styles.label}>סוג קטיף:</span>
-              <span className={styles.value}>{data.selectedHarvest?.label}</span>
+              <span className={styles.value}>{data.selectedPricing?.label}</span>
             </div>
           </div>
         </div>
@@ -93,7 +126,8 @@ export default function Submit({ data, onUpdate }) {
             {Object.entries(data.workersAttendance || {}).map(([workerId, status]) => (
               <div key={workerId} className={styles.workerCard}>
                 <div className={styles.workerName}>
-                  John Doe {/* TODO: Get actual worker name */}
+                  {/* TODO: Get actual worker name */}
+                  Worker {workerId}
                 </div>
                 <div className={styles.workerStatus}>
                   {getDisplayLabel(status, workerId)}

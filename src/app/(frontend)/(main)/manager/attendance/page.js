@@ -10,11 +10,15 @@ import Issues from "@/containers/attendance/issues";
 import Submit from "@/containers/attendance/submit";
 import { ToastContainer } from "react-toastify";
 import styles from "@/styles/screens/attendance.module.scss";
+import useProfile from "@/hooks/useProfile";
 
 export default function AttendancePage() {
   const [isWizardStarted, setIsWizardStarted] = useState(false);
   const [currentStep, setCurrentStep] = useState("general");
   const [formData, setFormData] = useState({});
+  const { profile, loading } = useProfile();
+
+  console.log(formData, "formData");
 
   const handleStepChange = (step) => {
     setCurrentStep(step);
@@ -37,6 +41,7 @@ export default function AttendancePage() {
             data={formData} 
             onUpdate={handleUpdateFormData} 
             onStepChange={handleStepChange}
+            managerId={profile?.manager?.id}
           />
         );
       case 'workers-attendance':
@@ -45,6 +50,7 @@ export default function AttendancePage() {
             data={formData} 
             onUpdate={handleUpdateFormData} 
             onStepChange={handleStepChange}
+            managerId={profile?.manager?.id}
           />
         );
       case 'issues':
@@ -53,6 +59,7 @@ export default function AttendancePage() {
             data={formData} 
             onUpdate={handleUpdateFormData} 
             onStepChange={handleStepChange}
+            managerId={profile?.manager?.id}
           />
         );
       case 'submit':
@@ -61,6 +68,7 @@ export default function AttendancePage() {
             data={formData} 
             onUpdate={handleUpdateFormData} 
             onStepChange={handleStepChange}
+            managerId={profile?.manager?.id}
           />
         );
       default:
@@ -94,6 +102,10 @@ export default function AttendancePage() {
         </div>
       </div>
     );
+  }
+
+  if (loading) {
+    return <div>Loading...</div>;
   }
 
   return (

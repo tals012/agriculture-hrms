@@ -1,76 +1,116 @@
 "use client";
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import styles from "@/styles/containers/attendance/workersAttendance.module.scss";
 import { BsArrowLeft, BsChevronDown } from "react-icons/bs";
 import { toast } from "react-toastify";
 import TextField from "@/components/textField";
+import getGroupMembers from "@/app/(backend)/actions/groups/getGroupMembers";
+import Spinner from "@/components/spinner";
 
 const attendanceOptions = [
-  { id: 'present', label: 'נוכח' },
-  { id: 'absent', label: 'לא נוכח' },
-  { id: 'day-off', label: 'יום חופש' },
-  { id: '0', label: '0 מכלים' },
-  { id: '1', label: '1 מכלים' },
-  { id: '2', label: '2 מכלים' },
-  { id: '2.5', label: '2.5 מכלים' },
-  { id: 'custom', label: 'מספר מכלים אחר' },
+  { id: "absent", label: "לא נוכח" },
+  { id: "0", label: "0 מכלים" },
+  { id: "1", label: "1 מכלים" },
+  { id: "2", label: "2 מכלים" },
+  { id: "2.5", label: "2.5 מכלים" },
+  { id: "custom", label: "מספר מכלים אחר" },
 ];
 
-export default function WorkersAttendance({ data, onUpdate, onStepChange }) {
-  // TODO: This should come from API based on selected group
-  const workers = [
-    { id: 1, firstName: "John", lastName: "Doe", passport: "AB123456" },
-    { id: 2, firstName: "Jane", lastName: "Smith", passport: "CD789012" },
-    { id: 3, firstName: "Bob", lastName: "Johnson", passport: "EF345678" },
-  ];
-
+export default function WorkersAttendance({
+  data,
+  onUpdate,
+  onStepChange,
+  managerId,
+}) {
   const [openWorkerId, setOpenWorkerId] = useState(null);
-  const [workersAttendance, setWorkersAttendance] = useState(data?.workersAttendance || {});
-  const [customContainers, setCustomContainers] = useState(data?.customContainers || {});
+  const [workersAttendance, setWorkersAttendance] = useState(
+    data?.workersAttendance || {}
+  );
+  const [customContainers, setCustomContainers] = useState(
+    data?.customContainers || {}
+  );
+
+  // ! ============================
+  // ! GROUP WORKERS
+  // ! ============================
+  const [groupWorkers, setGroupWorkers] = useState([]);
+  const [groupWorkersLoading, setGroupWorkersLoading] = useState(true);
+
+  const fetchGroupWorkers = async () => {
+    try {
+      if (!data.selectedGroup) return;
+
+      const response = await getGroupMembers({
+        groupId: data.selectedGroup.value,
+      });
+      console.log(response, "response");
+      if (response.status === 200) {
+        console.log(response.data, "response.data");
+        if (response.data.length === 0) {
+          setGroupWorkers([]);
+        } else {
+          setGroupWorkers(response.data);
+        }
+
+        setGroupWorkersLoading(false);
+      }
+    } catch (error) {
+      console.error("Error fetching group workers:", error);
+      setGroupWorkers([]);
+      setGroupWorkersLoading(false);
+    }
+  };
+
+  useEffect(() => {
+    fetchGroupWorkers();
+  }, [data.selectedGroup]);
+
+  // ! ============================
+  // ! GROUP WORKERS END
+  // ! ============================
 
   const handleWorkerClick = (workerId) => {
     setOpenWorkerId(openWorkerId === workerId ? null : workerId);
   };
 
   const handleAttendanceSelect = (workerId, optionId) => {
-    setWorkersAttendance(prev => {
+    setWorkersAttendance((prev) => {
       const newAttendance = {
         ...prev,
-        [workerId]: optionId
+        [workerId]: optionId,
       };
-      onUpdate({ 
+      onUpdate({
         workersAttendance: newAttendance,
-        customContainers
+        customContainers,
       });
       return newAttendance;
     });
   };
 
   const handleCustomContainers = (workerId, value) => {
-    // Only allow numbers and decimal point
-    const sanitizedValue = value.replace(/[^0-9.]/g, '');
-    
-    setCustomContainers(prev => {
+    const sanitizedValue = value.replace(/[^0-9.]/g, "");
+
+    setCustomContainers((prev) => {
       const newCustom = {
         ...prev,
-        [workerId]: sanitizedValue
+        [workerId]: sanitizedValue,
       };
-      onUpdate({ 
+      onUpdate({
         workersAttendance,
-        customContainers: newCustom
+        customContainers: newCustom,
       });
       return newCustom;
     });
   };
 
   const getDisplayLabel = (optionId, workerId) => {
-    if (optionId === 'custom' && customContainers[workerId]) {
+    if (optionId === "custom" && customContainers[workerId]) {
       return `${customContainers[workerId]} מכלים`;
     }
 
-    const option = attendanceOptions.find(opt => opt.id === optionId);
-    if (!option) return '';
-    
+    const option = attendanceOptions.find((opt) => opt.id === optionId);
+    if (!option) return "";
+
     // For numeric options, show just the number with מכלים
     if (!isNaN(parseFloat(optionId))) {
       return `${optionId} מכלים`;
@@ -84,83 +124,98 @@ export default function WorkersAttendance({ data, onUpdate, onStepChange }) {
       toast.error("נא לבחור נוכחות לפחות עובד אחד", {
         position: "top-center",
         autoClose: 3000,
-        rtl: true
+        rtl: true,
       });
       return;
     }
 
     // Validate custom containers input if selected
-    const invalidWorker = selectedWorkers.find(workerId => 
-      workersAttendance[workerId] === 'custom' && !customContainers[workerId]
+    const invalidWorker = selectedWorkers.find(
+      (workerId) =>
+        workersAttendance[workerId] === "custom" && !customContainers[workerId]
     );
 
     if (invalidWorker) {
       toast.error("נא להזין מספר מכלים", {
         position: "top-center",
         autoClose: 3000,
-        rtl: true
+        rtl: true,
       });
       return;
     }
 
-    onStepChange('issues');
+    onStepChange("issues");
   };
+
+  if (groupWorkersLoading) {
+    return (
+      <div className={styles.container} style={{ justifyContent: "center" }}>
+        <Spinner size={40} color="#000" />
+      </div>
+    );
+  }
 
   return (
     <div className={styles.container}>
       <h2 className={styles.heading}>סימון נוכחות עובדים</h2>
 
       <div className={styles.workersList}>
-        {workers.map((worker) => (
-          <div key={worker.id} className={styles.workerAccordion}>
-            <div 
-              className={`${styles.workerHeader} ${openWorkerId === worker.id ? styles.open : ''}`}
-              onClick={() => handleWorkerClick(worker.id)}
+        {groupWorkers?.map((worker) => (
+          <div key={worker.worker.id} className={styles.workerAccordion}>
+            <div
+              className={`${styles.workerHeader} ${
+                openWorkerId === worker.worker.id ? styles.open : ""
+              }`}
+              onClick={() => handleWorkerClick(worker.worker.id)}
             >
               <div className={styles.workerInfo}>
                 <span className={styles.name}>
-                  {worker.firstName} {worker.lastName}
+                  {worker.worker.nameHe} {worker.worker.surnameHe}
                 </span>
                 <span className={styles.passport}>
-                  {worker.passport}
+                  {worker.worker.passport}
                 </span>
               </div>
               <div className={styles.headerRight}>
-                {workersAttendance[worker.id] && (
+                {workersAttendance[worker.worker.id] && (
                   <span className={styles.selectedOption}>
-                    {getDisplayLabel(workersAttendance[worker.id], worker.id)}
+                    {getDisplayLabel(workersAttendance[worker.worker.id], worker.worker.id)}
                   </span>
                 )}
                 <BsChevronDown className={styles.chevron} />
               </div>
             </div>
-            
-            {openWorkerId === worker.id && (
+
+            {openWorkerId === worker.worker.id && (
               <div className={styles.workerBody}>
                 {attendanceOptions.map((option) => (
                   <label key={option.id} className={styles.optionItem}>
                     <input
                       type="radio"
-                      name={`attendance-${worker.id}`}
-                      checked={workersAttendance[worker.id] === option.id}
-                      onChange={() => handleAttendanceSelect(worker.id, option.id)}
+                      name={`attendance-${worker.worker.id}`}
+                      checked={workersAttendance[worker.worker.id] === option.id}
+                      onChange={() =>
+                        handleAttendanceSelect(worker.worker.id, option.id)
+                      }
                     />
                     <span>{option.label}</span>
                   </label>
                 ))}
-                {workersAttendance[worker.id] === 'custom' && (
+                {workersAttendance[worker.worker.id] === "custom" && (
                   <div className={styles.customInput}>
                     <TextField
                       label="מספר מכלים"
                       width="100%"
-                      value={customContainers[worker.id] || ''}
-                      onChange={(e) => handleCustomContainers(worker.id, e.target.value)}
+                      value={customContainers[worker.worker.id] || ""}
+                      onChange={(e) =>
+                        handleCustomContainers(worker.worker.id, e.target.value)
+                      }
                       style={{
-                        backgroundColor: 'transparent',
-                        border: '1px solid #E6E6E6',
-                        borderRadius: '6px',
-                        fontSize: '14px',
-                        color: '#374151',
+                        backgroundColor: "transparent",
+                        border: "1px solid #E6E6E6",
+                        borderRadius: "6px",
+                        fontSize: "14px",
+                        color: "#374151",
                       }}
                     />
                   </div>

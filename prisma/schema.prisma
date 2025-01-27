@@ -47,8 +47,8 @@ model User {
   organizationId String
   organization   Organization @relation(fields: [organizationId], references: [id])
 
-  manager Manager? 
-  worker  Worker? 
+  manager Manager?
+  worker  Worker?
 
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
@@ -158,6 +158,8 @@ model Worker {
 
   city   City?   @relation(fields: [cityId], references: [id])
   cityId String?
+
+  attendance WorkerAttendance[]
 
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
@@ -270,9 +272,10 @@ model Manager {
   userId String? @unique
   user   User?   @relation(fields: [userId], references: [id])
 
-  clientId String
-  client   Client  @relation(fields: [clientId], references: [id], onDelete: Cascade)
-  fields   Field[] // Fields managed by this manager
+  clientId   String
+  client     Client            @relation(fields: [clientId], references: [id], onDelete: Cascade)
+  fields     Field[] // Fields managed by this manager
+  attendance GroupAttendance[]
 
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
@@ -287,6 +290,7 @@ model Group {
   field                    Field                      @relation(fields: [fieldId], references: [id], onDelete: Cascade)
   members                  GroupMember[]
   clientPricingCombination ClientPricingCombination[]
+  attendance               GroupAttendance[]
 
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
@@ -305,6 +309,8 @@ model GroupMember {
 
   startDate DateTime  @default(now())
   endDate   DateTime?
+
+  attendance GroupAttendance[]
 
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
@@ -402,7 +408,53 @@ model ClientPricingCombination {
   clientId String
   client   Client @relation(fields: [clientId], references: [id])
 
-  groups Group[]
+  groups     Group[]
+  attendance GroupAttendance[]
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+}
+
+model GroupAttendance {
+  id String @id @default(cuid())
+
+  administratorName     String?
+  date                  DateTime                 @default(now())
+  combinationId         String // harvest type + species + container norm
+  combination           ClientPricingCombination @relation(fields: [combinationId], references: [id])
+  issues                String[]
+  workersAttendance     WorkerAttendance[]
+  totalIncome           Float
+  totalContainersFilled Int
+
+  groupId String
+  group   Group  @relation(fields: [groupId], references: [id])
+
+  managerId String?
+  manager   Manager? @relation(fields: [managerId], references: [id])
+
+  leaderId String?
+  leader   GroupMember? @relation(fields: [leaderId], references: [id])
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+}
+
+model WorkerAttendance {
+  id String @id @default(cuid())
+
+  attendanceId String
+  attendance   GroupAttendance @relation(fields: [attendanceId], references: [id])
+
+  containersFilled Int
+  totalWage        Float
+
+  hoursWorked Float?
+  startTime   DateTime?
+  endTime     DateTime?
+
+  workerId String
+  worker   Worker @relation(fields: [workerId], references: [id])
 
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt

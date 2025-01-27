@@ -1,15 +1,17 @@
 "use client";
-import { useState } from "react";
-import styles from "@/styles/containers/attendance/general.module.scss";
+import { useEffect, useState } from "react";
 import TextField from "@/components/textField";
 import ReactSelect from "react-select";
 import DatePicker from "react-datepicker";
-import { format } from 'date-fns';
-import { he } from 'date-fns/locale';
+import { format } from "date-fns";
+import { he } from "date-fns/locale";
 import Image from "next/image";
 import "react-datepicker/dist/react-datepicker.css";
 import { toast } from "react-toastify";
 import { BsArrowLeft } from "react-icons/bs";
+import styles from "@/styles/containers/attendance/general.module.scss";
+import { getGroups } from "@/app/(backend)/actions/groups/getGroups";
+import getPricing from "@/app/(backend)/actions/groups/getPricing";
 
 const selectStyle = {
   control: (baseStyles, state) => ({
@@ -27,25 +29,86 @@ const selectStyle = {
   menu: (provided) => ({ ...provided, zIndex: 9999 }),
 };
 
-export default function General({ data, onUpdate, onStepChange }) {
+export default function General({ data, onUpdate, onStepChange, managerId }) {
   const [formData, setFormData] = useState({
     fullName: data?.fullName || "",
     reportDate: data?.reportDate || new Date(),
     selectedGroup: data?.selectedGroup || null,
-    selectedHarvest: data?.selectedHarvest || null,
+    selectedPricing: data?.selectedPricing || null,
   });
 
-  // TODO: Fetch these from your API
-  const groups = [
-    { value: '1', label: 'קבוצה 1' },
-    { value: '2', label: 'קבוצה 2' },
-  ];
+  // ! ============================
+  // ! GROUPS
+  // ! ============================
+  const [groups, setGroups] = useState([]);
+  const [groupsLoading, setGroupsLoading] = useState(true);
 
-  const harvestTypes = [
-    { value: 'tomatoes', label: 'עגבניות' },
-    { value: 'cucumbers', label: 'מלפפונים' },
-    { value: 'peppers', label: 'פלפלים' },
-  ];
+  const fetchGroups = async () => {
+    try {
+      if (!managerId) return;
+
+      const response = await getGroups({ managerId });
+      if (response.status === 200) {
+        console.log(response.data, "response.data");
+        if (response.data.length === 0) {
+          setGroups([]);
+        } else {
+          setGroups(response.data);
+        }
+
+        setGroupsLoading(false);
+      }
+    } catch (error) {
+      console.error("Error fetching groups:", error);
+      setGroups([]);
+      setGroupsLoading(false);
+    }
+  };
+
+  useEffect(() => {
+    fetchGroups();
+  }, [managerId]);
+
+  // ! ============================
+  // ! GROUPS END
+  // ! ============================
+
+  // ! ============================
+  // ! PRICING
+  // ! ============================
+  const [pricing, setPricing] = useState([]);
+  const [pricingLoading, setPricingLoading] = useState(true);
+
+  const fetchPricing = async () => {
+    try {
+      if (!formData.selectedGroup) return;
+
+      const response = await getPricing({
+        groupId: formData.selectedGroup.value,
+      });
+      if (response.status === 200) {
+        console.log(response.data, "response.data");
+        if (response.data.length === 0) {
+          setPricing([]);
+        } else {
+          setPricing(response.data);
+        }
+        setPricingLoading(false);
+      }
+    } catch (error) {
+      console.error("Error fetching pricing:", error);
+      setPricing([]);
+      setPricingLoading(false);
+    }
+  };
+
+  useEffect(() => {
+    fetchPricing();
+  }, [formData.selectedGroup]);
+
+  // ! ============================
+  // ! PRICING END
+  // ! ============================
 
   const handleChange = (value, field) => {
     const newData = { ...formData, [field]: value };
@@ -59,7 +122,7 @@ export default function General({ data, onUpdate, onStepChange }) {
       toast.error("נא למלא שם מלא", {
         position: "top-center",
         autoClose: 3000,
-        rtl: true
+        rtl: true,
       });
       return;
     }
@@ -68,22 +131,21 @@ export default function General({ data, onUpdate, onStepChange }) {
       toast.error("נא לבחור קבוצה", {
         position: "top-center",
         autoClose: 3000,
-        rtl: true
+        rtl: true,
       });
       return;
     }
 
-    if (!formData.selectedHarvest) {
+    if (!formData.selectedPricing) {
       toast.error("נא לבחור סוג קטיף", {
         position: "top-center",
         autoClose: 3000,
-        rtl: true
+        rtl: true,
       });
       return;
     }
 
-    // Move to next step
-    onStepChange('workers-attendance');
+    onStepChange("workers-attendance");
   };
 
   return (
@@ -96,19 +158,26 @@ export default function General({ data, onUpdate, onStepChange }) {
             label="שם מלא"
             width="100%"
             value={formData.fullName}
-            onChange={(e) => handleChange(e.target.value, 'fullName')}
+            onChange={(e) => handleChange(e.target.value, "fullName")}
           />
         </div>
 
         <div style={{ width: "100%" }}>
           <DatePicker
             selected={formData.reportDate}
-            onChange={(date) => handleChange(date, 'reportDate')}
+            onChange={(date) => handleChange(date, "reportDate")}
             className={styles.datepicker}
             wrapperClassName={styles.dateWrapper}
             enableTabLoop={false}
             placeholderText="תאריך דיווח"
-            icon={<Image src="/assets/icons/calendar-1.svg" width={30} height={30} alt="calendar" />}
+            icon={
+              <Image
+                src="/assets/icons/calendar-1.svg"
+                width={30}
+                height={30}
+                alt="calendar"
+              />
+            }
             showIcon={true}
             calendarIconClassName="calendar-icon"
             locale={he}
@@ -118,9 +187,12 @@ export default function General({ data, onUpdate, onStepChange }) {
 
         <div style={{ width: "100%" }}>
           <ReactSelect
-            options={groups}
+            options={groups.map((group) => ({
+              value: group.id,
+              label: group.name,
+            }))}
             value={formData.selectedGroup}
-            onChange={(option) => handleChange(option, 'selectedGroup')}
+            onChange={(option) => handleChange(option, "selectedGroup")}
             placeholder="בחר קבוצה"
             components={{
               IndicatorSeparator: () => null,
@@ -128,23 +200,30 @@ export default function General({ data, onUpdate, onStepChange }) {
             styles={selectStyle}
             menuPortalTarget={document.body}
             menuPosition="fixed"
+            isLoading={groupsLoading}
           />
         </div>
 
-        <div style={{ width: "100%" }}>
-          <ReactSelect
-            options={harvestTypes}
-            value={formData.selectedHarvest}
-            onChange={(option) => handleChange(option, 'selectedHarvest')}
-            placeholder="בחר סוג קטיף"
-            components={{
-              IndicatorSeparator: () => null,
-            }}
-            styles={selectStyle}
-            menuPortalTarget={document.body}
-            menuPosition="fixed"
-          />
-        </div>
+        {formData.selectedGroup && (
+          <div style={{ width: "100%" }}>
+            <ReactSelect
+              options={pricing.map((pricing) => ({
+                value: pricing.id,
+                label: pricing.harvestType.name + " " + pricing.species.name,
+              }))}
+              value={formData.selectedPricing}
+              onChange={(option) => handleChange(option, "selectedPricing")}
+              placeholder="בחר סוג קטיף"
+              components={{
+                IndicatorSeparator: () => null,
+              }}
+              styles={selectStyle}
+              menuPortalTarget={document.body}
+              menuPosition="fixed"
+              isLoading={pricingLoading}
+            />
+          </div>
+        )}
       </div>
 
       <div className={styles.actions}>
