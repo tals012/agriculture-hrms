@@ -439,14 +439,14 @@ model WorkingSchedule {
   breakTimeInMinutes        Float   @default(30)
   isBreakTimePaid           Boolean @default(false)
 
-  organizationId String
-  organization   Organization @relation(fields: [organizationId], references: [id], onDelete: Cascade)
-  clientId       String
-  client         Client       @relation(fields: [clientId], references: [id], onDelete: Cascade)
-  groupId        String
-  group          Group        @relation(fields: [groupId], references: [id], onDelete: Cascade)
-  workerId       String
-  worker         Worker       @relation(fields: [workerId], references: [id], onDelete: Cascade)
+  organizationId String?
+  organization   Organization? @relation(fields: [organizationId], references: [id], onDelete: Cascade)
+  clientId       String?
+  client         Client?        @relation(fields: [clientId], references: [id], onDelete: Cascade)
+  groupId        String?
+  group          Group?         @relation(fields: [groupId], references: [id], onDelete: Cascade)
+  workerId       String?
+  worker         Worker?        @relation(fields: [workerId], references: [id], onDelete: Cascade)
 
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt

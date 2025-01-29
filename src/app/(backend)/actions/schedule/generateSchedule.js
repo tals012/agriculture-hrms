@@ -116,7 +116,7 @@ const generateSchedule = async (input) => {
       data: schedule,
     };
   } catch (error) {
-    console.error("Error generating schedule:", error);
+    console.error("Error generating schedule:", error.stack);
     return {
       status: 500,
       message: "Internal server error",

@@ -1,0 +1,5 @@
+-- AlterTable
+ALTER TABLE "WorkingSchedule" ALTER COLUMN "organizationId" DROP NOT NULL,
+ALTER COLUMN "clientId" DROP NOT NULL,
+ALTER COLUMN "groupId" DROP NOT NULL,
+ALTER COLUMN "workerId" DROP NOT NULL;
