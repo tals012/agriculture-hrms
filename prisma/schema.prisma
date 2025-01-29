@@ -29,6 +29,8 @@ model Organization {
   species      Species[]
   harvestTypes HarvestType[]
 
+  workingSchedule WorkingSchedule[]
+
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
 }
@@ -49,6 +51,8 @@ model User {
 
   manager Manager?
   worker  Worker?
+
+  workerAttendance WorkerAttendance[]
 
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
@@ -91,6 +95,8 @@ model Client {
   cityId String?
 
   clientPricingCombination ClientPricingCombination[]
+
+  workingSchedule WorkingSchedule[]
 
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
@@ -160,6 +166,8 @@ model Worker {
   cityId String?
 
   attendance WorkerAttendance[]
+
+  workingSchedule WorkingSchedule[]
 
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
@@ -272,10 +280,10 @@ model Manager {
   userId String? @unique
   user   User?   @relation(fields: [userId], references: [id])
 
-  clientId   String
-  client     Client            @relation(fields: [clientId], references: [id], onDelete: Cascade)
-  fields     Field[] // Fields managed by this manager
-  attendance GroupAttendance[]
+  clientId         String
+  client           Client             @relation(fields: [clientId], references: [id], onDelete: Cascade)
+  fields           Field[] // Fields managed by this manager
+  workerAttendance WorkerAttendance[]
 
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
@@ -290,7 +298,9 @@ model Group {
   field                    Field                      @relation(fields: [fieldId], references: [id], onDelete: Cascade)
   members                  GroupMember[]
   clientPricingCombination ClientPricingCombination[]
-  attendance               GroupAttendance[]
+  // attendance               GroupAttendance[]
+  workingSchedule          WorkingSchedule[]
+  workerAttendance         WorkerAttendance[]
 
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
@@ -310,7 +320,7 @@ model GroupMember {
   startDate DateTime  @default(now())
   endDate   DateTime?
 
-  attendance GroupAttendance[]
+  workerAttendance WorkerAttendance[]
 
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
@@ -408,27 +418,76 @@ model ClientPricingCombination {
   clientId String
   client   Client @relation(fields: [clientId], references: [id])
 
-  groups     Group[]
-  attendance GroupAttendance[]
+  groups           Group[]
+  // attendance GroupAttendance[]
+  workerAttendance WorkerAttendance[]
 
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
 }
 
-model GroupAttendance {
+model WorkingSchedule {
   id String @id @default(cuid())
 
-  administratorName     String?
-  date                  DateTime                 @default(now())
-  combinationId         String // harvest type + species + container norm
-  combination           ClientPricingCombination @relation(fields: [combinationId], references: [id])
-  issues                String[]
-  workersAttendance     WorkerAttendance[]
-  totalIncome           Float
-  totalContainersFilled Int
+  source WorkingScheduleSource @default(ORGANIZATION)
 
-  groupId String
-  group   Group  @relation(fields: [groupId], references: [id])
+  numberOfTotalHoursPerDay  Float   @default(8)
+  numberOfTotalDaysPerWeek  Float   @default(6)
+  numberOfTotalDaysPerMonth Float
+  startTimeInMinutes        Float   @default(480)
+  endTimeInMinutes          Float   @default(1020)
+  breakTimeInMinutes        Float   @default(30)
+  isBreakTimePaid           Boolean @default(false)
+
+  organizationId String
+  organization   Organization @relation(fields: [organizationId], references: [id], onDelete: Cascade)
+  clientId       String
+  client         Client       @relation(fields: [clientId], references: [id], onDelete: Cascade)
+  groupId        String
+  group          Group        @relation(fields: [groupId], references: [id], onDelete: Cascade)
+  workerId       String
+  worker         Worker       @relation(fields: [workerId], references: [id], onDelete: Cascade)
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+}
+
+enum WorkingScheduleSource {
+  ORGANIZATION
+  CLIENT
+  GROUP
+  WORKER
+}
+
+model WorkerAttendance {
+  id String @id @default(cuid())
+
+  attendanceDoneBy            AttendanceDoneBy         @default(ADMIN)
+  attendanceAdministratorName String?
+  attendanceDate              DateTime                 @default(now())
+  combinationId               String // harvest type + species + container norm
+  combination                 ClientPricingCombination @relation(fields: [combinationId], references: [id])
+  issues                      String[]
+
+  startTimeInMinutes    Float?   @default(480)
+  endTimeInMinutes      Float?   @default(1020)
+  breakTimeInMinutes    Float?
+  totalHoursWorked      Float?
+  totalContainersFilled Float?
+  isBreakTimePaid       Boolean? @default(false)
+  breakTimeAmount       Float?
+  totalWage             Float?
+
+  status WorkerAttendanceStatus
+
+  workerId String
+  worker   Worker @relation(fields: [workerId], references: [id])
+
+  groupId String?
+  group   Group?  @relation(fields: [groupId], references: [id])
+
+  userId String?
+  user   User?   @relation(fields: [userId], references: [id])
 
   managerId String?
   manager   Manager? @relation(fields: [managerId], references: [id])
@@ -440,22 +499,22 @@ model GroupAttendance {
   updatedAt DateTime @updatedAt
 }
 
-model WorkerAttendance {
-  id String @id @default(cuid())
+enum WorkerAttendanceStatus {
+  WORKING
+  SICK_LEAVE
+  DAY_OFF
+  HOLIDAY
+  INTER_VISA
+  NO_SCHEDULE
+  ABSENT
+  DAY_OFF_PERSONAL_REASON
+  WEEKEND
+  ACCIDENT
+  NOT_WORKING_BUT_PAID
+}
 
-  attendanceId String
-  attendance   GroupAttendance @relation(fields: [attendanceId], references: [id])
-
-  containersFilled Int
-  totalWage        Float
-
-  hoursWorked Float?
-  startTime   DateTime?
-  endTime     DateTime?
-
-  workerId String
-  worker   Worker @relation(fields: [workerId], references: [id])
-
-  createdAt DateTime @default(now())
-  updatedAt DateTime @updatedAt
+enum AttendanceDoneBy {
+  ADMIN
+  MANAGER
+  LEADER
 }
