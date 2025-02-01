@@ -144,11 +144,11 @@
     margin-top: 10px;
   
     &:hover {
-      background-color: darken(#2b85ff, 5%);
+      background-color: color.scale(#2b85ff, $lightness: -5%);
     }
   
     &:active {
-      background-color: darken(#2b85ff, 10%);
+      background-color: color.scale(#2b85ff, $lightness: -10%);
     }
   }
   

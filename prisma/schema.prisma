@@ -223,6 +223,8 @@ model Field {
   groups    Group[] // Groups working in this field
   harvests  Harvest[] // Harvest records for this field
 
+  workingSchedule WorkingSchedule[]
+
   city   City?   @relation(fields: [cityId], references: [id])
   cityId String?
 
@@ -442,11 +444,13 @@ model WorkingSchedule {
   organizationId String?
   organization   Organization? @relation(fields: [organizationId], references: [id], onDelete: Cascade)
   clientId       String?
-  client         Client?        @relation(fields: [clientId], references: [id], onDelete: Cascade)
+  client         Client?       @relation(fields: [clientId], references: [id], onDelete: Cascade)
+  fieldId        String?
+  field          Field?        @relation(fields: [fieldId], references: [id], onDelete: Cascade)
   groupId        String?
-  group          Group?         @relation(fields: [groupId], references: [id], onDelete: Cascade)
+  group          Group?        @relation(fields: [groupId], references: [id], onDelete: Cascade)
   workerId       String?
-  worker         Worker?        @relation(fields: [workerId], references: [id], onDelete: Cascade)
+  worker         Worker?       @relation(fields: [workerId], references: [id], onDelete: Cascade)
 
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
@@ -455,6 +459,7 @@ model WorkingSchedule {
 enum WorkingScheduleSource {
   ORGANIZATION
   CLIENT
+  FIELD
   GROUP
   WORKER
 }

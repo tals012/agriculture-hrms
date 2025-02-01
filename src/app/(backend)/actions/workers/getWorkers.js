@@ -21,7 +21,7 @@ const getWorkers = async (filters = {}) => {
     }
 
     if (filters.clientId) {
-      where.AND.push({ clientId: filters.clientId });
+      where.AND.push({ currentClientId: filters.clientId });
     }
 
     if (filters.name?.trim()) {

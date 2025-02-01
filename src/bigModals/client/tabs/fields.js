@@ -28,6 +28,8 @@ const Fields = ({
         getPricing({ clientId }),
       ]);
 
+      console.log(workersRes, pricingRes);
+
       if (workersRes?.status === 200) {
         setWorkers(workersRes.data);
       }

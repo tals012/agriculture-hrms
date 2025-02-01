@@ -28,7 +28,7 @@ const years = Array.from({ length: 10 }, (_, i) => ({
   label: String(currentYear + i),
 }));
 
-const selectStyle = {
+const createSelectStyle = (zIndex) => ({
   control: (baseStyles, state) => ({
     ...baseStyles,
     width: "100%",
@@ -38,10 +38,24 @@ const selectStyle = {
     color: "#999FA5",
     borderRadius: "6px",
     background: "transparent",
+    zIndex,
   }),
-  menuPortal: (provided) => ({ ...provided, zIndex: 9999 }),
-  menu: (provided) => ({ ...provided, zIndex: 9999 }),
-};
+  menuPortal: (provided) => ({ 
+    ...provided, 
+    zIndex: zIndex + 1000 
+  }),
+  menu: (provided) => ({ 
+    ...provided, 
+    zIndex: zIndex + 1000 
+  }),
+});
+
+// Create styles with different z-index values and larger gaps
+const monthSelectStyle = createSelectStyle(9000);
+const yearSelectStyle = createSelectStyle(8000);
+const clientSelectStyle = createSelectStyle(7000);
+const groupSelectStyle = createSelectStyle(6000);
+const workerSelectStyle = createSelectStyle(5000);
 
 const FilterRow = ({ onFilterChange }) => {
   const [filters, setFilters] = useState({
@@ -175,7 +189,9 @@ const FilterRow = ({ onFilterChange }) => {
             components={{
               IndicatorSeparator: () => null,
             }}
-            styles={selectStyle}
+            styles={monthSelectStyle}
+            menuPortalTarget={document.body}
+            menuPosition={"fixed"}
           />
           <ReactSelect
             options={years}
@@ -185,7 +201,9 @@ const FilterRow = ({ onFilterChange }) => {
             components={{
               IndicatorSeparator: () => null,
             }}
-            styles={selectStyle}
+            styles={yearSelectStyle}
+            menuPortalTarget={document.body}
+            menuPosition={"fixed"}
           />
         </div>
 
@@ -199,7 +217,9 @@ const FilterRow = ({ onFilterChange }) => {
             components={{
               IndicatorSeparator: () => null,
             }}
-            styles={selectStyle}
+            styles={clientSelectStyle}
+            menuPortalTarget={document.body}
+            menuPosition={"fixed"}
           />
           <ReactSelect
             options={groups}
@@ -211,7 +231,9 @@ const FilterRow = ({ onFilterChange }) => {
             components={{
               IndicatorSeparator: () => null,
             }}
-            styles={selectStyle}
+            styles={groupSelectStyle}
+            menuPortalTarget={document.body}
+            menuPosition={"fixed"}
           />
           <ReactSelect
             options={workers}
@@ -223,7 +245,9 @@ const FilterRow = ({ onFilterChange }) => {
             components={{
               IndicatorSeparator: () => null,
             }}
-            styles={selectStyle}
+            styles={workerSelectStyle}
+            menuPortalTarget={document.body}
+            menuPosition={"fixed"}
           />
         </div>
       </div>

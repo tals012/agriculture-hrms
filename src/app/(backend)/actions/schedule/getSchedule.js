@@ -5,6 +5,7 @@ import prisma from "@/lib/prisma";
 
 const getScheduleSchema = z.object({
   clientId: z.string().optional(),
+  fieldId: z.string().optional(),
   groupId: z.string().optional(),
   workerId: z.string().optional(),
   month: z.number().min(1).max(12),
@@ -49,7 +50,7 @@ const getSchedule = async (input) => {
       };
     }
 
-    const { clientId, groupId, workerId, month, year } = parsedData.data;
+    const { clientId, fieldId, groupId, workerId, month, year } = parsedData.data;
 
     // Get organization
     const organization = await prisma.organization.findFirst();
@@ -63,10 +64,13 @@ const getSchedule = async (input) => {
     // Build where clause based on priority
     let whereClause = { organizationId: organization.id };
 
+    // Priority: worker > group > field > client > organization
     if (workerId) {
       whereClause = { workerId };
     } else if (groupId) {
       whereClause = { groupId };
+    } else if (fieldId) {
+      whereClause = { fieldId };
     } else if (clientId) {
       whereClause = { clientId };
     }
@@ -104,6 +108,7 @@ const getSchedule = async (input) => {
         breakTimeInMinutes: isWeekendDay ? null : schedule.breakTimeInMinutes,
         isBreakTimePaid: isWeekendDay ? null : schedule.isBreakTimePaid,
         totalWorkingHours: isWeekendDay ? 0 : schedule.numberOfTotalHoursPerDay,
+        scheduleSource: schedule.source,
       });
     }
 
@@ -119,6 +124,7 @@ const getSchedule = async (input) => {
           totalDays: daysInMonth,
           workingDays: dailySchedule.filter(day => !day.isWeekend).length,
           weekendDays: dailySchedule.filter(day => day.isWeekend).length,
+          scheduleSource: schedule.source,
         }
       },
     };
