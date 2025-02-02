@@ -45,7 +45,18 @@ const getWorkingHours = async (input = {}) => {
     // Fetch worker attendance records with all related data
     const workingHours = await prisma.workerAttendance.findMany({
       where,
-      include: {
+      select: {
+        id: true,
+        startTimeInMinutes: true,
+        endTimeInMinutes: true,
+        breakTimeInMinutes: true,
+        totalHoursWorked: true,
+        totalHoursWorkedWindow100: true,
+        totalHoursWorkedWindow125: true,
+        totalHoursWorkedWindow150: true,
+        totalContainersFilled: true,
+        isBreakTimePaid: true,
+        status: true,
         worker: {
           select: {
             id: true,

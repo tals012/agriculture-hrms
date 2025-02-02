@@ -4,7 +4,7 @@ import { z } from "zod";
 import prisma from "@/lib/prisma";
 
 const generateScheduleSchema = z.object({
-  numberOfTotalHoursPerDay: z.number().min(1).max(24),
+  numberOfTotalHoursPerDay: z.number().min(1).max(12),
   numberOfTotalDaysPerWeek: z.number().min(1).max(7),
   startTimeInMinutes: z.number().min(0).max(1440),
   breakTimeInMinutes: z.number().min(0).max(240),
@@ -42,9 +42,25 @@ const generateSchedule = async (input) => {
       workerId,
     } = parsedData.data;
 
-    // Calculate end time in minutes
-    const totalMinutes = numberOfTotalHoursPerDay * 60;
+    // Calculate total minutes and end time
+    let totalMinutes = numberOfTotalHoursPerDay * 60;
+    
+    // If break is not paid, subtract break time from total working hours
+    if (!isBreakTimePaid) {
+      totalMinutes -= breakTimeInMinutes;
+    }
+    
     const endTimeInMinutes = startTimeInMinutes + totalMinutes;
+
+    // Calculate actual working hours (for display)
+    const actualTotalHoursPerDay = !isBreakTimePaid 
+      ? numberOfTotalHoursPerDay - (breakTimeInMinutes / 60)
+      : numberOfTotalHoursPerDay;
+
+    // Calculate overtime windows based on Israeli labor laws
+    const numberOfTotalHoursPerDayWindow100 = Math.min(actualTotalHoursPerDay, 8);
+    const numberOfTotalHoursPerDayWindow125 = Math.min(Math.max(actualTotalHoursPerDay - 8, 0), 2);
+    const numberOfTotalHoursPerDayWindow150 = Math.min(Math.max(actualTotalHoursPerDay - 10, 0), 2);
 
     // Calculate total days per month (average)
     const numberOfTotalDaysPerMonth = numberOfTotalDaysPerWeek * 4.33;
@@ -60,7 +76,10 @@ const generateSchedule = async (input) => {
 
     // Determine which IDs to use based on priority
     let scheduleData = {
-      numberOfTotalHoursPerDay,
+      numberOfTotalHoursPerDay: actualTotalHoursPerDay,
+      numberOfTotalHoursPerDayWindow100: numberOfTotalHoursPerDayWindow100,
+      numberOfTotalHoursPerDayWindow125: numberOfTotalHoursPerDayWindow125,
+      numberOfTotalHoursPerDayWindow150: numberOfTotalHoursPerDayWindow150,
       numberOfTotalDaysPerWeek,
       numberOfTotalDaysPerMonth,
       startTimeInMinutes,

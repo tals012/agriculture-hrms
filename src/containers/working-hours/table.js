@@ -1,6 +1,6 @@
 "use client";
 
-import { useMemo, useState, useEffect } from "react";
+import { useMemo, useState, useEffect, useRef } from "react";
 import styles from "@/styles/containers/working-hours/table.module.scss";
 import { toast } from "react-toastify";
 import updateWorkingSchedule from "@/app/(backend)/actions/workers/updateWorkingSchedule";
@@ -53,47 +53,64 @@ const getScheduleSourceText = (source) => {
 const EditableCell = ({ value, type, onSave, disabled }) => {
   const [editing, setEditing] = useState(false);
   const [editValue, setEditValue] = useState(value);
+  const inputRef = useRef(null);
 
   useEffect(() => {
-    // For time fields, always show in HH:mm format
     if (type === "time") {
       setEditValue(formatMinutesToTime(value));
+    } else if (type === "currency") {
+      setEditValue(value ? value.toString() : "");
     } else {
-      setEditValue(value);
+      setEditValue(value || "");
     }
   }, [value, type]);
 
-  const handleDoubleClick = () => {
+  const handleClick = () => {
     if (!disabled) {
       setEditing(true);
     }
   };
 
+  const handleChange = (e) => {
+    let newValue = e.target.value;
+    
+    // Handle special cases for different types
+    if (type === "number") {
+      // Allow only numbers and empty string
+      newValue = newValue.replace(/[^0-9]/g, '');
+    } else if (type === "time") {
+      // Allow numbers, colon, and empty string
+      newValue = newValue.replace(/[^0-9:]/g, '');
+      // Auto-add colon after 2 digits if not present
+      if (newValue.length === 2 && !newValue.includes(':')) {
+        newValue += ':';
+      }
+    }
+    
+    setEditValue(newValue);
+  };
+
   const handleBlur = async () => {
+    if (!editing) return;
+    
     setEditing(false);
     if (editValue !== value) {
       let parsedValue = editValue;
+      
       if (type === "time") {
-        // Always send time values in HH:mm format
-        if (/^\d+$/.test(editValue)) {
-          // If user entered minutes, convert to HH:mm
-          const minutes = Number(editValue);
+        // Handle different time input formats
+        if (/^\d{1,2}:\d{2}$/.test(editValue)) {
+          parsedValue = editValue.padStart(5, '0');
+        } else if (/^\d{1,4}$/.test(editValue)) {
+          const minutes = parseInt(editValue);
           const hours = Math.floor(minutes / 60);
           const mins = minutes % 60;
-          parsedValue = `${hours.toString().padStart(2, "0")}:${mins.toString().padStart(2, "0")}`;
-        } else if (!editValue.includes(":")) {
-          // If no colon, assume it's hours and add :00
-          parsedValue = `${editValue.padStart(2, "0")}:00`;
-        } else {
-          // Ensure proper HH:mm format
-          const [hours, minutes] = editValue.split(":").map(Number);
-          parsedValue = `${hours.toString().padStart(2, "0")}:${(minutes || 0).toString().padStart(2, "0")}`;
+          parsedValue = `${hours.toString().padStart(2, '0')}:${mins.toString().padStart(2, '0')}`;
         }
-      } else if (type === "currency") {
-        parsedValue = parseCurrency(editValue);
-      } else if (type === "number") {
-        parsedValue = Number(editValue);
+      } else if (type === "currency" || type === "number") {
+        parsedValue = editValue ? Number(editValue) : 0;
       }
+      
       await onSave(parsedValue);
     }
   };
@@ -102,30 +119,55 @@ const EditableCell = ({ value, type, onSave, disabled }) => {
     if (e.key === "Enter") {
       e.target.blur();
     } else if (e.key === "Escape") {
-      setEditValue(type === "time" ? formatMinutesToTime(value) : value);
       setEditing(false);
+      if (type === "time") {
+        setEditValue(formatMinutesToTime(value));
+      } else {
+        setEditValue(value || "");
+      }
+    } else if (type === "time" && e.key === ":") {
+      // Prevent multiple colons in time input
+      if (editValue.includes(':')) {
+        e.preventDefault();
+      }
     }
   };
 
   if (editing) {
     return (
-      <input
-        type="text"
-        value={editValue}
-        onChange={(e) => setEditValue(e.target.value)}
-        onBlur={handleBlur}
-        onKeyDown={handleKeyDown}
-        autoFocus
-        className={styles.editInput}
-      />
+      <div className={styles.editableCellWrapper}>
+        <input
+          ref={inputRef}
+          type="text"
+          value={editValue}
+          onChange={handleChange}
+          onBlur={handleBlur}
+          onKeyDown={handleKeyDown}
+          autoFocus
+          className={styles.editInput}
+          placeholder={
+            type === "time" ? "HH:mm" :
+            type === "number" ? "מספר" :
+            type === "currency" ? "סכום" : ""
+          }
+        />
+        <div className={styles.editingHint}>
+          {type === "time" ? "לחץ Enter לשמירה" : ""}
+        </div>
+      </div>
     );
   }
 
   return (
-    <div onDoubleClick={handleDoubleClick} className={styles.editableCell}>
+    <div 
+      onClick={handleClick} 
+      className={`${styles.editableCell} ${disabled ? styles.disabled : ''}`}
+      title={disabled ? "לא ניתן לערוך בסוף שבוע" : "לחץ לעריכה"}
+    >
       {type === "time" ? formatMinutesToTime(value) :
        type === "currency" ? formatCurrency(value) :
        value || "-"}
+      {!disabled && <span className={styles.editIcon}>✎</span>}
     </div>
   );
 };
@@ -148,66 +190,36 @@ const Table = ({ data, workerId }) => {
 
   const handleCellUpdate = async (date, field, value) => {
     if (loading) return;
+    setLoading(true);
 
     try {
-      setLoading(true);
-      const dayData = dailySchedule.find(day => day.date === date);
-      
-      // Format time values to HH:mm
-      const formatTimeValue = (minutes) => {
-        if (!minutes && minutes !== 0) return null;
-        const hours = Math.floor(minutes / 60);
-        const mins = minutes % 60;
-        return `${hours.toString().padStart(2, "0")}:${mins.toString().padStart(2, "0")}`;
-      };
+      // Convert time fields from HH:mm to minutes
+      let processedValue = value;
+      if (field === 'startTimeInMinutes' || field === 'endTimeInMinutes') {
+        // Convert HH:mm to minutes
+        const [hours, minutes] = value.split(':').map(Number);
+        processedValue = hours * 60 + minutes;
+      } else if (field === 'breakTimeInMinutes') {
+        processedValue = Number(value);
+      }
 
-      // Prepare base data with all required fields
       const updateData = {
         workerId,
         date: date.split('T')[0],
-        startTimeInMinutes: formatTimeValue(dayData.startTimeInMinutes),
-        endTimeInMinutes: formatTimeValue(dayData.endTimeInMinutes),
-        breakTimeInMinutes: dayData.breakTimeInMinutes || 0,
-        totalHoursWorked: dayData.totalWorkingHours || 0,
-        totalContainersFilled: dayData.totalContainersFilled || 0,
-        totalWage: dayData.totalWage || 0,
-        isBreakTimePaid: dayData.isBreakTimePaid || false,
-        status: dayData.status || 'WORKING'
+        [field]: processedValue
       };
 
-      // Update the specific field that was changed
-      if (field === 'startTimeInMinutes' || field === 'endTimeInMinutes') {
-        updateData[field] = value;
-      } else if (field === 'totalWorkingHours') {
-        updateData.totalHoursWorked = Number(value) || 0;
-      } else if (field === 'breakTimeInMinutes' || field === 'totalContainersFilled' || field === 'totalWage') {
-        updateData[field] = Number(value) || 0;
-      }
-
-      console.log('Updating schedule with data:', {
-        ...updateData,
-        originalDayData: dayData
-      });
-
-      const response = await updateWorkingSchedule(updateData);
       
-      if (response.status === 200) {
-        toast.success("נתונים עודכנו בהצלחה", {
-          position: "top-center",
-          autoClose: 3000,
-        });
-      } else {
-        toast.error(response.message || "שגיאה בעדכון הנתונים", {
-          position: "top-center",
-          autoClose: 3000,
-        });
+      const result = await updateWorkingSchedule(updateData);
+
+      if (result.status !== 200) {
+        throw new Error(result.error || 'Failed to update schedule');
       }
+
+      toast.success('העדכון בוצע בהצלחה');
     } catch (error) {
-      console.error("Error updating cell:", error);
-      toast.error("שגיאה בעדכון הנתונים", {
-        position: "top-center",
-        autoClose: 3000,
-      });
+      console.error('Error updating schedule:', error);
+      toast.error(error.message || 'שגיאה בעדכון הנתונים');
     } finally {
       setLoading(false);
     }
@@ -217,10 +229,17 @@ const Table = ({ data, workerId }) => {
   const totals = dailySchedule.reduce((acc, day) => {
     if (day.scheduleSource === 'ATTENDANCE' && !day.isWeekend) {
       acc.totalContainers += day.totalContainersFilled || 0;
-      acc.totalWage += day.totalWage || 0;
+      acc.totalHours100 += day.totalHoursWorkedWindow100 || 0;
+      acc.totalHours125 += day.totalHoursWorkedWindow125 || 0;
+      acc.totalHours150 += day.totalHoursWorkedWindow150 || 0;
     }
     return acc;
-  }, { totalContainers: 0, totalWage: 0 });
+  }, { 
+    totalContainers: 0,
+    totalHours100: 0,
+    totalHours125: 0,
+    totalHours150: 0
+  });
 
   return (
     <div className={styles.container}>
@@ -245,12 +264,20 @@ const Table = ({ data, workerId }) => {
           {metadata.hasAttendanceRecords && (
             <>
               <div className={styles.stat}>
-                <span>סה״כ מיכלים</span>
-                <span>{totals.totalContainers}</span>
+                <span>שעות רגילות (100%)</span>
+                <span>{totals.totalHours100.toFixed(2)}</span>
               </div>
               <div className={styles.stat}>
-                <span>סה״כ שכר</span>
-                <span>{formatCurrency(totals.totalWage)}</span>
+                <span>שעות נוספות (125%)</span>
+                <span>{totals.totalHours125.toFixed(2)}</span>
+              </div>
+              <div className={styles.stat}>
+                <span>שעות נוספות (150%)</span>
+                <span>{totals.totalHours150.toFixed(2)}</span>
+              </div>
+              <div className={styles.stat}>
+                <span>סה״כ מיכלים</span>
+                <span>{totals.totalContainers}</span>
               </div>
             </>
           )}
@@ -267,10 +294,12 @@ const Table = ({ data, workerId }) => {
               <th>שעת התחלה</th>
               <th>שעת סיום</th>
               <th>זמן הפסקה</th>
+              <th>100%</th>
+              <th>125%</th>
+              <th>150%</th>
               <th>סה״כ שעות</th>
               <th>מיכלים</th>
-              <th>שכר</th>
-              <th>מקור</th>
+              {/* <th>מקור</th> */}
             </tr>
           </thead>
           <tbody>
@@ -281,7 +310,11 @@ const Table = ({ data, workerId }) => {
               >
                 <td>{new Date(day.date).toLocaleDateString("he-IL")}</td>
                 <td>{weekDays[day.dayOfWeek]}</td>
-                <td>{day.isWeekend ? "סוף שבוע" : "יום עבודה"}</td>
+                <td>
+                  <span className={day.isWeekend ? styles.weekendBadge : styles.workdayBadge}>
+                    {day.isWeekend ? "סוף שבוע" : "יום עבודה"}
+                  </span>
+                </td>
                 <td>
                   <EditableCell
                     value={day.startTimeInMinutes}
@@ -298,39 +331,25 @@ const Table = ({ data, workerId }) => {
                     disabled={day.isWeekend}
                   />
                 </td>
-                <td>
-                  <EditableCell
-                    value={day.breakTimeInMinutes}
-                    type="number"
-                    onSave={(value) => handleCellUpdate(day.date, 'breakTimeInMinutes', value)}
-                    disabled={day.isWeekend}
-                  />
-                </td>
-                <td>
-                  <EditableCell
-                    value={day.totalWorkingHours}
-                    type="number"
-                    onSave={(value) => handleCellUpdate(day.date, 'totalHoursWorked', value)}
-                    disabled={day.isWeekend}
-                  />
-                </td>
+                <td>{formatMinutesToTime(day.breakTimeInMinutes) || "-"}</td>
+                <td>{!day.isWeekend ? (day.totalWorkingHoursWindow100?.toFixed(2)) : "-"}</td>
+                <td>{!day.isWeekend ? (day.totalWorkingHoursWindow125?.toFixed(2)) : "-"}</td>
+                <td>{!day.isWeekend ? (day.totalWorkingHoursWindow150?.toFixed(2)) : "-"}</td>
+                <td>{!day.isWeekend ? (day.totalWorkingHours?.toFixed(2)) : "-"}</td>
                 <td>
                   <EditableCell
                     value={day.totalContainersFilled}
+
                     type="number"
                     onSave={(value) => handleCellUpdate(day.date, 'totalContainersFilled', value)}
                     disabled={day.isWeekend}
                   />
                 </td>
-                <td>
-                  <EditableCell
-                    value={day.totalWage}
-                    type="currency"
-                    onSave={(value) => handleCellUpdate(day.date, 'totalWage', value)}
-                    disabled={day.isWeekend}
-                  />
-                </td>
-                <td>{getScheduleSourceText(day.scheduleSource)}</td>
+                {/* <td>
+                  <span className={styles.sourceBadge}>
+                    {getScheduleSourceText(day.scheduleSource)}
+                  </span>
+                </td> */}
               </tr>
             ))}
           </tbody>

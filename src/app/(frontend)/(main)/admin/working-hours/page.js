@@ -5,7 +5,7 @@ import ScreenHead from "@/components/screenHead";
 import FilterRow from "@/containers/working-hours/filterRow";
 import Table from "@/containers/working-hours/table";
 import { useSearchParams } from "next/navigation";
-import { ToastContainer } from "react-toastify";
+import { ToastContainer, toast } from "react-toastify";
 import "react-toastify/dist/ReactToastify.css";
 import styles from "@/styles/screens/working-hours.module.scss";
 import Spinner from "@/components/spinner";

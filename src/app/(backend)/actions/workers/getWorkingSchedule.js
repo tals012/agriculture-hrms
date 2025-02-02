@@ -49,7 +49,7 @@ const getWorkingSchedule = async (input) => {
 
     const { workerId, month, year } = parsedData.data;
 
-    // Get organization
+    // * Get organization
     const organization = await prisma.organization.findFirst();
     if (!organization) {
       return {
@@ -58,9 +58,10 @@ const getWorkingSchedule = async (input) => {
       };
     }
 
-    // Get worker with their groups and current client
+    // * Get worker with their groups and current client
     const worker = await prisma.worker.findUnique({
       where: { id: workerId },
+
       include: {
         groups: {
           include: {
@@ -82,9 +83,9 @@ const getWorkingSchedule = async (input) => {
       };
     }
 
-    // Get worker's attendance records for the specified month
+    // * Get worker's attendance records for the specified month
     const startDate = new Date(Date.UTC(year, month - 1, 1, 0, 0, 0));
-    const endDate = new Date(Date.UTC(year, month, 0, 23, 59, 59)); // Last day of the month
+    const endDate = new Date(Date.UTC(year, month, 0, 23, 59, 59)); // ! Last day of the month
     
     const attendanceRecords = await prisma.workerAttendance.findMany({
       where: {
@@ -107,22 +108,24 @@ const getWorkingSchedule = async (input) => {
       },
     });
 
-    // Create a map of attendance records by date for easy lookup
+    // * Create a map of attendance records by date for easy lookup
     const attendanceByDate = new Map(
       attendanceRecords.map(record => {
-        // Normalize the date to YYYY-MM-DD format in UTC
+        // ! Normalize the date to YYYY-MM-DD format in UTC
         const date = new Date(record.attendanceDate);
         const utcDate = new Date(Date.UTC(date.getUTCFullYear(), date.getUTCMonth(), date.getUTCDate()));
         return [utcDate.toISOString().split('T')[0], record];
       })
     );
 
-    // Calculate attendance statistics
+    // * Calculate attendance statistics
     const attendanceStats = attendanceRecords.reduce((stats, record) => {
       if (!record.isWeekend) {
         stats.totalContainers += record.totalContainersFilled || 0;
-        stats.totalWage += record.totalWage || 0;
         stats.totalHours += record.totalHoursWorked || 0;
+        stats.totalHours100 += record.totalHoursWorkedWindow100 || 0;
+        stats.totalHours125 += record.totalHoursWorkedWindow125 || 0;
+        stats.totalHours150 += record.totalHoursWorkedWindow150 || 0;
 
         if (record.combination) {
           const key = `${record.combination.harvestType.name}-${record.combination.species.name}`;
@@ -131,25 +134,25 @@ const getWorkingSchedule = async (input) => {
               harvestType: record.combination.harvestType.name,
               species: record.combination.species.name,
               containers: 0,
-              wage: 0,
             };
           }
           stats.byProduct[key].containers += record.totalContainersFilled || 0;
-          stats.byProduct[key].wage += record.totalWage || 0;
         }
       }
       return stats;
     }, { 
       totalContainers: 0, 
-      totalWage: 0, 
       totalHours: 0,
+      totalHours100: 0,
+      totalHours125: 0,
+      totalHours150: 0,
       byProduct: {} 
     });
 
-    // Get the working schedule following the priority system
+    // * Get the working schedule following the priority system
     let schedule;
 
-    // Priority 1: Check worker's personal schedule
+    // & Priority 1: Check worker's personal schedule
     schedule = await prisma.workingSchedule.findFirst({
       where: { workerId },
       orderBy: { createdAt: 'desc' }
@@ -158,7 +161,7 @@ const getWorkingSchedule = async (input) => {
     if (schedule) {
       console.log("Found worker's personal schedule");
     } else {
-      // Priority 2: Check schedule from worker's current group
+      // & Priority 2: Check schedule from worker's current group
       const currentGroup = worker.groups.find(membership => !membership.endDate);
       if (currentGroup) {
         schedule = await prisma.workingSchedule.findFirst({
@@ -172,7 +175,7 @@ const getWorkingSchedule = async (input) => {
       }
 
       if (!schedule) {
-        // Priority 3: Check schedules from worker's fields
+        // & Priority 3: Check schedules from worker's fields
         const fieldIds = [...new Set(worker.groups.map(membership => membership.group.field?.id).filter(Boolean))];
         schedule = await prisma.workingSchedule.findFirst({
           where: { fieldId: { in: fieldIds } },
@@ -182,7 +185,7 @@ const getWorkingSchedule = async (input) => {
         if (schedule) {
           console.log("Found schedule from worker's field");
         } else {
-          // Priority 4: Check client's schedule
+          // & Priority 4: Check client's schedule
           if (worker.currentClientId) {
             schedule = await prisma.workingSchedule.findFirst({
               where: { clientId: worker.currentClientId },
@@ -194,7 +197,7 @@ const getWorkingSchedule = async (input) => {
             }
           }
 
-          // Priority 5: Fall back to organization schedule
+          // & Priority 5: Fall back to organization schedule
           if (!schedule) {
             schedule = await prisma.workingSchedule.findFirst({
               where: { organizationId: organization.id },
@@ -216,18 +219,18 @@ const getWorkingSchedule = async (input) => {
       };
     }
 
-    // Generate daily schedule for the month
+    // * Generate daily schedule for the month
     const daysInMonth = getDaysInMonth(month, year);
     const dailySchedule = [];
 
     for (let day = 1; day <= daysInMonth; day++) {
-      // Create date in UTC to match the attendance records
+      // & Create date in UTC to match the attendance records
       const date = new Date(Date.UTC(year, month - 1, day));
       const dateString = date.toISOString().split('T')[0];
       const attendanceRecord = attendanceByDate.get(dateString);
 
       if (attendanceRecord) {
-        // Use actual attendance record
+        // & Use actual attendance record
         dailySchedule.push({
           date: date.toISOString(),
           dayOfWeek: date.getDay(),
@@ -241,16 +244,19 @@ const getWorkingSchedule = async (input) => {
           scheduleSource: 'ATTENDANCE',
           status: attendanceRecord.status,
           totalContainersFilled: attendanceRecord.totalContainersFilled,
-          totalWage: attendanceRecord.totalWage,
+          totalWorkingHoursWindow100: attendanceRecord.totalHoursWorkedWindow100,
+          totalWorkingHoursWindow125: attendanceRecord.totalHoursWorkedWindow125,
+          totalWorkingHoursWindow150: attendanceRecord.totalHoursWorkedWindow150,
           combination: attendanceRecord.combination ? {
             harvestType: attendanceRecord.combination.harvestType.name,
             species: attendanceRecord.combination.species.name,
             price: attendanceRecord.combination.price,
             containerNorm: attendanceRecord.combination.containerNorm,
           } : null,
+
         });
       } else {
-        // Use planned schedule
+        // & Use planned schedule
         const isWeekendDay = isWeekend(date, schedule.numberOfTotalDaysPerWeek);
         dailySchedule.push({
           date: date.toISOString(),
@@ -262,9 +268,13 @@ const getWorkingSchedule = async (input) => {
           breakTimeInMinutes: isWeekendDay ? null : schedule.breakTimeInMinutes,
           isBreakTimePaid: isWeekendDay ? null : schedule.isBreakTimePaid,
           totalWorkingHours: isWeekendDay ? 0 : schedule.numberOfTotalHoursPerDay,
+          totalWorkingHoursWindow100: isWeekendDay ? 0 : schedule.numberOfTotalHoursPerDayWindow100,
+          totalWorkingHoursWindow125: isWeekendDay ? 0 : schedule.numberOfTotalHoursPerDayWindow125,
+          totalWorkingHoursWindow150: isWeekendDay ? 0 : schedule.numberOfTotalHoursPerDayWindow150,
           scheduleSource: schedule.source,
         });
       }
+
     }
 
     return {
@@ -284,8 +294,10 @@ const getWorkingSchedule = async (input) => {
           attendance: attendanceRecords.length > 0 ? {
             totalRecords: attendanceRecords.length,
             totalContainers: attendanceStats.totalContainers,
-            totalWage: attendanceStats.totalWage,
             totalHours: attendanceStats.totalHours,
+            totalHours100: attendanceStats.totalHours100,
+            totalHours125: attendanceStats.totalHours125,
+            totalHours150: attendanceStats.totalHours150,
             byProduct: Object.values(attendanceStats.byProduct),
           } : null,
         }

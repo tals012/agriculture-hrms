@@ -433,13 +433,16 @@ model WorkingSchedule {
 
   source WorkingScheduleSource @default(ORGANIZATION)
 
-  numberOfTotalHoursPerDay  Float   @default(8)
-  numberOfTotalDaysPerWeek  Float   @default(6)
-  numberOfTotalDaysPerMonth Float
-  startTimeInMinutes        Float   @default(480)
-  endTimeInMinutes          Float   @default(1020)
-  breakTimeInMinutes        Float   @default(30)
-  isBreakTimePaid           Boolean @default(false)
+  numberOfTotalHoursPerDay          Float   @default(8)
+  numberOfTotalHoursPerDayWindow100 Float?
+  numberOfTotalHoursPerDayWindow125 Float?
+  numberOfTotalHoursPerDayWindow150 Float?
+  numberOfTotalDaysPerWeek          Float   @default(6)
+  numberOfTotalDaysPerMonth         Float
+  startTimeInMinutes                Float   @default(480)
+  endTimeInMinutes                  Float   @default(1020)
+  breakTimeInMinutes                Float   @default(30)
+  isBreakTimePaid                   Boolean @default(false)
 
   organizationId String?
   organization   Organization? @relation(fields: [organizationId], references: [id], onDelete: Cascade)
@@ -474,14 +477,17 @@ model WorkerAttendance {
   combination                 ClientPricingCombination @relation(fields: [combinationId], references: [id])
   issues                      String[]
 
-  startTimeInMinutes    Float?   @default(480)
-  endTimeInMinutes      Float?   @default(1020)
-  breakTimeInMinutes    Float?
-  totalHoursWorked      Float?
-  totalContainersFilled Float?
-  isBreakTimePaid       Boolean? @default(false)
-  breakTimeAmount       Float?
-  totalWage             Float?
+  startTimeInMinutes        Float?   @default(480)
+  endTimeInMinutes          Float?   @default(1020)
+  breakTimeInMinutes        Float?
+  totalHoursWorked          Float?
+  totalHoursWorkedWindow100 Float?
+  totalHoursWorkedWindow125 Float?
+  totalHoursWorkedWindow150 Float?
+  totalContainersFilled     Float?
+  isBreakTimePaid           Boolean? @default(false)
+  breakTimeAmount           Float?
+  totalWage                 Float?
 
   status WorkerAttendanceStatus
 

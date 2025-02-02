@@ -1,112 +1,201 @@
 @use "sass:color";
 
 .container {
-  width: 100%;
-  background-color: #ffffff;
-  box-shadow: 0 0 10px 0 rgba(0, 0, 0, 0.1);
-  border-radius: 5px;
-  overflow: hidden;
+  background: #FFFFFF;
+  border-radius: 12px;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.05);
+  padding: 24px;
 }
 
 .header {
-  padding: 20px;
-  border-bottom: 1px solid #e6e6e6;
+  margin-bottom: 32px;
 
   .stats {
-    display: flex;
-    gap: 40px;
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(180px, 1fr));
+    gap: 20px;
 
     .stat {
+      background: #F8FAFC;
+      padding: 16px 20px;
+      border-radius: 10px;
       display: flex;
       flex-direction: column;
-      gap: 5px;
+      gap: 8px;
 
-      span {
-        &:first-child {
-          font-size: 14px;
-          color: #999FA5;
-        }
+      span:first-child {
+        color: #64748B;
+        font-size: 14px;
+      }
 
-        &:last-child {
-          font-size: 18px;
-          font-weight: 600;
-          color: #020608;
-        }
+      span:last-child {
+        color: #1E293B;
+        font-size: 20px;
+        font-weight: 600;
       }
     }
   }
 }
 
 .tableWrapper {
-  width: 100%;
   overflow-x: auto;
+  border-radius: 12px;
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.05);
 }
 
 .table {
   width: 100%;
-  border-collapse: collapse;
-
-  th, td {
-    padding: 12px 20px;
-    text-align: right;
-    font-size: 14px;
-  }
-
+  border-collapse: separate;
+  border-spacing: 0;
+  
   th {
-    background-color: #F8F9FA;
-    color: #4A4A4A;
+    background: #F8FAFC;
+    color: #64748B;
+    font-size: 14px;
     font-weight: 600;
+    text-align: right;
+    padding: 16px 24px;
     white-space: nowrap;
+    position: sticky;
+    top: 0;
+    z-index: 1;
+
+    &:first-child {
+      border-top-right-radius: 12px;
+    }
+
+    &:last-child {
+      border-top-left-radius: 12px;
+    }
   }
 
   td {
-    color: #4A4A4A;
-    border-bottom: 1px solid #E6E6E6;
+    padding: 16px 24px;
+    font-size: 15px;
+    color: #1E293B;
+    border-bottom: 1px solid #F1F5F9;
+    white-space: nowrap;
   }
 
-  tbody {
-    tr {
+  tbody tr {
+    transition: background-color 0.2s ease;
+
+    &:hover {
+      background-color: #F8FAFC;
+    }
+
+    &.weekend {
+      background-color: #FEF2F2;
+      color: #991B1B;
+
       &:hover {
-        background-color: #F8F9FA;
+        background-color: #FEE2E2;
       }
 
-      &.weekend {
-        background-color: #FFF8F8;
-        
-        &:hover {
-          background-color: color.scale(#FFF8F8, $lightness: -2%);
-        }
-
-        td {
-          color: #FF4D4D;
-        }
+      td {
+        color: #991B1B;
       }
     }
   }
 }
 
 .editableCell {
+  position: relative;
   cursor: pointer;
-  padding: 4px 8px;
+  padding: 8px;
   border-radius: 4px;
-  transition: background-color 0.2s ease;
+  transition: all 0.2s ease;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  min-width: 80px;
 
   &:hover {
-    background-color: #F0F0F0;
+    background-color: rgba(0, 0, 0, 0.05);
+
+    .editIcon {
+      opacity: 1;
+    }
   }
+
+  &.disabled {
+    cursor: not-allowed;
+    color: #999;
+    background-color: #f5f5f5;
+  }
+}
+
+.editIcon {
+  opacity: 0;
+  font-size: 14px;
+  color: #666;
+  margin-left: 6px;
+  transition: opacity 0.2s ease;
+}
+
+.editableCellWrapper {
+  position: relative;
+  width: 100%;
 }
 
 .editInput {
   width: 100%;
-  padding: 4px 8px;
-  border: 2px solid #2b85ff;
+  padding: 8px;
+  border: 2px solid #007bff;
   border-radius: 4px;
   font-size: 14px;
   outline: none;
-  background: #ffffff;
-  color: #4A4A4A;
+  transition: all 0.2s ease;
+  background-color: white;
+  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+
+  &::placeholder {
+    color: #aaa;
+    font-style: italic;
+  }
 
   &:focus {
-    box-shadow: 0 0 0 2px rgba(43, 133, 255, 0.2);
+    border-color: #0056b3;
+    box-shadow: 0 2px 8px rgba(0, 123, 255, 0.25);
   }
+}
+
+.editingHint {
+  position: absolute;
+  bottom: -20px;
+  left: 50%;
+  transform: translateX(-50%);
+  font-size: 12px;
+  color: #666;
+  white-space: nowrap;
+  background-color: rgba(255, 255, 255, 0.9);
+  padding: 2px 6px;
+  border-radius: 3px;
+  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
+  z-index: 1;
+}
+
+.weekendBadge, .workdayBadge, .sourceBadge {
+  display: inline-block;
+  padding: 6px 12px;
+  border-radius: 20px;
+  font-size: 13px;
+  font-weight: 500;
+}
+
+.weekendBadge {
+  background-color: #FEE2E2;
+  color: #991B1B;
+}
+
+.workdayBadge {
+  background-color: #E0F2FE;
+  color: #0369A1;
+}
+
+.sourceBadge {
+  background-color: #F1F5F9;
+  color: #475569;
+  font-size: 12px;
+  padding: 4px 10px;
 }
