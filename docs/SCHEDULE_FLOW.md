@@ -26,6 +26,7 @@ Creates schedule templates that define working hours, break times, and days per 
 - Handles paid/unpaid break time calculations
 - Supports multiple schedule sources (Worker, Group, Field, Client, Organization)
 - Calculates actual working hours for future salary calculations
+- Supports overtime window calculations (100%, 125%, 150%)
 
 ### Input Parameters
 ```javascript
@@ -35,6 +36,9 @@ Creates schedule templates that define working hours, break times, and days per 
   startTimeInMinutes: number,        // 0-1440 minutes
   breakTimeInMinutes: number,        // 0-240 minutes
   isBreakTimePaid: boolean,         // Affects total working hours
+  numberOfTotalHoursPerDayWindow100: number, // Regular hours (up to 8)
+  numberOfTotalHoursPerDayWindow125: number, // First overtime window (8-10)
+  numberOfTotalHoursPerDayWindow150: number, // Second overtime window (10+)
   clientId?: string,                // Optional
   groupId?: string,                 // Optional
   workerId?: string                 // Optional
@@ -110,6 +114,7 @@ Updates actual attendance records for workers, handling both creation of new rec
 - Manages worker's personal schedule creation if needed
 - Supports various attendance statuses (WORKING, SICK_LEAVE, etc.)
 - Maintains connection with pricing combinations and groups
+- Calculates overtime windows based on Israeli labor laws
 
 ### Input Parameters
 ```javascript
@@ -126,16 +131,19 @@ Updates actual attendance records for workers, handling both creation of new rec
 }
 ```
 
-### Key Functionality
-1. Personal Schedule Creation:
-   - If worker has no personal schedule, creates one based on current hierarchy
-   - Copies settings from group/field/client/organization schedule
+### Overtime Window Calculation
+```javascript
+// Calculate total working hours based on break time payment status
+const totalMinutes = endTime - startTime;
+const calculatedTotalHours = isPaidBreak
+  ? totalMinutes / 60  // If break is paid, include break time
+  : (totalMinutes - breakTime) / 60;  // If break is unpaid, subtract break time
 
-2. Break Time Handling:
-   ```javascript
-   // Calculate total working hours
-   const calculatedTotalHours = (endTime - startTime - breakTime) / 60;
-   ```
+// Calculate overtime windows based on Israeli labor laws
+const hoursWindow100 = Math.min(calculatedTotalHours, 8);
+const hoursWindow125 = Math.min(Math.max(calculatedTotalHours - 8, 0), 2);
+const hoursWindow150 = Math.min(Math.max(calculatedTotalHours - 10, 0), 2);
+```
 
 3. Attendance Status Options:
    - WORKING
@@ -165,6 +173,7 @@ Retrieves actual working schedules with attendance records, showing what actuall
 - Calculates actual working hours based on attendance records
 - Handles break time calculations for actual worked hours
 - Used for salary calculations (based on actual hours worked)
+- Provides detailed overtime window breakdowns
 
 ### Input Parameters
 ```javascript
@@ -185,6 +194,49 @@ if (!isBreakTimePaid) {
   actualWorkingHours = totalHours - (breakMinutes / 60)
 } else {
   actualWorkingHours = totalHours
+}
+```
+
+### Output Structure
+```javascript
+{
+  schedule: WorkingSchedule,      // Template details
+  dailySchedule: Array<{         // Daily breakdown
+    date: string,
+    dayOfWeek: number,
+    isWeekend: boolean,
+    scheduleType: "WEEKEND" | "WORKING_DAY",
+    startTimeInMinutes: number,
+    endTimeInMinutes: number,
+    breakTimeInMinutes: number,
+    isBreakTimePaid: boolean,
+    totalWorkingHours: number,
+    totalWorkingHoursWindow100: number,  // Regular hours
+    totalWorkingHoursWindow125: number,  // First overtime window
+    totalWorkingHoursWindow150: number,  // Second overtime window
+    scheduleSource: string
+  }>,
+  metadata: {                    // Monthly summary
+    month: number,
+    year: number,
+    totalDays: number,
+    workingDays: number,
+    weekendDays: number,
+    scheduleSource: string,
+    attendance?: {
+      totalRecords: number,
+      totalContainers: number,
+      totalHours: number,
+      totalHours100: number,     // Total regular hours
+      totalHours125: number,     // Total first overtime window
+      totalHours150: number,     // Total second overtime window
+      byProduct: Array<{
+        harvestType: string,
+        species: string,
+        containers: number
+      }>
+    }
+  }
 }
 ```
 
@@ -248,22 +300,35 @@ const workingSchedule = await getWorkingSchedule({
    - Paid breaks are included in total working hours
    - This affects salary calculations
 
-2. Weekend Handling:
+2. Overtime Windows:
+   - Window 100%: First 8 hours of work
+   - Window 125%: Hours 9-10 (up to 2 hours)
+   - Window 150%: Hours beyond 10
+   - Calculations follow Israeli labor laws
+   - Break time payment status affects window calculations
+
+3. Table Display:
+   - Shows all three overtime windows separately
+   - Formats hours with 2 decimal places
+   - Provides totals for each overtime window in stats
+   - Updates automatically when attendance is modified
+
+4. Weekend Handling:
    - 5 working days: Friday and Saturday are weekends
    - 6 working days: Only Saturday is weekend
    - 7 working days: No weekends
 
-3. Schedule Sources:
+5. Schedule Sources:
    - Each schedule record includes its source
    - Higher priority sources override lower ones
    - Changes to templates don't affect historical records
 
-4. Future Salary Calculations:
+6. Future Salary Calculations:
    - Based on actual working hours from getWorkingSchedule
    - Accounts for paid/unpaid break times
    - Uses attendance records for accuracy
 
-5. Attendance Record Updates:
+7. Attendance Record Updates:
    - Updates affect only the specific date
    - Maintains historical record accuracy
    - Critical for accurate salary calculations
