@@ -1,90 +1,79 @@
 "use client";
 
-import { useState, useEffect } from "react";
+import { useState, useCallback, useMemo } from "react";
 import ScreenHead from "@/components/screenHead";
 import FilterRow from "@/containers/working-hours/filterRow";
 import Table from "@/containers/working-hours/table";
-import { useSearchParams } from "next/navigation";
-import { ToastContainer, toast } from "react-toastify";
+import getWorkingSchedule from "@/app/(backend)/actions/workers/getWorkingSchedule";
+import { ToastContainer } from "react-toastify";
 import "react-toastify/dist/ReactToastify.css";
 import styles from "@/styles/screens/working-hours.module.scss";
 import Spinner from "@/components/spinner";
-import getWorkingSchedule from "@/app/(backend)/actions/workers/getWorkingSchedule";
 
 export default function WorkingHours() {
-  const searchParams = useSearchParams();
-  const [scheduleData, setScheduleData] = useState(null);
-  const [loading, setLoading] = useState(false);
-  const [selectedWorkerId, setSelectedWorkerId] = useState(null);
+  const [state, setState] = useState({
+    scheduleData: null,
+    loading: false,
+    currentWorkerId: null
+  });
 
-  const handleFilterChange = async (filters) => {
+  const handleFilterChange = useCallback(async (filters) => {
+    setState(prev => ({ ...prev, loading: true }));
     try {
-      setLoading(true);
+      const response = await getWorkingSchedule(filters);
       
-      if (!filters.workerId) {
-        setScheduleData(null);
-        setSelectedWorkerId(null);
-        return;
-      }
-
-      setSelectedWorkerId(filters.workerId);
-      const response = await getWorkingSchedule({
-        workerId: filters.workerId,
-        month: filters.month,
-        year: filters.year,
-      });
-      
-      if (response.status === 200) {
-        setScheduleData(response.data);
-      } else {
-        setScheduleData(null);
-        toast.error(response.message || "Failed to fetch schedule", {
-          position: "top-center",
-          autoClose: 3000,
-        });
-      }
+      setState(prev => ({
+        ...prev,
+        loading: false,
+        scheduleData: response.status === 200 ? response.data : null,
+        currentWorkerId: response.status === 200 ? filters.workerId : null
+      }));
     } catch (error) {
-      console.error("Error fetching working hours:", error);
-      setScheduleData(null);
-      toast.error("Error fetching working hours", {
-        position: "top-center",
-        autoClose: 3000,
-      });
-    } finally {
-      setLoading(false);
+      console.error("Error fetching schedule:", error);
+      setState(prev => ({
+        ...prev,
+        loading: false,
+        scheduleData: null,
+        currentWorkerId: null
+      }));
     }
-  };
-
-  // Initial load with current month/year
-  useEffect(() => {
-    const currentDate = new Date();
-    handleFilterChange({
-      month: currentDate.getMonth() + 1,
-      year: currentDate.getFullYear(),
-    });
   }, []);
+
+  const handleDataUpdate = useCallback(async (updatedData) => {
+    if (state.currentWorkerId) {
+      const currentDate = new Date();
+      await handleFilterChange({
+        workerId: state.currentWorkerId,
+        month: currentDate.getMonth() + 1,
+        year: currentDate.getFullYear(),
+      });
+    }
+  }, [state.currentWorkerId, handleFilterChange]);
+
+  const tableProps = useMemo(() => ({
+    data: state.scheduleData,
+    workerId: state.currentWorkerId,
+    onDataUpdate: handleDataUpdate
+  }), [state.scheduleData, state.currentWorkerId, handleDataUpdate]);
 
   return (
     <div className={styles.container}>
       <div className={styles.wrapper}>
         <ScreenHead
           title="שעות עבודה"
-          desc="כאן תוכל לראות את שעות העבודה של העובדים שלך"
+          desc="כאן תוכל לנהל את שעות העבודה של העובדים שלך"
           stats={[]}
         />
 
         <div className={styles.row}>
           <div className={styles.content}>
             <FilterRow onFilterChange={handleFilterChange} />
-            {loading ? (
+            {state.loading ? (
               <div className={styles.loader}>
                 <Spinner />
               </div>
-            ) : scheduleData ? (
-              <Table 
-                data={scheduleData} 
-                workerId={selectedWorkerId}
-              />
+            ) : state.scheduleData ? (
+              <Table {...tableProps} />
             ) : null}
           </div>
         </div>

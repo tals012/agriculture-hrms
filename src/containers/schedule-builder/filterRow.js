@@ -207,7 +207,7 @@ const FilterRow = ({ onFilterChange }) => {
           />
         </div>
 
-        <div className={styles.entityFilters}>
+        {/* <div className={styles.entityFilters}>
           <ReactSelect
             options={clients}
             isLoading={loading.clients}
@@ -249,7 +249,7 @@ const FilterRow = ({ onFilterChange }) => {
             menuPortalTarget={document.body}
             menuPosition={"fixed"}
           />
-        </div>
+        </div> */}
       </div>
     </div>
   );

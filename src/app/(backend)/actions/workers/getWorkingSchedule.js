@@ -30,7 +30,7 @@ const isWeekend = (date, numberOfTotalDaysPerWeek) => {
   return false;
 };
 
-const getWorkingSchedule = async (input) => {
+export async function getWorkingSchedule(input) {
   try {
     const parsedData = getWorkingScheduleSchema.safeParse(input);
 
@@ -311,6 +311,6 @@ const getWorkingSchedule = async (input) => {
       error: error.message,
     };
   }
-};
+}
 
 export default getWorkingSchedule;

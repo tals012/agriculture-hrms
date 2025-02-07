@@ -470,11 +470,11 @@ enum WorkingScheduleSource {
 model WorkerAttendance {
   id String @id @default(cuid())
 
-  attendanceDoneBy            AttendanceDoneBy         @default(ADMIN)
+  attendanceDoneBy            AttendanceDoneBy          @default(ADMIN)
   attendanceAdministratorName String?
-  attendanceDate              DateTime                 @default(now())
-  combinationId               String // harvest type + species + container norm
-  combination                 ClientPricingCombination @relation(fields: [combinationId], references: [id])
+  attendanceDate              DateTime                  @default(now())
+  combinationId               String? // harvest type + species + container norm
+  combination                 ClientPricingCombination? @relation(fields: [combinationId], references: [id])
   issues                      String[]
 
   startTimeInMinutes        Float?   @default(480)

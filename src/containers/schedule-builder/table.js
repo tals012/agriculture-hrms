@@ -41,6 +41,10 @@ const Table = ({ data }) => {
             <span>סופי שבוע</span>
             <span>{metadata.weekendDays}</span>
           </div>
+          <div className={styles.stat}>
+            <span>מקור לוח זמנים</span>
+            <span>{schedule.source}</span>
+          </div>
         </div>
       </div>
 
@@ -65,7 +69,11 @@ const Table = ({ data }) => {
               >
                 <td>{new Date(day.date).toLocaleDateString("he-IL")}</td>
                 <td>{weekDays[day.dayOfWeek]}</td>
-                <td>{day.isWeekend ? "סוף שבוע" : "יום עבודה"}</td>
+                <td>
+                  <span className={day.isWeekend ? styles.weekendBadge : styles.workdayBadge}>
+                    {day.isWeekend ? "סוף שבוע" : "יום עבודה"}
+                  </span>
+                </td>
                 <td>{formatMinutesToTime(day.startTimeInMinutes)}</td>
                 <td>{formatMinutesToTime(day.endTimeInMinutes)}</td>
                 <td>
@@ -74,7 +82,7 @@ const Table = ({ data }) => {
                     : "-"
                   }
                 </td>
-                <td>{day.totalWorkingHours}</td>
+                <td>{day.totalWorkingHours?.toFixed(2) || "-"}</td>
               </tr>
             ))}
           </tbody>

@@ -11,13 +11,14 @@ const updateWorkingScheduleSchema = z
   .object({
     workerId: z.string(),
     date: z.string(), // ISO date string
-    startTimeInMinutes: z.number().nullable(),
-    endTimeInMinutes: z.number().nullable(),
-    breakTimeInMinutes: z.number().nullable(),
+    startTimeInMinutes: z.number().nullable().optional(),
+    endTimeInMinutes: z.number().nullable().optional(),
+    breakTimeInMinutes: z.number().nullable().optional(),
     totalHoursWorked: z.number().nullable(),
-    totalContainersFilled: z.number().nullable(),
+    totalContainersFilled: z.number().nullable().optional(),
     totalWage: z.number().nullable(),
-    isBreakTimePaid: z.boolean().optional().default(false),
+    isBreakTimePaid: z.boolean().nullable().optional(),
+    combinationId: z.string().nullable().optional(),
     status: z.enum([
       "WORKING",
       "SICK_LEAVE",
@@ -30,15 +31,74 @@ const updateWorkingScheduleSchema = z
       "WEEKEND",
       "ACCIDENT",
       "NOT_WORKING_BUT_PAID",
-    ]),
+    ]).optional(),
   })
-  .partial() // Make all fields optional except workerId and date
-  .required({ workerId: true, date: true }); // These fields are always required
+  .partial()
+  .required({ workerId: true, date: true });
+
+const calculateWorkingHoursAndTimes = (
+  containersFilled,
+  containerNorm,
+  defaultStartTime
+) => {
+  if (!containersFilled || !containerNorm || defaultStartTime === null || defaultStartTime === undefined) return null;
+  
+  // Calculate total hours proportionally:
+  // If containerNorm = 3 and containersFilled = 3, then totalHours = 8
+  // If containerNorm = 3 and containersFilled = 1.5, then totalHours = 4
+  const totalHours = (containersFilled / containerNorm) * 8;
+  
+  // Calculate end time by adding total hours to start time
+  const endTimeInMinutes = defaultStartTime + Math.round(totalHours * 60);
+  
+  // Calculate overtime windows based on total hours
+  const hoursWindow100 = Math.min(totalHours, 8);
+  const hoursWindow125 = Math.min(Math.max(totalHours - 8, 0), 2);
+  const hoursWindow150 = Math.max(totalHours - 10, 0);
+  
+  return {
+    totalHours,
+    startTimeInMinutes: defaultStartTime,
+    endTimeInMinutes,
+    hoursWindow100,
+    hoursWindow125,
+    hoursWindow150
+  };
+};
+
+const calculateFromTimes = (startTime, endTime, containerNorm) => {
+  if (!startTime || !endTime || endTime <= startTime || !containerNorm) return null;
+  
+  const totalHours = (endTime - startTime) / 60;
+  
+  // Calculate containers based on hours worked and container norm
+  // Example: If totalHours = 8 and containerNorm = 4, then containers = 4
+  // Example: If totalHours = 4 and containerNorm = 3, then containers = 1.5
+  const totalContainers = (totalHours / 8) * containerNorm;
+  
+  return {
+    totalHours,
+    totalContainers: Math.round(totalContainers * 100) / 100, // Round to 2 decimal places
+    hoursWindow100: Math.min(totalHours, 8),
+    hoursWindow125: Math.min(Math.max(totalHours - 8, 0), 2),
+    hoursWindow150: Math.max(totalHours - 10, 0)
+  };
+};
+
+const calculateContainers = (totalHours, containerNorm) => {
+  if (!totalHours || !containerNorm) return null;
+  
+  // Calculate containers based on hours worked
+  // Example: If totalHours = 8 and containerNorm = 5, then containers = 5
+  // Example: If totalHours = 4 and containerNorm = 3, then containers = 1.5
+  return (totalHours / 8) * containerNorm;
+};
 
 const updateWorkingSchedule = async (input) => {
   try {
-    console.log("input", input);
     const parsedData = updateWorkingScheduleSchema.safeParse(input);
+
+    console.log(parsedData.data, "parsedData.data")
 
     if (!parsedData.success) {
       const formattedErrors = parsedData.error.issues.map((issue) => ({
@@ -56,17 +116,77 @@ const updateWorkingSchedule = async (input) => {
     const {
       workerId,
       date,
-      startTimeInMinutes,
-      endTimeInMinutes,
-      breakTimeInMinutes,
-      totalHoursWorked,
-      totalContainersFilled,
+      startTimeInMinutes: inputStartTime,
+      endTimeInMinutes: inputEndTime,
+      breakTimeInMinutes: inputBreakTime,
+      totalHoursWorked: inputTotalHours,
+      totalContainersFilled: inputContainers,
       totalWage,
       isBreakTimePaid,
+      combinationId,
       status,
     } = parsedData.data;
 
-    // * Get worker to check if exists and get current client
+    // Get existing record to check values
+    const existingRecord = await prisma.workerAttendance.findFirst({
+      where: {
+        workerId,
+        attendanceDate: new Date(date),
+      },
+    });
+
+    // Prevent updates to fields other than status when status is not WORKING
+    if (existingRecord && existingRecord.status !== 'WORKING' && status === undefined) {
+      return {
+        status: 400,
+        message: "Cannot update fields when status is not WORKING",
+      };
+    }
+
+    // Check if we're just updating individual fields
+    const isTimeUpdate = inputStartTime !== undefined || inputEndTime !== undefined;
+    const isPricingUpdate = combinationId !== undefined;
+    const isContainersUpdate = inputContainers !== undefined;
+
+    // For time updates, ensure pricing and containers exist (either in current update or existing record)
+    if (isTimeUpdate) {
+      const hasPricing = combinationId || existingRecord?.combinationId;
+      const hasContainers = inputContainers !== undefined || existingRecord?.totalContainersFilled !== null;
+      
+      if (!hasPricing || !hasContainers) {
+        return {
+          status: 400,
+          message: "Cannot update times without pricing combination and containers filled",
+        };
+      }
+    }
+
+    // For new entries or complete updates, ensure both pricing and containers are provided together
+    if (!existingRecord && ((combinationId && !inputContainers) || (!combinationId && inputContainers))) {
+      return {
+        status: 400,
+        message: "Both pricing combination and containers filled must be provided together for new entries",
+      };
+    }
+
+    // Get the pricing combination if provided or exists
+    let combination = null;
+    const combinationIdToUse = combinationId || existingRecord?.combinationId;
+
+    if (combinationIdToUse) {
+      combination = await prisma.clientPricingCombination.findUnique({
+        where: { id: combinationIdToUse },
+      });
+
+      if (!combination) {
+        return {
+          status: 400,
+          message: "Invalid pricing combination ID",
+        };
+      }
+    }
+
+    // Get worker with their active group and pricing combination
     const worker = await prisma.worker.findUnique({
       where: { id: workerId },
       include: {
@@ -89,29 +209,38 @@ const updateWorkingSchedule = async (input) => {
       };
     }
 
-    // * Get the active group and its pricing combination
+    // Get the active group
     const activeGroup = worker.groups.find(
       (membership) => !membership.endDate
     )?.group;
-    if (!activeGroup || !activeGroup.clientPricingCombination?.[0]) {
+    
+    if (!activeGroup) {
       return {
         status: 400,
-        message: "Worker must be assigned to a group with pricing combination",
+        message: "Worker must be assigned to a group",
       };
     }
 
-    const combinationId = activeGroup.clientPricingCombination[0].id;
+    // Use the provided combination's container norm or get from active group
+    const containerNorm = combination?.containerNorm || 
+                         activeGroup.clientPricingCombination?.[0]?.containerNorm;
 
-    // * Check if worker already has a personal schedule
+    if (!containerNorm) {
+      return {
+        status: 400,
+        message: "No container norm found for worker's group or provided combination",
+      };
+    }
+
+    // Get existing schedule for default values
     const existingPersonalSchedule = await prisma.workingSchedule.findFirst({
       where: { workerId },
       orderBy: { createdAt: "desc" },
     });
 
-    // * If no personal schedule exists, create one based on the current schedule being used
+    // Get current schedule following priority system if no personal schedule exists
     let currentSchedule;
     if (!existingPersonalSchedule) {
-      // * Get the current schedule following the priority system
       currentSchedule = await prisma.workingSchedule.findFirst({
         where: {
           OR: [
@@ -130,143 +259,106 @@ const updateWorkingSchedule = async (input) => {
           { createdAt: "desc" },
         ],
       });
+    }
 
-      if (currentSchedule) {
-        // Create a personal schedule for the worker based on the current schedule
-        await prisma.workingSchedule.create({
-          data: {
-            source: "WORKER",
-            numberOfTotalHoursPerDay: currentSchedule.numberOfTotalHoursPerDay,
-            numberOfTotalDaysPerWeek: currentSchedule.numberOfTotalDaysPerWeek,
-            numberOfTotalDaysPerMonth:
-              currentSchedule.numberOfTotalDaysPerMonth,
-            startTimeInMinutes: currentSchedule.startTimeInMinutes,
-            endTimeInMinutes: currentSchedule.endTimeInMinutes,
-            breakTimeInMinutes: currentSchedule.breakTimeInMinutes,
-            isBreakTimePaid: currentSchedule.isBreakTimePaid,
-            numberOfTotalHoursPerDayWindow100: currentSchedule.numberOfTotalHoursPerDayWindow100,
-            numberOfTotalHoursPerDayWindow125: currentSchedule.numberOfTotalHoursPerDayWindow125,
-            numberOfTotalHoursPerDayWindow150: currentSchedule.numberOfTotalHoursPerDayWindow150,
-            workerId: workerId,
-          },
-        });
+    // Default times from schedule
+    const defaultStartTime = existingPersonalSchedule?.startTimeInMinutes ?? 
+                           currentSchedule?.startTimeInMinutes ?? 
+                           480; // 8 AM default
 
+    let calculatedValues = {
+      totalHoursWorked: null,
+      totalContainersFilled: null,
+      startTimeInMinutes: null,
+      endTimeInMinutes: null,
+      totalHoursWorkedWindow100: null,
+      totalHoursWorkedWindow125: null,
+      totalHoursWorkedWindow150: null
+    };
+
+    // Check if any relevant values have changed
+    const hasContainersChanged = inputContainers !== undefined && inputContainers !== existingRecord?.totalContainersFilled;
+    const hasStartTimeChanged = inputStartTime !== undefined && inputStartTime !== existingRecord?.startTimeInMinutes;
+    const hasEndTimeChanged = inputEndTime !== undefined && inputEndTime !== existingRecord?.endTimeInMinutes;
+    const hasContainerNormChanged = combinationId && combinationId !== existingRecord?.combinationId;
+
+    // If any relevant value has changed, recalculate everything
+    if (hasContainersChanged || hasStartTimeChanged || hasEndTimeChanged || hasContainerNormChanged) {
+      // Priority 1: Use containers if provided or changed
+      if (inputContainers !== undefined) {
+        const calculated = calculateWorkingHoursAndTimes(
+          inputContainers,
+          containerNorm,
+          inputStartTime ?? existingRecord?.startTimeInMinutes ?? defaultStartTime
+        );
+        
+        if (calculated) {
+          calculatedValues = {
+            totalHoursWorked: calculated.totalHours,
+            totalContainersFilled: inputContainers,
+            startTimeInMinutes: calculated.startTimeInMinutes,
+            endTimeInMinutes: calculated.endTimeInMinutes,
+            totalHoursWorkedWindow100: calculated.hoursWindow100,
+            totalHoursWorkedWindow125: calculated.hoursWindow125,
+            totalHoursWorkedWindow150: calculated.hoursWindow150
+          };
+        }
+      }
+      // Priority 2: Use times if both are available
+      else if (inputStartTime !== undefined || inputEndTime !== undefined) {
+        const startTime = inputStartTime ?? existingRecord?.startTimeInMinutes ?? defaultStartTime;
+        const endTime = inputEndTime ?? existingRecord?.endTimeInMinutes;
+        
+        if (startTime !== null && endTime !== null) {
+          const calculated = calculateFromTimes(startTime, endTime, containerNorm);
+          
+          if (calculated) {
+            calculatedValues = {
+              totalHoursWorked: calculated.totalHours,
+              totalContainersFilled: calculated.totalContainers,
+              startTimeInMinutes: startTime,
+              endTimeInMinutes: endTime,
+              totalHoursWorkedWindow100: calculated.hoursWindow100,
+              totalHoursWorkedWindow125: calculated.hoursWindow125,
+              totalHoursWorkedWindow150: calculated.hoursWindow150
+            };
+          }
+        }
       }
     }
 
-    let strtTime =
-      startTimeInMinutes ??
-      existingPersonalSchedule?.startTimeInMinutes ??
-      currentSchedule?.startTimeInMinutes;
-    let endTime =
-      endTimeInMinutes ??
-      existingPersonalSchedule?.endTimeInMinutes ??
-      currentSchedule?.endTimeInMinutes;
-    let breakTime =
-      breakTimeInMinutes ??
-      existingPersonalSchedule?.breakTimeInMinutes ??
-      currentSchedule?.breakTimeInMinutes;
-    let isPaidBreak =
-      isBreakTimePaid ??
-      existingPersonalSchedule?.isBreakTimePaid ??
-      currentSchedule?.isBreakTimePaid;
+    // Create or update the attendance record
+    const attendanceData = {
+      workerId, // Always include workerId
+      status: status ?? existingRecord?.status ?? 'WORKING', // Always include status with fallbacks
+      ...(inputStartTime !== undefined && { startTimeInMinutes: inputStartTime }),
+      ...(inputEndTime !== undefined && { endTimeInMinutes: inputEndTime }),
+      ...(inputBreakTime !== undefined && { breakTimeInMinutes: inputBreakTime }),
+      ...(isBreakTimePaid !== undefined && { isBreakTimePaid }),
+      ...(inputContainers !== undefined && { totalContainersFilled: inputContainers }),
+      ...(combinationId !== undefined && { combinationId }),
+      ...(inputTotalHours !== undefined && { totalHoursWorked: inputTotalHours }),
+      ...(totalWage !== undefined && { totalWage }),
+      ...(existingRecord && { attendanceDate: new Date(date) }),
+      ...(existingRecord && { attendanceDoneBy: "ADMIN" }),
+      ...(existingRecord && { groupId: activeGroup.id }),
+    };
 
-    // Calculate total working hours based on break time payment status
-    const totalMinutes = endTime - strtTime;
-    const calculatedTotalHours = isPaidBreak
-      ? totalMinutes / 60  // If break is paid, include break time in total hours
-      : (totalMinutes - breakTime) / 60;  // If break is unpaid, subtract break time
+    // For new records, ensure these fields are included
+    if (!existingRecord) {
+      attendanceData.attendanceDate = new Date(date);
+      attendanceData.attendanceDoneBy = "ADMIN";
+      attendanceData.groupId = activeGroup.id;
+    }
 
-    // Calculate overtime windows based on Israeli labor laws
-    const hoursWindow100 = Math.min(calculatedTotalHours, 8);
-    const hoursWindow125 = Math.min(Math.max(calculatedTotalHours - 8, 0), 2);
-    const hoursWindow150 = Math.min(Math.max(calculatedTotalHours - 10, 0), 2);
+    console.log(attendanceData, "attendanceData")
 
-    // Check if attendance record already exists for this date
-    const existingRecord = await prisma.workerAttendance.findFirst({
-      where: {
-        workerId,
-        attendanceDate: new Date(date),
-      },
-    });
-
-    // *Create or update the attendance record
     const attendanceRecord = await prisma.workerAttendance.upsert({
       where: {
-        id: existingRecord?.id || "new", // 'new' for creation
+        id: existingRecord?.id || "new",
       },
-      create: {
-        workerId,
-        attendanceDate: new Date(date),
-        startTimeInMinutes: startTimeInMinutes
-          ? startTimeInMinutes
-          : existingPersonalSchedule
-          ? existingPersonalSchedule?.startTimeInMinutes
-          : currentSchedule?.startTimeInMinutes,
-        endTimeInMinutes: endTimeInMinutes
-          ? endTimeInMinutes
-          : existingPersonalSchedule
-          ? existingPersonalSchedule?.endTimeInMinutes
-          : currentSchedule?.endTimeInMinutes,
-        breakTimeInMinutes:
-          breakTimeInMinutes ??
-          existingPersonalSchedule?.breakTimeInMinutes ??
-          currentSchedule?.breakTimeInMinutes,
-
-        totalHoursWorked: totalHoursWorked ?? calculatedTotalHours,
-        totalHoursWorkedWindow100: hoursWindow100,
-        totalHoursWorkedWindow125: hoursWindow125,
-        totalHoursWorkedWindow150: hoursWindow150,
-        totalContainersFilled:
-          totalContainersFilled ??
-          existingPersonalSchedule?.totalContainersFilled ??
-          currentSchedule?.totalContainersFilled ??
-          0,
-        totalWage:
-          totalWage ??
-          existingPersonalSchedule?.totalWage ??
-          currentSchedule?.totalWage ??
-          0,
-        isBreakTimePaid: isPaidBreak,
-
-        status: status ?? "WORKING",
-        combinationId,
-        groupId: activeGroup.id,
-        attendanceDoneBy: "ADMIN",
-      },
-      update: {
-        startTimeInMinutes:
-          startTimeInMinutes ??
-          existingPersonalSchedule?.startTimeInMinutes ??
-          currentSchedule?.startTimeInMinutes,
-        endTimeInMinutes:
-          endTimeInMinutes ??
-          existingPersonalSchedule?.endTimeInMinutes ??
-          currentSchedule?.endTimeInMinutes,
-        breakTimeInMinutes:
-          breakTimeInMinutes ??
-          existingPersonalSchedule?.breakTimeInMinutes ??
-          currentSchedule?.breakTimeInMinutes,
-
-        totalHoursWorked: totalHoursWorked ?? calculatedTotalHours,
-        totalHoursWorkedWindow100: hoursWindow100,
-        totalHoursWorkedWindow125: hoursWindow125,
-        totalHoursWorkedWindow150: hoursWindow150,
-        totalContainersFilled:
-          totalContainersFilled ??
-          existingPersonalSchedule?.totalContainersFilled ??
-          currentSchedule?.totalContainersFilled ??
-          0,
-        totalWage:
-          totalWage ??
-          existingPersonalSchedule?.totalWage ??
-          currentSchedule?.totalWage ??
-          0,
-
-        isBreakTimePaid: isPaidBreak,
-
-        status: status ?? "WORKING",
-      },
+      create: attendanceData,
+      update: attendanceData,
     });
 
     return {

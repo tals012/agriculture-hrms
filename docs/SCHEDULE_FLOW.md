@@ -429,3 +429,103 @@ The system implements Israeli labor law requirements for overtime calculations u
    - 100% window → Base pay rate
    - 125% window → 1.25× base pay rate
    - 150% window → 1.50× base pay rate 
+
+## Container and Time Calculations
+
+The system implements a bidirectional calculation system between containers filled and working hours:
+
+### Container-Based Calculations
+When containers are updated, the system calculates hours proportionally:
+```javascript
+// If containerNorm = 3 and containersFilled = 3 → totalHours = 8
+// If containerNorm = 3 and containersFilled = 1.5 → totalHours = 4
+const totalHours = (containersFilled / containerNorm) * 8;
+
+// Calculate end time based on total hours
+const endTimeInMinutes = startTimeInMinutes + Math.round(totalHours * 60);
+```
+
+### Time-Based Calculations
+When start/end times are updated, the system calculates containers proportionally:
+```javascript
+// Calculate total hours from times
+const totalHours = (endTimeInMinutes - startTimeInMinutes) / 60;
+
+// Calculate containers based on hours
+// If totalHours = 8 and containerNorm = 4 → containers = 4
+// If totalHours = 4 and containerNorm = 3 → containers = 1.5
+const totalContainers = (totalHours / 8) * containerNorm;
+```
+
+### Dependencies and Validation
+1. Pricing Combination Required:
+   - Must select pricing combination before entering containers
+   - Must select pricing combination before updating times
+   - Pricing combination provides the container norm for calculations
+
+2. Automatic Updates:
+   - Updating containers recalculates hours and times
+   - Updating times recalculates containers
+   - Removing pricing combination clears containers
+
+3. Calculation Priority:
+   ```javascript
+   if (hasContainersChanged || hasStartTimeChanged || hasEndTimeChanged || hasContainerNormChanged) {
+     // Priority 1: Use containers if provided
+     if (inputContainers !== undefined) {
+       calculateFromContainers();
+     }
+     // Priority 2: Use times if available
+     else if (inputStartTime !== undefined || inputEndTime !== undefined) {
+       calculateFromTimes();
+     }
+   }
+   ```
+
+### Examples
+
+1. Container-Based Updates:
+   ```javascript
+   // Container norm = 3
+   containersFilled = 3  → totalHours = 8   (full day)
+   containersFilled = 1.5 → totalHours = 4   (half day)
+   containersFilled = 6   → totalHours = 16  (double day)
+   ```
+
+2. Time-Based Updates:
+   ```javascript
+   // Container norm = 4
+   hours = 8 (08:00-16:00) → containers = 4
+   hours = 4 (08:00-12:00) → containers = 2
+   hours = 12 (08:00-20:00) → containers = 6
+   ```
+
+3. Overtime Windows:
+   ```javascript
+   // Based on total hours:
+   hoursWindow100 = Math.min(totalHours, 8)
+   hoursWindow125 = Math.min(Math.max(totalHours - 8, 0), 2)
+   hoursWindow150 = Math.max(totalHours - 10, 0)
+   ```
+
+### Important Notes
+
+1. Validation Rules:
+   - Cannot enter containers without pricing combination
+   - Cannot update times without pricing combination
+   - All calculations require valid container norm
+
+2. Rounding:
+   - Container calculations rounded to 2 decimal places
+   - Time calculations rounded to nearest minute
+   - Hours displayed with 2 decimal places
+
+3. State Management:
+   - All calculations performed on backend
+   - Frontend only displays values and sends updates
+   - No local calculations in frontend to ensure consistency
+
+4. Error Handling:
+   - Clear error messages for missing pricing combination
+   - Validation before any calculations
+   - Proper null/undefined handling 
