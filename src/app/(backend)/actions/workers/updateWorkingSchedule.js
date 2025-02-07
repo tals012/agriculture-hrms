@@ -57,18 +57,19 @@ const calculateWorkingHoursAndTimes = (
   const hoursWindow150 = Math.max(totalHours - 10, 0);
   
   return {
-    totalHours,
+    totalHours: Math.round(totalHours * 100) / 100, // Round to 2 decimal places
     startTimeInMinutes: defaultStartTime,
     endTimeInMinutes,
-    hoursWindow100,
-    hoursWindow125,
-    hoursWindow150
+    hoursWindow100: Math.round(hoursWindow100 * 100) / 100,
+    hoursWindow125: Math.round(hoursWindow125 * 100) / 100,
+    hoursWindow150: Math.round(hoursWindow150 * 100) / 100
   };
 };
 
 const calculateFromTimes = (startTime, endTime, containerNorm) => {
   if (!startTime || !endTime || endTime <= startTime || !containerNorm) return null;
   
+  // Calculate total hours from time difference
   const totalHours = (endTime - startTime) / 60;
   
   // Calculate containers based on hours worked and container norm
@@ -76,12 +77,17 @@ const calculateFromTimes = (startTime, endTime, containerNorm) => {
   // Example: If totalHours = 4 and containerNorm = 3, then containers = 1.5
   const totalContainers = (totalHours / 8) * containerNorm;
   
+  // Calculate overtime windows
+  const hoursWindow100 = Math.min(totalHours, 8);
+  const hoursWindow125 = Math.min(Math.max(totalHours - 8, 0), 2);
+  const hoursWindow150 = Math.max(totalHours - 10, 0);
+  
   return {
-    totalHours,
-    totalContainers: Math.round(totalContainers * 100) / 100, // Round to 2 decimal places
-    hoursWindow100: Math.min(totalHours, 8),
-    hoursWindow125: Math.min(Math.max(totalHours - 8, 0), 2),
-    hoursWindow150: Math.max(totalHours - 10, 0)
+    totalHours: Math.round(totalHours * 100) / 100,
+    totalContainers: Math.round(totalContainers * 100) / 100,
+    hoursWindow100: Math.round(hoursWindow100 * 100) / 100,
+    hoursWindow125: Math.round(hoursWindow125 * 100) / 100,
+    hoursWindow150: Math.round(hoursWindow150 * 100) / 100
   };
 };
 
@@ -329,19 +335,22 @@ const updateWorkingSchedule = async (input) => {
 
     // Create or update the attendance record
     const attendanceData = {
-      workerId, // Always include workerId
-      status: status ?? existingRecord?.status ?? 'WORKING', // Always include status with fallbacks
-      ...(inputStartTime !== undefined && { startTimeInMinutes: inputStartTime }),
-      ...(inputEndTime !== undefined && { endTimeInMinutes: inputEndTime }),
+      workerId,
+      status: status ?? existingRecord?.status ?? 'WORKING',
+      ...(calculatedValues.startTimeInMinutes !== null && { startTimeInMinutes: calculatedValues.startTimeInMinutes }),
+      ...(calculatedValues.endTimeInMinutes !== null && { endTimeInMinutes: calculatedValues.endTimeInMinutes }),
       ...(inputBreakTime !== undefined && { breakTimeInMinutes: inputBreakTime }),
       ...(isBreakTimePaid !== undefined && { isBreakTimePaid }),
-      ...(inputContainers !== undefined && { totalContainersFilled: inputContainers }),
+      ...(calculatedValues.totalContainersFilled !== null && { totalContainersFilled: calculatedValues.totalContainersFilled }),
       ...(combinationId !== undefined && { combinationId }),
-      ...(inputTotalHours !== undefined && { totalHoursWorked: inputTotalHours }),
+      ...(calculatedValues.totalHoursWorked !== null && { totalHoursWorked: calculatedValues.totalHoursWorked }),
+      ...(calculatedValues.totalHoursWorkedWindow100 !== null && { totalHoursWorkedWindow100: calculatedValues.totalHoursWorkedWindow100 }),
+      ...(calculatedValues.totalHoursWorkedWindow125 !== null && { totalHoursWorkedWindow125: calculatedValues.totalHoursWorkedWindow125 }),
+      ...(calculatedValues.totalHoursWorkedWindow150 !== null && { totalHoursWorkedWindow150: calculatedValues.totalHoursWorkedWindow150 }),
       ...(totalWage !== undefined && { totalWage }),
-      ...(existingRecord && { attendanceDate: new Date(date) }),
-      ...(existingRecord && { attendanceDoneBy: "ADMIN" }),
-      ...(existingRecord && { groupId: activeGroup.id }),
+      attendanceDate: new Date(date),
+      attendanceDoneBy: "ADMIN",
+      groupId: activeGroup.id,
     };
 
     // For new records, ensure these fields are included
