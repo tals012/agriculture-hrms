@@ -386,69 +386,71 @@
   }
 }
 
-:global(.react-select__control--is-focused) {
-  border-color: #3B82F6 !important;
-  box-shadow: 0 0 0 3px rgba(59, 130, 246, 0.1) !important;
-  background-color: #FFFFFF !important;
-}
-
-:global(.react-select__control--is-disabled) {
-  background-color: transparent !important;
-  border-color: transparent !important;
-  cursor: not-allowed !important;
-
-  .react-select__single-value {
-    color: #64748B !important;
+.selectWrapper {
+  :global(.react-select__control--is-focused) {
+    border-color: #3B82F6 !important;
+    box-shadow: 0 0 0 3px rgba(59, 130, 246, 0.1) !important;
+    background-color: #FFFFFF !important;
   }
-}
 
-:global(.react-select__menu-portal) {
-  z-index: 9999;
-}
+  :global(.react-select__control--is-disabled) {
+    background-color: transparent !important;
+    border-color: transparent !important;
+    cursor: not-allowed !important;
 
-:global(.react-select__menu) {
-  position: absolute;
-  width: 100%;
-  z-index: 9999;
-  border-radius: 8px;
-  border: 1px solid #E2E8F0;
-  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
-  font-size: 16px;
-  background-color: white;
-  margin-top: 4px;
-}
+    .react-select__single-value {
+      color: #64748B !important;
+    }
+  }
 
-:global(.react-select__option) {
-  padding: 12px 16px;
-  cursor: pointer;
-}
+  :global(.react-select__menu-portal) {
+    z-index: 9999;
+  }
 
-:global(.react-select__option--is-selected) {
-  background-color: #3B82F6;
-  color: white;
-}
+  :global(.react-select__menu) {
+    position: absolute;
+    width: 100%;
+    z-index: 9999;
+    border-radius: 8px;
+    border: 1px solid #E2E8F0;
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+    font-size: 16px;
+    background-color: white;
+    margin-top: 4px;
+  }
 
-:global(.react-select__option--is-focused) {
-  background-color: #EFF6FF;
-}
+  :global(.react-select__option) {
+    padding: 12px 16px;
+    cursor: pointer;
+  }
 
-:global(.react-select__value-container) {
-  padding: 2px 12px;
-}
+  :global(.react-select__option--is-selected) {
+    background-color: #3B82F6;
+    color: white;
+  }
 
-:global(.react-select__placeholder) {
-  color: #94A3B8;
-  font-size: 16px;
-}
+  :global(.react-select__option--is-focused) {
+    background-color: #EFF6FF;
+  }
 
-:global(.react-select__single-value) {
-  color: #1E293B;
-  font-size: 16px;
-}
+  :global(.react-select__value-container) {
+    padding: 2px 12px;
+  }
 
-:global(.react-select__input) {
-  color: #1E293B;
-  font-size: 16px;
+  :global(.react-select__placeholder) {
+    color: #94A3B8;
+    font-size: 16px;
+  }
+
+  :global(.react-select__single-value) {
+    color: #1E293B;
+    font-size: 16px;
+  }
+
+  :global(.react-select__input) {
+    color: #1E293B;
+    font-size: 16px;
+  }
 }
 
 .statusSelect {

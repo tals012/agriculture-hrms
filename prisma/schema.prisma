@@ -165,9 +165,9 @@ model Worker {
   city   City?   @relation(fields: [cityId], references: [id])
   cityId String?
 
-  attendance WorkerAttendance[]
-
-  workingSchedule WorkingSchedule[]
+  attendance         WorkerAttendance[]
+  workingSchedule    WorkingSchedule[]
+  monthlySubmissions WorkerMonthlyWorkingHoursSubmission[]
 
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
@@ -528,4 +528,66 @@ enum AttendanceDoneBy {
   ADMIN
   MANAGER
   LEADER
+}
+
+model WorkerMonthlyWorkingHoursSubmission {
+  id                                        String         @id @default(cuid())
+  monthYear                                 String // 12/2024
+  firstDayOfMonth                           DateTime // 2024-12-01T00:00:00.000Z
+  signature                                 String?
+  signedAt                                  DateTime?
+  approvalStatus                            ApprovalStatus @default(PENDING)
+  approvalResponseAt                        DateTime?
+  createdAt                                 DateTime       @default(now())
+  updatedAt                                 DateTime       @updatedAt
+  isSentToSalarySystem                      Boolean        @default(false)
+  normalWorkingDays                         Int?
+  smsReminderSent                           Boolean        @default(false)
+  supposedTotalMonthlyHours                 Float?
+  supposedTotalMonthlyHours100              Float?
+  supposedTotalMonthlyHours125              Float?
+  supposedTotalMonthlyHours150              Float?
+  totalDaysOff                              Int?
+  totalHolidays                             Int?
+  totalInterVisa                            Int?
+  totalMonthlyHours                         Float?
+  totalMonthlyHours100                      Float?
+  totalMonthlyHours125                      Float?
+  totalMonthlyHours150                      Float?
+  totalSaturdays                            Int?
+  totalSickLeaves                           Int?
+  totalWorkingDays                          Int?
+  window100Rate                             Float?
+  window125Rate                             Float?
+  window150Rate                             Float?
+  // salaryReceiptStatus                       SalaryReceiptStatus  @default(PENDING)
+  salaryReceiptStatusUpdatedAt              DateTime?
+  smsReminderSentAt                         DateTime?
+  // smsReminderStatus                         GeneralStatus?       @default(PENDING)
+  supposedTotalMonthlyHours100ForNormalDays Float?
+  supposedTotalMonthlyHours125ForNormalDays Float?
+  supposedTotalMonthlyHours150ForNormalDays Float?
+  supposedTotalMonthlyHours175              Float?
+  supposedTotalMonthlyHours175ForNormalDays Float?
+  supposedTotalMonthlyHours200              Float?
+  supposedTotalMonthlyHours200ForNormalDays Float?
+  supposedTotalMonthlyHoursForNormalDays    Float?
+  totalForWeatherDays                       Float?
+  totalMonthlyHours100ForNormalDays         Float?
+  totalMonthlyHours125ForNormalDays         Float?
+  totalMonthlyHours150ForNormalDays         Float?
+  totalMonthlyHours175                      Float?
+  totalMonthlyHours175ForNormalDays         Float?
+  totalMonthlyHours200                      Float?
+  totalMonthlyHours200ForNormalDays         Float?
+  totalMonthlyHoursForNormalDays            Float?
+  worker                                    Worker         @relation(fields: [workerId], references: [id], onDelete: Cascade)
+  workerId                                  String
+  // salaryReceipt                             WorkerSalaryReceipt?
+}
+
+enum ApprovalStatus {
+  PENDING
+  APPROVED
+  REJECTED
 }

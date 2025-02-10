@@ -1,0 +1,60 @@
+-- CreateEnum
+CREATE TYPE "ApprovalStatus" AS ENUM ('PENDING', 'APPROVED', 'REJECTED');
+
+-- CreateTable
+CREATE TABLE "WorkerMonthlyWorkingHoursSubmission" (
+    "id" TEXT NOT NULL,
+    "monthYear" TEXT NOT NULL,
+    "firstDayOfMonth" TIMESTAMP(3) NOT NULL,
+    "signature" TEXT,
+    "signedAt" TIMESTAMP(3),
+    "approvalStatus" "ApprovalStatus" NOT NULL DEFAULT 'PENDING',
+    "approvalResponseAt" TIMESTAMP(3),
+    "createdAt" TIMESTAMP(3) NOT NULL DEFAULT CURRENT_TIMESTAMP,
+    "updatedAt" TIMESTAMP(3) NOT NULL,
+    "isSentToSalarySystem" BOOLEAN NOT NULL DEFAULT false,
+    "normalWorkingDays" INTEGER,
+    "smsReminderSent" BOOLEAN NOT NULL DEFAULT false,
+    "supposedTotalMonthlyHours" DOUBLE PRECISION,
+    "supposedTotalMonthlyHours100" DOUBLE PRECISION,
+    "supposedTotalMonthlyHours125" DOUBLE PRECISION,
+    "supposedTotalMonthlyHours150" DOUBLE PRECISION,
+    "totalDaysOff" INTEGER,
+    "totalHolidays" INTEGER,
+    "totalInterVisa" INTEGER,
+    "totalMonthlyHours" DOUBLE PRECISION,
+    "totalMonthlyHours100" DOUBLE PRECISION,
+    "totalMonthlyHours125" DOUBLE PRECISION,
+    "totalMonthlyHours150" DOUBLE PRECISION,
+    "totalSaturdays" INTEGER,
+    "totalSickLeaves" INTEGER,
+    "totalWorkingDays" INTEGER,
+    "window100Rate" DOUBLE PRECISION,
+    "window125Rate" DOUBLE PRECISION,
+    "window150Rate" DOUBLE PRECISION,
+    "salaryReceiptStatusUpdatedAt" TIMESTAMP(3),
+    "smsReminderSentAt" TIMESTAMP(3),
+    "supposedTotalMonthlyHours100ForNormalDays" DOUBLE PRECISION,
+    "supposedTotalMonthlyHours125ForNormalDays" DOUBLE PRECISION,
+    "supposedTotalMonthlyHours150ForNormalDays" DOUBLE PRECISION,
+    "supposedTotalMonthlyHours175" DOUBLE PRECISION,
+    "supposedTotalMonthlyHours175ForNormalDays" DOUBLE PRECISION,
+    "supposedTotalMonthlyHours200" DOUBLE PRECISION,
+    "supposedTotalMonthlyHours200ForNormalDays" DOUBLE PRECISION,
+    "supposedTotalMonthlyHoursForNormalDays" DOUBLE PRECISION,
+    "totalForWeatherDays" DOUBLE PRECISION,
+    "totalMonthlyHours100ForNormalDays" DOUBLE PRECISION,
+    "totalMonthlyHours125ForNormalDays" DOUBLE PRECISION,
+    "totalMonthlyHours150ForNormalDays" DOUBLE PRECISION,
+    "totalMonthlyHours175" DOUBLE PRECISION,
+    "totalMonthlyHours175ForNormalDays" DOUBLE PRECISION,
+    "totalMonthlyHours200" DOUBLE PRECISION,
+    "totalMonthlyHours200ForNormalDays" DOUBLE PRECISION,
+    "totalMonthlyHoursForNormalDays" DOUBLE PRECISION,
+    "workerId" TEXT NOT NULL,
+
+    CONSTRAINT "WorkerMonthlyWorkingHoursSubmission_pkey" PRIMARY KEY ("id")
+);
+
+-- AddForeignKey
+ALTER TABLE "WorkerMonthlyWorkingHoursSubmission" ADD CONSTRAINT "WorkerMonthlyWorkingHoursSubmission_workerId_fkey" FOREIGN KEY ("workerId") REFERENCES "Worker"("id") ON DELETE CASCADE ON UPDATE CASCADE;

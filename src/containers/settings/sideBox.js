@@ -15,7 +15,7 @@ const SideBox = () => {
   ];
 
   const handleTabChange = (tabId) => {
-    router.push(`/settings?tab=${tabId}`);
+    router.push(`/admin/settings?tab=${tabId}`);
   };
 
   return (
