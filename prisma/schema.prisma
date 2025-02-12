@@ -534,15 +534,15 @@ model WorkerMonthlyWorkingHoursSubmission {
   id                                        String         @id @default(cuid())
   monthYear                                 String // 12/2024
   firstDayOfMonth                           DateTime // 2024-12-01T00:00:00.000Z
-  signature                                 String?
-  signedAt                                  DateTime?
+  signature                                 String? // for later use
+  signedAt                                  DateTime? // for later use
   approvalStatus                            ApprovalStatus @default(PENDING)
-  approvalResponseAt                        DateTime?
+  approvalResponseAt                        DateTime? 
   createdAt                                 DateTime       @default(now())
   updatedAt                                 DateTime       @updatedAt
   isSentToSalarySystem                      Boolean        @default(false)
   normalWorkingDays                         Int?
-  smsReminderSent                           Boolean        @default(false)
+  smsReminderSent                           Boolean        @default(false) // for later use
   supposedTotalMonthlyHours                 Float?
   supposedTotalMonthlyHours100              Float?
   supposedTotalMonthlyHours125              Float?
@@ -561,8 +561,8 @@ model WorkerMonthlyWorkingHoursSubmission {
   window125Rate                             Float?
   window150Rate                             Float?
   // salaryReceiptStatus                       SalaryReceiptStatus  @default(PENDING)
-  salaryReceiptStatusUpdatedAt              DateTime?
-  smsReminderSentAt                         DateTime?
+  salaryReceiptStatusUpdatedAt              DateTime? // for later use
+  smsReminderSentAt                         DateTime? // for later use
   // smsReminderStatus                         GeneralStatus?       @default(PENDING)
   supposedTotalMonthlyHours100ForNormalDays Float?
   supposedTotalMonthlyHours125ForNormalDays Float?

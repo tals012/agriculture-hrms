@@ -16,21 +16,27 @@ async function deleteAllUsers() {
         manager: {
           include: {
             fields: true,
-            client: true
+            client: true,
+            workerAttendance: true
           }
         },
         worker: {
           include: {
             groups: {
               include: {
-                group: true
+                group: true,
+                workerAttendance: true
               }
             },
             harvestEntries: true,
-            clientHistory: true
+            clientHistory: true,
+            workingSchedule: true,
+            attendance: true,
+            monthlySubmissions: true
           }
         },
-        organization: true
+        organization: true,
+        workerAttendance: true
       }
     });
 
@@ -47,6 +53,14 @@ async function deleteAllUsers() {
       sum + (u.manager?.fields.length || 0), 0);
     const totalHarvestEntries = users.reduce((sum, u) => 
       sum + (u.worker?.harvestEntries.length || 0), 0);
+    const totalWorkingSchedules = users.reduce((sum, u) => 
+      sum + (u.worker?.workingSchedule.length || 0), 0);
+    const totalAttendance = users.reduce((sum, u) => 
+      sum + u.workerAttendance.length + 
+      (u.manager?.workerAttendance.length || 0) +
+      (u.worker?.attendance.length || 0), 0);
+    const totalMonthlySubmissions = users.reduce((sum, u) => 
+      sum + (u.worker?.monthlySubmissions.length || 0), 0);
 
     console.log("\nFound users:");
     console.log(`Total users: ${users.length}`);
@@ -56,11 +70,17 @@ async function deleteAllUsers() {
     console.log(`Group leaders: ${totalGroupLeaders}`);
     console.log(`Total fields managed: ${totalFieldsManaged}`);
     console.log(`Total harvest entries: ${totalHarvestEntries}`);
+    console.log(`Total working schedules: ${totalWorkingSchedules}`);
+    console.log(`Total attendance records: ${totalAttendance}`);
+    console.log(`Total monthly submissions: ${totalMonthlySubmissions}`);
 
     const confirm = await question('\nAre you sure you want to delete ALL users? This will:\n' +
       '- Delete ALL user accounts\n' +
       '- Remove manager roles and unassign managed fields\n' +
       '- Remove group leader statuses\n' +
+      '- Delete ALL working schedules\n' +
+      '- Delete ALL attendance records\n' +
+      '- Delete ALL monthly submissions\n' +
       '- Unlink workers from their user accounts\n' +
       'Type "YES" to confirm: ');
 
@@ -73,6 +93,11 @@ async function deleteAllUsers() {
     for (const user of users) {
       await prisma.$transaction(async (tx) => {
         if (user.manager) {
+          // Delete manager's worker attendance records
+          await tx.workerAttendance.deleteMany({
+            where: { managerId: user.manager.id }
+          });
+
           // Update fields to remove manager reference
           await tx.field.updateMany({
             where: { managerId: user.manager.id },
@@ -86,6 +111,21 @@ async function deleteAllUsers() {
         }
 
         if (user.worker) {
+          // Delete worker's attendance records
+          await tx.workerAttendance.deleteMany({
+            where: { workerId: user.worker.id }
+          });
+
+          // Delete working schedules
+          await tx.workingSchedule.deleteMany({
+            where: { workerId: user.worker.id }
+          });
+
+          // Delete monthly submissions
+          await tx.workerMonthlyWorkingHoursSubmission.deleteMany({
+            where: { workerId: user.worker.id }
+          });
+
           // Remove group leader status if applicable
           const leaderGroups = user.worker.groups.filter(g => g.isGroupLeader);
           for (const membership of leaderGroups) {
@@ -101,6 +141,11 @@ async function deleteAllUsers() {
             data: { userId: null }
           });
         }
+
+        // Delete user's attendance records
+        await tx.workerAttendance.deleteMany({
+          where: { userId: user.id }
+        });
 
         // Delete the user
         await tx.user.delete({

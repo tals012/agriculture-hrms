@@ -1,0 +1,63 @@
+@use "sass:color";
+
+.container {
+  width: 100%;
+  background-color: #ffffff;
+  box-shadow: 0 0 10px 0 rgba(0, 0, 0, 0.1);
+  border-radius: 5px;
+  padding: 20px;
+  margin-bottom: 20px;
+}
+
+.filters {
+  display: flex;
+  align-items: center;
+  gap: 15px;
+}
+
+.dateFilters {
+  display: flex;
+  gap: 15px;
+  flex: 2;
+
+  & > div {
+    flex: 1;
+  }
+}
+
+.entityFilters {
+  display: flex;
+  gap: 15px;
+  flex: 2;
+
+  & > div {
+    flex: 1;
+  }
+}
+
+.submitButton {
+  height: 44px;
+  padding: 0 24px;
+  border-radius: 6px;
+  border: none;
+  background: #2b85ff;
+  font-size: 15px;
+  font-weight: 600;
+  color: #ffffff;
+  cursor: pointer;
+  transition: background-color 0.2s ease;
+  flex-shrink: 0;
+
+  &:hover {
+    background-color: color.scale(#2b85ff, $lightness: -5%);
+  }
+
+  &:active {
+    background-color: color.scale(#2b85ff, $lightness: -10%);
+  }
+
+  &:disabled {
+    background-color: #cccccc;
+    cursor: not-allowed;
+  }
+}

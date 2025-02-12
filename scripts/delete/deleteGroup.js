@@ -20,10 +20,13 @@ async function deleteAllGroups() {
               include: {
                 user: true
               }
-            }
+            },
+            workerAttendance: true
           }
         },
-        clientPricingCombination: true
+        clientPricingCombination: true,
+        workingSchedule: true,
+        workerAttendance: true
       }
     });
 
@@ -36,7 +39,9 @@ async function deleteAllGroups() {
     const totalLeaders = groups.reduce((sum, g) => 
       sum + g.members.filter(m => m.isGroupLeader).length, 0);
     const totalPricingCombinations = groups.reduce((sum, g) => 
-      sum + g.clientPricingCombination.length, 0);
+      sum + (g.clientPricingCombination ? g.clientPricingCombination.length : 0), 0);
+    const totalWorkingSchedules = groups.reduce((sum, g) => sum + g.workingSchedule.length, 0);
+    const totalWorkerAttendance = groups.reduce((sum, g) => sum + g.workerAttendance.length, 0);
 
     console.log("\nFound groups:");
     console.log(`Total groups: ${groups.length}`);
@@ -44,10 +49,14 @@ async function deleteAllGroups() {
     console.log(`Total members: ${totalMembers}`);
     console.log(`Total group leaders: ${totalLeaders}`);
     console.log(`Total pricing combinations: ${totalPricingCombinations}`);
+    console.log(`Total working schedules: ${totalWorkingSchedules}`);
+    console.log(`Total worker attendance records: ${totalWorkerAttendance}`);
 
     const confirm = await question('\nAre you sure you want to delete ALL groups? This will:\n' +
       '- Delete ALL group records\n' +
       '- Delete ALL member associations\n' +
+      '- Delete ALL working schedules\n' +
+      '- Delete ALL worker attendance records\n' +
       '- Delete group leader user accounts\n' +
       '- Remove group references from pricing combinations\n' +
       'Type "YES" to confirm: ');
@@ -58,6 +67,26 @@ async function deleteAllGroups() {
     }
 
     await prisma.$transaction(async (tx) => {
+      // Delete worker attendance records
+      await tx.workerAttendance.deleteMany({
+        where: {
+          group: {
+            id: {
+              in: groups.map(g => g.id)
+            }
+          }
+        }
+      });
+
+      // Delete working schedules
+      await tx.workingSchedule.deleteMany({
+        where: {
+          groupId: {
+            in: groups.map(g => g.id)
+          }
+        }
+      });
+
       const groupLeaderUserIds = groups
         .flatMap(g => g.members)
         .filter(m => m.isGroupLeader && m.worker.userId)

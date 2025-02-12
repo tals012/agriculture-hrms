@@ -1,0 +1,55 @@
+.container {
+  .wrapper {
+    display: flex;
+    flex-direction: column;
+    min-height: calc(100vh - 60px);
+
+    .row {
+      display: flex;
+      gap: 50px;
+      width: 100%;
+      padding: 64px 50px 32px 50px;
+
+      .content {
+        width: 100%;
+      } 
+    }
+
+    .loader {
+      width: 100%;
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      height: 150px;
+    }
+  }
+}
+
+.actions {
+  display: flex;
+  justify-content: flex-end;
+  margin-top: 24px;
+}
+
+.sendButton {
+  height: 44px;
+  padding: 0 32px;
+  background: #22C55E;
+  color: white;
+  border: none;
+  border-radius: 6px;
+  font-size: 16px;
+  font-weight: 500;
+  cursor: pointer;
+  transition: all 0.2s ease;
+
+  &:hover:not(:disabled) {
+    background: #16A34A;
+    transform: translateY(-1px);
+  }
+
+  &:disabled {
+    background: #94A3B8;
+    cursor: not-allowed;
+  }
+}

@@ -23,17 +23,21 @@ async function deleteAllFields() {
                   include: {
                     user: true
                   }
-                }
+                },
+                workerAttendance: true
               }
             },
-            clientPricingCombination: true
+            clientPricingCombination: true,
+            workingSchedule: true,
+            workerAttendance: true
           }
         },
         harvests: {
           include: {
             entries: true
           }
-        }
+        },
+        workingSchedule: true
       }
     });
 
@@ -51,6 +55,11 @@ async function deleteAllFields() {
     const totalGroupLeaders = fields.reduce((sum, f) => 
       sum + f.groups.reduce((gSum, g) => 
         gSum + g.members.filter(m => m.isGroupLeader).length, 0), 0);
+    const totalWorkingSchedules = fields.reduce((sum, f) => 
+      sum + f.workingSchedule.length + 
+      f.groups.reduce((gSum, g) => gSum + g.workingSchedule.length, 0), 0);
+    const totalWorkerAttendance = fields.reduce((sum, f) => 
+      sum + f.groups.reduce((gSum, g) => gSum + g.workerAttendance.length, 0), 0);
 
     console.log("\nFound fields:");
     console.log(`Total fields: ${fields.length}`);
@@ -60,11 +69,15 @@ async function deleteAllFields() {
     console.log(`Total harvest entries: ${totalEntries}`);
     console.log(`Total group members: ${totalGroupMembers}`);
     console.log(`Total group leaders: ${totalGroupLeaders}`);
+    console.log(`Total working schedules: ${totalWorkingSchedules}`);
+    console.log(`Total worker attendance records: ${totalWorkerAttendance}`);
 
     const confirm = await question('\nAre you sure you want to delete ALL fields? This will:\n' +
       '- Delete ALL field records\n' +
       '- Delete ALL groups and their member associations\n' +
       '- Delete ALL harvests and harvest entries\n' +
+      '- Delete ALL working schedules\n' +
+      '- Delete ALL worker attendance records\n' +
       '- Delete group leader user accounts\n' +
       '- Remove field references from managers\n' +
       'Type "YES" to confirm: ');
@@ -77,6 +90,15 @@ async function deleteAllFields() {
     // Process each field in its own transaction
     for (const field of fields) {
       await prisma.$transaction(async (tx) => {
+        // Delete worker attendance records
+        await tx.workerAttendance.deleteMany({
+          where: {
+            group: {
+              fieldId: field.id
+            }
+          }
+        });
+
         // Delete harvest entries first
         await tx.harvestEntry.deleteMany({
           where: {
@@ -116,8 +138,22 @@ async function deleteAllFields() {
           }
         });
 
+        // Delete working schedules for groups
+        await tx.workingSchedule.deleteMany({
+          where: {
+            group: {
+              fieldId: field.id
+            }
+          }
+        });
+
         // Delete groups
         await tx.group.deleteMany({
+          where: { fieldId: field.id }
+        });
+
+        // Delete working schedules for field
+        await tx.workingSchedule.deleteMany({
           where: { fieldId: field.id }
         });
 

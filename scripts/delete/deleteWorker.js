@@ -16,12 +16,16 @@ async function deleteAllWorkers() {
         user: true,
         groups: {
           include: {
-            group: true
+            group: true,
+            workerAttendance: true
           }
         },
         harvestEntries: true,
         clientHistory: true,
-        currentClient: true
+        currentClient: true,
+        workingSchedule: true,
+        attendance: true,
+        monthlySubmissions: true
       }
     });
 
@@ -35,6 +39,9 @@ async function deleteAllWorkers() {
     const totalHistory = workers.reduce((sum, w) => sum + w.clientHistory.length, 0);
     const totalUserAccounts = workers.filter(w => w.user).length;
     const totalGroupLeaders = workers.filter(w => w.groups.some(g => g.isGroupLeader)).length;
+    const totalWorkingSchedules = workers.reduce((sum, w) => sum + w.workingSchedule.length, 0);
+    const totalAttendance = workers.reduce((sum, w) => sum + w.attendance.length, 0);
+    const totalMonthlySubmissions = workers.reduce((sum, w) => sum + w.monthlySubmissions.length, 0);
 
     console.log("\nFound workers:");
     console.log(`Total workers: ${workers.length}`);
@@ -44,12 +51,18 @@ async function deleteAllWorkers() {
     console.log(`Total history records: ${totalHistory}`);
     console.log(`Workers with user accounts: ${totalUserAccounts}`);
     console.log(`Group leaders: ${totalGroupLeaders}`);
+    console.log(`Total working schedules: ${totalWorkingSchedules}`);
+    console.log(`Total attendance records: ${totalAttendance}`);
+    console.log(`Total monthly submissions: ${totalMonthlySubmissions}`);
 
     const confirm = await question('\nAre you sure you want to delete ALL workers? This will:\n' +
       '- Delete ALL worker records\n' +
       '- Delete ALL group memberships\n' +
       '- Delete ALL harvest entries\n' +
       '- Delete ALL work history records\n' +
+      '- Delete ALL working schedules\n' +
+      '- Delete ALL attendance records\n' +
+      '- Delete ALL monthly submissions\n' +
       '- Delete associated user accounts\n' +
       'Type "YES" to confirm: ');
 
@@ -67,6 +80,14 @@ async function deleteAllWorkers() {
         }
       });
 
+      await tx.workerAttendance.deleteMany({
+        where: {
+          workerId: {
+            in: workers.map(w => w.id)
+          }
+        }
+      });
+
       await tx.groupMember.deleteMany({
         where: {
           workerId: {
@@ -76,6 +97,22 @@ async function deleteAllWorkers() {
       });
 
       await tx.workerClientHistory.deleteMany({
+        where: {
+          workerId: {
+            in: workers.map(w => w.id)
+          }
+        }
+      });
+
+      await tx.workingSchedule.deleteMany({
+        where: {
+          workerId: {
+            in: workers.map(w => w.id)
+          }
+        }
+      });
+
+      await tx.workerMonthlyWorkingHoursSubmission.deleteMany({
         where: {
           workerId: {
             in: workers.map(w => w.id)

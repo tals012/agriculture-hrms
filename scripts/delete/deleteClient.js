@@ -22,19 +22,28 @@ async function deleteAllClients() {
             },
             groups: {
               include: {
-                members: true
+                members: true,
+                workingSchedule: true,
+                workerAttendance: true
               }
-            }
+            },
+            workingSchedule: true
           }
         },
         managers: {
           include: {
-            user: true
+            user: true,
+            workerAttendance: true
           }
         },
         currentWorkers: true,
         workerHistory: true,
-        clientPricingCombination: true
+        clientPricingCombination: {
+          include: {
+            workerAttendance: true
+          }
+        },
+        workingSchedule: true
       }
     });
 
@@ -50,6 +59,10 @@ async function deleteAllClients() {
       sum + c.fields.reduce((fSum, f) => fSum + f.harvests.length, 0), 0);
     const totalGroups = clients.reduce((sum, c) => 
       sum + c.fields.reduce((fSum, f) => fSum + f.groups.length, 0), 0);
+    const totalWorkingSchedules = clients.reduce((sum, c) => 
+      sum + c.workingSchedule.length + 
+      c.fields.reduce((fSum, f) => fSum + f.workingSchedule.length, 0) +
+      c.fields.reduce((fSum, f) => fSum + f.groups.reduce((gSum, g) => gSum + g.workingSchedule.length, 0), 0), 0);
 
     console.log("\nFound clients:");
     console.log(`Total clients: ${clients.length}`);
@@ -59,6 +72,7 @@ async function deleteAllClients() {
     console.log(`Total current workers: ${totalWorkers}`);
     console.log(`Total harvests: ${totalHarvests}`);
     console.log(`Total groups: ${totalGroups}`);
+    console.log(`Total working schedules: ${totalWorkingSchedules}`);
 
     const confirm = await question('\nAre you sure you want to delete ALL clients? This will:\n' +
       '- Delete ALL client records\n' +
@@ -66,6 +80,7 @@ async function deleteAllClients() {
       '- Delete ALL managers and their user accounts\n' +
       '- Delete ALL worker history records\n' +
       '- Delete ALL pricing combinations\n' +
+      '- Delete ALL working schedules\n' +
       '- Remove client references from workers\n' +
       'Type "YES" to confirm: ');
 
@@ -77,6 +92,31 @@ async function deleteAllClients() {
     // Process in chunks to avoid transaction timeout
     for (const client of clients) {
       await prisma.$transaction(async (tx) => {
+        // Delete worker attendance records for all related entities
+        await tx.workerAttendance.deleteMany({
+          where: {
+            OR: [
+              {
+                group: {
+                  field: {
+                    clientId: client.id
+                  }
+                }
+              },
+              {
+                manager: {
+                  clientId: client.id
+                }
+              },
+              {
+                combination: {
+                  clientId: client.id
+                }
+              }
+            ]
+          }
+        });
+
         // Delete harvest entries and harvests for each field
         for (const field of client.fields) {
           await tx.harvestEntry.deleteMany({
@@ -101,6 +141,11 @@ async function deleteAllClients() {
           });
 
           await tx.group.deleteMany({
+            where: { fieldId: field.id }
+          });
+
+          // Delete working schedules for fields
+          await tx.workingSchedule.deleteMany({
             where: { fieldId: field.id }
           });
         }
@@ -135,6 +180,11 @@ async function deleteAllClients() {
         });
 
         await tx.clientPricingCombination.deleteMany({
+          where: { clientId: client.id }
+        });
+
+        // Delete working schedules for client
+        await tx.workingSchedule.deleteMany({
           where: { clientId: client.id }
         });
 
