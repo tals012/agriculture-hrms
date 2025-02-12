@@ -52,7 +52,11 @@ export default function Card() {
         // Redirect based on role
         if (res.role === "GROUP_LEADER") {
           router.push("/group-leader/my-group");
-        } else {
+        } 
+        else if (res.role === "FIELD_MANAGER") {
+          router.push("/manager/my-fields");
+        }
+        else {
           router.push("/admin/clients");
         }
       }

@@ -537,7 +537,7 @@ model WorkerMonthlyWorkingHoursSubmission {
   signature                                 String? // for later use
   signedAt                                  DateTime? // for later use
   approvalStatus                            ApprovalStatus @default(PENDING)
-  approvalResponseAt                        DateTime? 
+  approvalResponseAt                        DateTime?
   createdAt                                 DateTime       @default(now())
   updatedAt                                 DateTime       @updatedAt
   isSentToSalarySystem                      Boolean        @default(false)
@@ -560,6 +560,7 @@ model WorkerMonthlyWorkingHoursSubmission {
   window100Rate                             Float?
   window125Rate                             Float?
   window150Rate                             Float?
+  totalBonus                                Float?
   // salaryReceiptStatus                       SalaryReceiptStatus  @default(PENDING)
   salaryReceiptStatusUpdatedAt              DateTime? // for later use
   smsReminderSentAt                         DateTime? // for later use
