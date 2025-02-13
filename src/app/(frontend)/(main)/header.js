@@ -72,13 +72,13 @@ const Header = () => {
                 </li>
               </Link>
 
-              <Link href="/admin/users">
+              {/* <Link href="/admin/users">
                 <li
                   className={pathname === "/admin/users" ? styles.active : ""}
                 >
                   משתמשים
                 </li>
-              </Link>
+              </Link> */}
 
               <Link href="/admin/settings">
                 <li
