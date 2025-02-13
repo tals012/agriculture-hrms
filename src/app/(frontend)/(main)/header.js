@@ -50,11 +50,11 @@ const Header = () => {
           </Link>
           <nav>
             <ul className={styles.ulDesktop}>
-              <Link href="/home">
+              {/* <Link href="/home">
                 <li className={pathname === "/home" ? styles.active : ""}>
                   ראשי
                 </li>
-              </Link>
+              </Link> */}
 
               <Link href="/admin/clients">
                 <li
