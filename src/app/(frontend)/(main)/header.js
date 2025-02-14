@@ -122,7 +122,16 @@ const Header = () => {
               className={styles.avatar}
             /> */}
 
-            <InitialsCircle name={name} />
+            <InitialsCircle
+              name={name}
+              width={32}
+              height={32}
+              fontSize={15}
+              fontWeight={400}
+              lineHeight={24}
+              letterSpacing={-0.15}
+              textAlign="center"
+            />
 
             {isDropOpen && (
               <div className={styles.userDrop} onClick={handleLogout}>

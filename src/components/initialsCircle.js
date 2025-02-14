@@ -3,13 +3,13 @@ import styles from "@/styles/components/initialsCircle.module.scss";
 
 const InitialsCircle = ({
   name,
-  width = 32,
-  height = 32,
-  fontSize = 15,
-  fontWeight = 400,
-  lineHeight = 24,
-  letterSpacing = -0.15,
-  textAlign = "center",
+  width,
+  height,
+  fontSize,
+  fontWeight,
+  lineHeight,
+  letterSpacing,
+  textAlign,
 }) => {
   return (
     <div

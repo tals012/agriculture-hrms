@@ -60,9 +60,20 @@ const Table = ({ data = [], setWorkerId }) => {
                   </td>
                   <td onClick={() => setWorkerId(worker.id)}>
                     <div className={styles.user}>
-                      <InitialsCircle name={`${worker.nameHe} ${worker.surnameHe}`} />
+                      <InitialsCircle
+                        name={`${worker.nameHe} ${worker.surnameHe}`}
+                        width={32}
+                        height={32}
+                        fontSize={15}
+                        fontWeight={400}
+                        lineHeight={24}
+                        letterSpacing={-0.15}
+                        textAlign="center"
+                      />
                       <div className={styles.name}>
-                        <p>{worker.nameHe} {worker.surnameHe}</p>
+                        <p>
+                          {worker.nameHe} {worker.surnameHe}
+                        </p>
                       </div>
                     </div>
                   </td>
@@ -112,4 +123,4 @@ const Table = ({ data = [], setWorkerId }) => {
   );
 };
 
-export default Table; 
+export default Table;

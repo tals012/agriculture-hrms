@@ -54,6 +54,13 @@ const Table = ({ data, setClientId }) => {
                       /> */}
                       <InitialsCircle
                         name={`${item.name ? item.name : item.nameEnglish}`}
+                        width={32}
+                        height={32}
+                        fontSize={15}
+                        fontWeight={400}
+                        lineHeight={24}
+                        letterSpacing={-0.15}
+                        textAlign="center"
                       />
                       <p>{`${item.name ? item.name : item.nameEnglish}`}</p>
                     </div>
