@@ -32,6 +32,13 @@ const FilterBox = ({ setIsOpen, filters, setFilters, handleSearch }) => {
           value={filters.phone}
           onChange={(e) => setFilters({ ...filters, phone: e.target.value })}
         />
+        {/* passport */}
+        <input
+          type="text"
+          placeholder="ת.ז"
+          value={filters.passport}
+          onChange={(e) => setFilters({ ...filters, passport: e.target.value })}
+        />
         <ReactSelect
           options={[
             { value: "ACTIVE", label: "פעיל" },
@@ -101,6 +108,7 @@ export default function Workers() {
     name: "",
     status: "",
     phone: "",
+    passport: "",
   });
 
   const fetchData = async (searchQuery = "", currentFilters = {}) => {
@@ -112,8 +120,9 @@ export default function Workers() {
         ...(currentFilters.name ? { name: currentFilters.name } : {}),
         ...(currentFilters.status ? { status: currentFilters.status } : {}),
         ...(currentFilters.phone ? { phone: currentFilters.phone } : {}),
+        ...(currentFilters.passport ? { passport: currentFilters.passport } : {}),
       };
-      
+
       const res = await getWorkers(payload);
       if (res?.status === 200) {
         setWorkers(res.data || []);
@@ -128,14 +137,16 @@ export default function Workers() {
     }
   };
   const debouncedFetchData = useCallback(
-    debounce((searchQuery, currentFilters) => fetchData(searchQuery, currentFilters), 300),
+    debounce(
+      (searchQuery, currentFilters) => fetchData(searchQuery, currentFilters),
+      300
+    ),
     []
   );
 
   useEffect(() => {
     debouncedFetchData(search, filters);
   }, [search, filters, debouncedFetchData]);
-
 
   useEffect(() => {
     const fetchStats = async () => {
@@ -227,4 +238,4 @@ export default function Workers() {
       <ToastContainer />
     </div>
   );
-} 
+}

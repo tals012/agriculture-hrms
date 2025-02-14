@@ -10,14 +10,18 @@
 
       .filterBox {
         position: absolute;
+        display: flex;
+        flex-direction: column;
+        justify-content: center;
         right: 60px;
         width: 353px;
-        // height: 643px;
-        height: auto;
+        height: 330px;
+        padding-top: 25px;
         padding-bottom: 25px;
         border-radius: 6px;
         background: #ffffff;
         box-shadow: -10px 0px 106.9px 0px #00000033;
+        z-index: 10;
 
         .header {
           width: 100%;
@@ -53,24 +57,66 @@
         }
 
         .fields {
-          padding: 0px 35px;
+          padding: 0px 30px;
           display: flex;
           flex-direction: column;
           gap: 22px;
 
+          input {
+            width: 100%;
+            height: 48px;
+            padding: 0 15px;
+            border: 1px solid #E5E7EB;
+            border-radius: 6px;
+            font-size: 14px;
+            
+            &::placeholder {
+              color: #6B7280;
+            }
+          }
+
+          // Style for react-select
+          > div {
+            .css-13cymwt-control {
+              min-height: 48px;
+              border-color: #E5E7EB;
+            }
+          }
+        }
+
+        .btns {
+          margin-top: 25px;
+          padding: 0 30px;
+          display: flex;
+          gap: 10px;
+
           button {
-            width: 282px;
+            flex: 1;
             height: 48px;
             border: none;
             border-radius: 6px;
-            opacity: 0px;
-            background: #2b85ff;
             font-size: 15px;
             font-weight: 600;
-            line-height: 24px;
-            letter-spacing: -0.005em;
-            text-align: center;
-            color: #ffffff;
+            cursor: pointer;
+            transition: all 0.2s ease;
+
+            &:first-child {
+              background: #F3F4F6;
+              color: #374151;
+
+              &:hover {
+                background: #E5E7EB;
+              }
+            }
+
+            &:last-child {
+              background: #2b85ff;
+              color: #ffffff;
+
+              &:hover {
+                background: #1a76f2;
+              }
+            }
           }
         }
       }

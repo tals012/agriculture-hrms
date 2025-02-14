@@ -6,6 +6,7 @@ import { usePathname, useRouter } from "next/navigation";
 import getProfile from "@/app/(backend)/actions/auth/getProfile";
 import { getCookie } from "@/lib/getCookie";
 import styles from "@/styles/layout/header.module.scss";
+import InitialsCircle from "@/components/initialsCircle";
 
 const Header = () => {
   const router = useRouter();
@@ -17,6 +18,7 @@ const Header = () => {
     router.push("/login");
   };
   const [role, setRole] = useState("");
+  const [name, setName] = useState("");
   const [loading, setLoading] = useState(true);
 
   // * fetch logged in user details
@@ -26,6 +28,7 @@ const Header = () => {
       const token = getCookie("token");
       const { data } = await getProfile({ token });
       setRole(data.role);
+      setName(data.name);
       setLoading(false);
     };
     fetchData();
@@ -111,13 +114,15 @@ const Header = () => {
               width={24}
               height={24}
             />
-            <Image
+            {/* <Image
               src="/assets/icons/user-1.jpg"
               alt="avatar"
               width={32}
               height={32}
               className={styles.avatar}
-            />
+            /> */}
+
+            <InitialsCircle name={name} />
 
             {isDropOpen && (
               <div className={styles.userDrop} onClick={handleLogout}>

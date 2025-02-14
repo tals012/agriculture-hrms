@@ -21,6 +21,7 @@ const Table = ({ data, setClientId }) => {
                 <th>סטטוס</th>
                 <th>תאריך פתיחה</th>
                 <th>תוקף רישיון</th>
+                <th></th>
               </tr>
             </thead>
 

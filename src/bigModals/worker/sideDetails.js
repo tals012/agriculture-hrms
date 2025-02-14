@@ -8,6 +8,7 @@ import Chip from "@/components/chip";
 import Spinner from "@/components/spinner";
 import updateWorker from "@/app/(backend)/actions/workers/updateWorker";
 import styles from "@/styles/bigModals/worker/sideDetails.module.scss";
+import InitialsCircle from "@/components/initialsCircle";
 
 const statusMap = {
   ACTIVE: "פעיל",
@@ -79,17 +80,28 @@ const SideDetails = ({
       }`}
     >
       <div className={styles.card}>
-        <Image
+        {/* <Image
           src="/assets/icons/user-1.jpg"
           alt="user"
           width={95}
           height={95}
+        /> */}
+        <InitialsCircle
+          name={data.nameHe + " " + data.surnameHe}
+          width={95}
+          height={95}
+          fontSize={20}
+          fontWeight={600}
+          lineHeight={24}
+          letterSpacing={-0.15}
+          textAlign="center"
         />
         <span className={styles.divider}></span>
         <div className={styles.text}>
-          <h4>{data.name} {data.surname}</h4>
           {data.nameHe && data.surnameHe && (
-            <p>{data.nameHe} {data.surnameHe}</p>
+            <h4>
+              {data.nameHe} {data.surnameHe}
+            </h4>
           )}
         </div>
       </div>
@@ -204,4 +216,4 @@ const SideDetails = ({
   );
 };
 
-export default SideDetails; 
+export default SideDetails;

@@ -7,6 +7,7 @@ import Chip from "@/components/chip";
 import Spinner from "@/components/spinner";
 import updateClient from "@/app/(backend)/actions/clients/updateClient";
 import styles from "@/styles/bigModals/client/sideDetails.module.scss";
+import InitialsCircle from "@/components/initialsCircle";
 
 const SideDetails = ({
   data,
@@ -52,11 +53,21 @@ const SideDetails = ({
       }`}
     >
       <div className={styles.card}>
-        <Image
+        {/* <Image
           src={data.logo || "/assets/icons/user-1.jpg"}
           alt="user"
           width={95}
           height={95}
+        /> */}
+        <InitialsCircle
+          name={data.name}
+          width={95}
+          height={95}
+          fontSize={20}
+          fontWeight={600}
+          lineHeight={24}
+          letterSpacing={-0.15}
+          textAlign="center"
         />
         <span className={styles.divider}></span>
         <div className={styles.text}>

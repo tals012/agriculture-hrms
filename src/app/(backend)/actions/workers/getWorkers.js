@@ -12,7 +12,9 @@ const getWorkers = async (filters = {}) => {
       where.AND.push({
         OR: [
           { name: { contains: filters.search, mode: "insensitive" } },
+          { nameHe: { contains: filters.search, mode: "insensitive" } },
           { surname: { contains: filters.search, mode: "insensitive" } },
+          { surnameHe: { contains: filters.search, mode: "insensitive" } },
           { primaryPhone: { contains: filters.search, mode: "insensitive" } },
           { secondaryPhone: { contains: filters.search, mode: "insensitive" } },
           { passport: { contains: filters.search, mode: "insensitive" } },
@@ -41,6 +43,12 @@ const getWorkers = async (filters = {}) => {
     }
     if (filters.status) {
       where.AND.push({ workerStatus: filters.status });
+    }
+
+    if (filters.passport?.trim()) {
+      where.AND.push({
+        passport: { contains: filters.passport, mode: "insensitive" },
+      });
     }
 
     const workers = await prisma.worker.findMany({

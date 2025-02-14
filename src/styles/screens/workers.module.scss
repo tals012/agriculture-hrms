@@ -10,16 +10,20 @@
 
       .filterBox {
         position: absolute;
+        display: flex;
+        flex-direction: column;
+        justify-content: center;
         right: 60px;
         width: 353px;
-        height: auto;
+        height: 380px;
+        padding-top: 25px;
         padding-bottom: 25px;
         border-radius: 6px;
         background: #ffffff;
         box-shadow: -10px 0px 106.9px 0px #00000033;
 
         .fields {
-          padding: 0px 35px;
+          padding: 0px 30px;
           display: flex;
           flex-direction: column;
           gap: 22px;
@@ -41,7 +45,7 @@
         }
 
         .btns {
-          padding: 0px 35px;
+          padding: 0px 30px;
           margin-top: 22px;
           display: flex;
           align-items: center;
