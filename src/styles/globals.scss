@@ -33,9 +33,11 @@ button,
 select,
 textarea {
   outline: none;
+  font-family: inherit;
 }
 
 button {
+  font-family: inherit;
   transition: all 250ms ease-in-out;
   cursor: pointer;
 
