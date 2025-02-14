@@ -4,7 +4,7 @@ import prisma from "@/lib/prisma";
 import { z } from "zod";
 
 const getPricingSchema = z.object({
-  groupId: z.string().min(1, "Group ID is required"),
+  groupId: z.string().min(1, "נדרש מזהה קבוצה"),
 });
 
 export const getPricing = async (filters = {}) => {
@@ -19,7 +19,7 @@ export const getPricing = async (filters = {}) => {
 
       return {
         status: 400,
-        message: "Invalid filters provided",
+        message: "הפילטרים שסופקו אינם תקינים",
         errors: formattedErrors,
         data: []
       };
@@ -60,15 +60,15 @@ export const getPricing = async (filters = {}) => {
 
     return {
       status: 200,
-      message: "Pricing combinations fetched successfully",
+      message: "צירופי המחירים נטענו בהצלחה",
       data: pricing
     };
 
   } catch (error) {
-    console.error("Error fetching pricing combinations:", error);
+    console.error("שגיאה בטעינת צירופי המחירים:", error);
     return {
       status: 500,
-      message: "Internal server error",
+      message: "שגיאת שרת פנימית",
       error: error.message,
       data: []
     };

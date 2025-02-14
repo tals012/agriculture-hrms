@@ -4,7 +4,7 @@ import prisma from "@/lib/prisma";
 import { z } from "zod";
 
 const getAvailableWorkersSchema = z.object({
-  clientId: z.string().min(1, "Client ID is required"),
+  clientId: z.string().min(1, "נדרש מזהה לקוח"),
   search: z.string().optional().nullable(),
 });
 
@@ -20,7 +20,7 @@ export const getAvailableWorkers = async (input = {}) => {
 
       return {
         status: 400,
-        message: "Invalid data provided",
+        message: "הנתונים שסופקו אינם תקינים",
         errors: formattedErrors,
         data: [],
       };

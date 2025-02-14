@@ -22,7 +22,7 @@ const getMonthlySalaryData = async (filters = {}) => {
 
       return {
         status: 400,
-        message: "Invalid filters provided",
+        message: "הפילטרים שסופקו אינם תקינים",
         errors: formattedErrors,
         data: []
       };

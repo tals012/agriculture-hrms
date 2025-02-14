@@ -13,7 +13,7 @@ const getAvailableWorkers = async (input) => {
     if (!parsedData.success) {
       return {
         status: 400,
-        message: "Invalid data provided",
+        message: "נתונים לא תקינים",
         errors: parsedData.error.issues,
       };
     }
@@ -36,14 +36,14 @@ const getAvailableWorkers = async (input) => {
     
     return {
       status: 200,
-      message: "Available workers fetched successfully",
+      message: "העובדים הזמינים נשלפו בהצלחה",
       data: workers,
     };
   } catch (error) {
-    console.error("Error fetching available workers:", error);
+    console.error("שגיאה בשליפת העובדים הזמינים:", error);
     return {
       status: 500,
-      message: "Internal server error",
+      message: "שגיאת שרת פנימית",
       data: null,
     };
   } finally {

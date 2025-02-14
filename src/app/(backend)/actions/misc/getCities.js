@@ -8,14 +8,14 @@ const getCities = async () => {
 
     return {
       status: 200,
-      message: "Cities fetched successfully",
+      message: "הערים נטענו בהצלחה",
       data: cities,
     };
   } catch (error) {
     console.log(error);
     return {
       status: 500,
-      message: "Internal server error",
+      message: "שגיאת שרת פנימית",
       data: null,
     };
   }

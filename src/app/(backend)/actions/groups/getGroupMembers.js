@@ -13,7 +13,7 @@ const getGroupMembers = async (input) => {
     if (!parsedData.success) {
       return {
         status: 400,
-        message: "Invalid data provided",
+        message: "נתונים לא תקינים",
         errors: parsedData.error.issues,
       };
     }
@@ -32,14 +32,14 @@ const getGroupMembers = async (input) => {
 
     return {
       status: 200,
-      message: "Group members fetched successfully",
+      message: "חברי הקבוצה נשלפו בהצלחה",
       data: groupMembers,
     };
   } catch (error) {
     console.error("Error fetching group members:", error);
     return {
       status: 500,
-      message: "Internal server error",
+      message: "שגיאת שרת פנימית",
       data: null,
     };
   } finally {

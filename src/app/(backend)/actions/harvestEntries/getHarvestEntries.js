@@ -16,7 +16,7 @@ export default async function getHarvestEntries({ payload }) {
     if (!validatedPayload.success) {
       return {
         status: 400,
-        message: "Invalid payload",
+        message: "נתונים לא חוקיים",
       };
     }
 
@@ -70,7 +70,7 @@ export default async function getHarvestEntries({ payload }) {
     console.log(error);
     return {
       status: 500,
-      message: "Internal server error",
+      message: "שגיאת שרת פנימית",
     };
   }
 } 

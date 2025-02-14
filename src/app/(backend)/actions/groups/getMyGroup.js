@@ -46,7 +46,7 @@ export const getMyGroup = async ({ userId }) => {
     if (!user || !user.worker) {
       return {
         status: 404,
-        message: "User or worker not found",
+        message: "משתמש או עובד לא נמצאו",
         data: null,
       };
     }
@@ -55,22 +55,22 @@ export const getMyGroup = async ({ userId }) => {
     if (!leaderGroup) {
       return {
         status: 404,
-        message: "No group found where user is leader",
+        message: "לא נמצאה קבוצה שבה המשתמש הוא מנהל",
         data: null,
       };
     }
 
     return {
       status: 200,
-      message: "Group data retrieved successfully",
+      message: "נתוני הקבוצה אוחזרו בהצלחה",
       data: leaderGroup.group,
     };
 
   } catch (error) {
-    console.error("Error getting group data:", error);
+    console.error("שגיאה באחזור נתוני הקבוצה:", error);
     return {
       status: 500,
-      message: "Internal server error",
+      message: "שגיאת שרת פנימית",
       error: error.message,
       data: null,
     };

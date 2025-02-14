@@ -25,11 +25,26 @@ const createClientSchema = z.object({
 
 const createClient = async ({ payload }) => {
   try {
-    const parsedData = createClientSchema.safeParse(payload);
-    if (!parsedData.success) {
+    if (!payload) {
       return {
         status: 400,
-        message: parsedData.error.errors.map((e) => e.message).join(", "),
+        message: "לא סופק מידע",
+        data: null,
+      };
+    }
+
+    const parsedData = createClientSchema.safeParse(payload);
+    
+    if (!parsedData.success) {
+      const formattedErrors = parsedData.error.issues.map(issue => ({
+        field: issue.path.join('.'),
+        message: issue.message
+      }));
+
+      return {
+        status: 400,
+        message: "אימות נכשל",
+        errors: formattedErrors,
         data: null,
       };
     }

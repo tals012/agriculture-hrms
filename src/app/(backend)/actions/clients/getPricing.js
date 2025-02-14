@@ -4,7 +4,7 @@ import prisma from "@/lib/prisma";
 import { z } from "zod";
 
 const getPricingSchema = z.object({
-  clientId: z.string().min(1, "Client ID is required"),
+  clientId: z.string().min(1, "נדרש מזהה לקוח"),
   search: z.string().optional(),
 });
 
@@ -20,7 +20,7 @@ export const getPricing = async (filters = {}) => {
 
       return {
         status: 400,
-        message: "Invalid filters provided",
+        message: "הנתונים שסופקו אינם תקינים",
         errors: formattedErrors,
         data: []
       };
@@ -79,7 +79,7 @@ export const getPricing = async (filters = {}) => {
 
     return {
       status: 200,
-      message: "Pricing combinations fetched successfully",
+      message: "תמחורים נשלפו בהצלחה",
       data: pricing
     };
 
@@ -87,7 +87,7 @@ export const getPricing = async (filters = {}) => {
     console.error("Error fetching pricing combinations:", error);
     return {
       status: 500,
-      message: "Internal server error",
+      message: "שגיאת שרת פנימית",
       error: error.message,
       data: []
     };

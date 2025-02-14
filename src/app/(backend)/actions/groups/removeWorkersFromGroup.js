@@ -14,7 +14,7 @@ const removeWorkersFromGroup = async (input) => {
     if (!parsedData.success) {
       return {
         status: 400,
-        message: "Invalid data provided",
+        message: "הנתונים שסופקו אינם תקינים",
         errors: parsedData.error.issues,
       };
     }
@@ -30,13 +30,13 @@ const removeWorkersFromGroup = async (input) => {
 
     return {
       status: 200,
-      message: "Workers removed from group successfully",
+      message: "העובדים הוסרו מהקבוצה בהצלחה",
     };
   } catch (error) {
-    console.error("Error removing workers from group:", error);
+    console.error("שגיאה בהסרת עובדים מהקבוצה:", error);
     return {
       status: 500,
-      message: "Internal server error",
+      message: "שגיאת שרת פנימית",
     };
   } finally {
     await prisma.$disconnect();

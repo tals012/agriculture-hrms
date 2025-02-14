@@ -21,7 +21,7 @@ const getFields = async (filters = {}) => {
 
       return {
         status: 400,
-        message: "Invalid filters provided",
+        message: "הנתונים שסופקו אינם תקינים",
         errors: formattedErrors,
         data: []
       };
@@ -93,7 +93,7 @@ const getFields = async (filters = {}) => {
 
     return {
       status: 200,
-      message: "השדות נטענו בהצלחה",
+      message: "שדות נשלפו בהצלחה",
       data: fields
     };
 

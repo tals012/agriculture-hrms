@@ -4,8 +4,8 @@ import prisma from "@/lib/prisma";
 import { z } from "zod";
 
 const endWorkerAssignmentSchema = z.object({
-  workerId: z.string().min(1, "Worker ID is required"),
-  clientId: z.string().min(1, "Client ID is required"),
+  workerId: z.string().min(1, "נדרש מזהה עובד"),
+  clientId: z.string().min(1, "נדרש מזהה לקוח"),
   endDate: z.union([z.string(), z.date()]).transform(val => new Date(val)),
 });
 
@@ -21,7 +21,7 @@ export const endWorkerAssignment = async (input) => {
 
       return {
         status: 400,
-        message: "Invalid data provided",
+        message: "אימות נכשל",
         errors: formattedErrors
       };
     }
@@ -60,14 +60,14 @@ export const endWorkerAssignment = async (input) => {
 
     return {
       status: 200,
-      message: "Worker assignment ended successfully"
+      message: "ההשתתפות בפרוייקט נסגרה בהצלחה"
     };
 
   } catch (error) {
     console.error("Error ending worker assignment:", error);
     return {
       status: 500,
-      message: "Internal server error",
+      message: "שגיאת שרת פנימית",
       error: error.message
     };
   }

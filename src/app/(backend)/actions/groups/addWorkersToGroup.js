@@ -3,8 +3,8 @@
 import prisma from "@/lib/prisma";
 import { z } from "zod";
 const schema = z.object({
-  groupId: z.string().min(1, "Group ID is required"),
-  workers: z.array(z.string()).min(1, "Workers are required"),
+  groupId: z.string().min(1, "נדרש מזהה קבוצה"),
+  workers: z.array(z.string()).min(1, "נדרשים עובדים"),
 });
 
 const addWorkersToGroup = async (input) => {
@@ -14,7 +14,7 @@ const addWorkersToGroup = async (input) => {
     if (!parsedData.success) {
       return {
         status: 400,
-        message: "Invalid data provided",
+        message: "הנתונים שסופקו אינם תקינים",
         errors: parsedData.error.issues,
       };
     }
@@ -30,14 +30,14 @@ const addWorkersToGroup = async (input) => {
 
     return {
       status: 200,
-      message: "Workers added to group successfully",
+      message: "העובדים נוספו לקבוצה בהצלחה",
     };
     
   } catch (error) {
     console.error("Error adding workers to group:", error);
     return {
       status: 500,
-      message: "Internal server error",
+      message: "שגיאת שרת פנימית",
     };
   } finally {
     await prisma.$disconnect();

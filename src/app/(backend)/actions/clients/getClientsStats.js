@@ -35,7 +35,7 @@ const getClientsStats = async () => {
 
     return {
       status: 200,
-      message: "Clients stats fetched successfully",
+        message: "נתוני לקוחות נשלפו בהצלחה",
       data: {
         totalClientsCount,
         newClientsCount,
@@ -47,7 +47,7 @@ const getClientsStats = async () => {
     console.error("Error fetching clients stats:", error);
     return {
       status: 500,
-      message: "Internal server error",
+      message: "שגיאת שרת פנימית",
       data: null,
     };
   } finally {

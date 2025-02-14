@@ -45,7 +45,7 @@ const getSchedule = async (input) => {
 
       return {
         status: 400,
-        message: "Invalid data provided",
+        message: "נתונים לא תקינים",
         errors: formattedErrors,
       };
     }
@@ -57,7 +57,7 @@ const getSchedule = async (input) => {
     if (!organization) {
       return {
         status: 404,
-        message: "Organization not found",
+        message: "הארגון לא נמצא",
       };
     }
 
@@ -86,7 +86,7 @@ const getSchedule = async (input) => {
     if (!schedule) {
       return {
         status: 404,
-        message: "No schedule found",
+        message: "לא נמצא לוח זמנים",
       };
     }
 
@@ -114,7 +114,7 @@ const getSchedule = async (input) => {
 
     return {
       status: 200,
-      message: "Schedule retrieved successfully",
+      message: "לוח הזמנים אוחזר בהצלחה",
       data: {
         schedule,
         dailySchedule,
@@ -129,10 +129,10 @@ const getSchedule = async (input) => {
       },
     };
   } catch (error) {
-    console.error("Error retrieving schedule:", error);
+    console.error("שגיאה באחזור לוח הזמנים:", error);
     return {
       status: 500,
-      message: "Internal server error",
+      message: "שגיאת שרת פנימית",
       error: error.message,
     };
   }

@@ -27,7 +27,7 @@ export const createGroup = async (input) => {
 
       return {
         status: 400,
-        message: "Invalid data provided",
+        message: "הנתונים שסופקו אינם תקינים",
         errors: formattedErrors,
       };
     }
@@ -49,7 +49,7 @@ export const createGroup = async (input) => {
     if (!field) {
       return {
         status: 404,
-        message: "Field not found",
+        message: "שדה לא נמצא",
       };
     }
 
@@ -81,7 +81,7 @@ export const createGroup = async (input) => {
       if (!worker) {
         return {
           status: 404,
-          message: "Leader worker not found",
+          message: "עובד מנהיג לא נמצא",
         };
       }
 
@@ -90,7 +90,7 @@ export const createGroup = async (input) => {
         if (!organization) {
           return {
             status: 404,
-            message: "No organization exists",
+            message: "ארגון לא נמצא",
           };
         }
 
@@ -185,14 +185,14 @@ export const createGroup = async (input) => {
 
     return {
       status: 201,
-      message: "Group created successfully",
+      message: "קבוצה נוצרה בהצלחה",
       data: result,
     };
   } catch (error) {
     console.error("Error creating group:", error);
     return {
       status: 500,
-      message: "Internal server error",
+      message: "שגיאת שרת פנימית",
       error: error.message,
     };
   }

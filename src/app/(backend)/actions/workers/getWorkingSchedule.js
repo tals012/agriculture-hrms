@@ -42,7 +42,7 @@ export async function getWorkingSchedule(input) {
 
       return {
         status: 400,
-        message: "Invalid data provided",
+        message: "נתונים לא תקינים",
         errors: formattedErrors,
       };
     }
@@ -54,7 +54,7 @@ export async function getWorkingSchedule(input) {
     if (!organization) {
       return {
         status: 404,
-        message: "Organization not found",
+        message: "הארגון לא נמצא",
       };
     }
 
@@ -79,7 +79,7 @@ export async function getWorkingSchedule(input) {
     if (!worker) {
       return {
         status: 404,
-        message: "Worker not found",
+        message: "העובד לא נמצא",
       };
     }
 
@@ -215,7 +215,7 @@ export async function getWorkingSchedule(input) {
     if (!schedule) {
       return {
         status: 404,
-        message: "No schedule found for this worker at any level (personal, group, field, client, or organization)",
+        message: "לא נמצא לוח זמנים עבור עובד זה בכל הרמות (אישי, קבוצה, שדה, לקוח או ארגון)",
       };
     }
 
@@ -279,7 +279,7 @@ export async function getWorkingSchedule(input) {
 
     return {
       status: 200,
-      message: "Schedule retrieved successfully",
+      message: "לוח הזמנים אוחזר בהצלחה",
       data: {
         schedule,
         dailySchedule,
@@ -307,7 +307,7 @@ export async function getWorkingSchedule(input) {
     console.error("Error retrieving working schedule:", error.stack);
     return {
       status: 500,
-      message: "Internal server error",
+      message: "שגיאת שרת פנימית",
       error: error.message,
     };
   }

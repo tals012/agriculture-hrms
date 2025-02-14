@@ -4,10 +4,10 @@ import prisma from "@/lib/prisma";
 import { z } from "zod";
 
 const updateClientSchema = z.object({
-  id: z.string(),
+  id: z.string().min(1, "נדרש מזהה לקוח"),
   name: z.string().optional(),
   nameEnglish: z.string().optional().nullable(),
-  email: z.string().email().optional().nullable(),
+  email: z.string().email("פורמט אימייל לא תקין").optional().nullable(),
   phone: z.string().optional().nullable(),
   secondaryPhone: z.string().optional().nullable(),
   logo: z.string().optional().nullable(),

@@ -20,7 +20,7 @@ const getGroupsStats = async () => {
 
     return {
       status: 200,
-      message: "Groups stats fetched successfully",
+      message: "נתוני הקבוצות נטענו בהצלחה",
       data: {
         totalGroupsCount,
         newGroupsCount,
@@ -30,7 +30,7 @@ const getGroupsStats = async () => {
     console.error("Error fetching groups stats:", error);
     return {
       status: 500,
-      message: "Internal server error",
+      message: "שגיאת שרת פנימית",
       data: null,
     };
   } finally {

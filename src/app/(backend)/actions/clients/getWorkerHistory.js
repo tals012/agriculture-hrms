@@ -4,10 +4,11 @@ import prisma from "@/lib/prisma";
 import { z } from "zod";
 
 const getWorkerHistorySchema = z.object({
-  clientId: z.string().min(1, "Client ID is required"),
+  clientId: z.string().min(1, "נדרש מזהה לקוח"),
+  search: z.string().optional(),
 });
 
-export const getWorkerHistory = async (input) => {
+export const getWorkerHistory = async (input = {}) => {
   try {
     const parsedData = getWorkerHistorySchema.safeParse(input);
 
@@ -19,9 +20,9 @@ export const getWorkerHistory = async (input) => {
 
       return {
         status: 400,
-        message: "Invalid data provided",
+        message: "הנתונים שסופקו אינם תקינים",
         errors: formattedErrors,
-        data: []
+        data: [],
       };
     }
 
@@ -47,7 +48,7 @@ export const getWorkerHistory = async (input) => {
 
     return {
       status: 200,
-      message: "Worker history fetched successfully",
+      message: "ההשתתפות בפרוייקט נשלפה בהצלחה",
       data: workerHistory
     };
 
@@ -55,7 +56,7 @@ export const getWorkerHistory = async (input) => {
     console.error("Error fetching worker history:", error);
     return {
       status: 500,
-      message: "Internal server error",
+      message: "שגיאת שרת פנימית",
       error: error.message,
       data: []
     };

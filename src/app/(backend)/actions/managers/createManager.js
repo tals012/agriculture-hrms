@@ -18,7 +18,7 @@ const createManager = async ({ payload }) => {
     if (!payload) {
       return {
         status: 400,
-        message: "No payload provided",
+        message: "לא סופק מידע",
         data: null,
       };
     }
@@ -33,7 +33,7 @@ const createManager = async ({ payload }) => {
 
       return {
         status: 400,
-        message: "Validation failed",
+        message: "האימות נכשל",
         errors: formattedErrors,
         data: null,
       };
@@ -53,7 +53,7 @@ const createManager = async ({ payload }) => {
     if (!client) {
       return {
         status: 404,
-        message: "Client not found",
+        message: "הלקוח לא נמצא",
         data: null,
       };
     }
@@ -65,7 +65,7 @@ const createManager = async ({ payload }) => {
     if (existingManager) {
       return {
         status: 409,
-        message: "Email already in use",
+        message: "כתובת האימייל כבר בשימוש",
         data: null,
       };
     }
@@ -87,7 +87,7 @@ const createManager = async ({ payload }) => {
     if (!organization) {
       return {
         status: 404,
-        message: "No organization exists",
+        message: "לא קיים ארגון",
         data: null,
       };
     }
@@ -129,7 +129,7 @@ const createManager = async ({ payload }) => {
 
     return {
       status: 201,
-      message: "Manager and user account created successfully",
+      message: "חשבון המנהל והמשתמש נוצרו בהצלחה",
       data: result.manager,
     };
 
@@ -139,14 +139,14 @@ const createManager = async ({ payload }) => {
     if (error.code === 'P2002') {
       return {
         status: 409,
-        message: "A unique constraint would be violated. The email or username might already be in use.",
+        message: "הפרה של אילוץ ייחודיות. ייתכן שהאימייל או שם המשתמש כבר בשימוש",
         data: null,
       };
     }
 
     return {
       status: 500,
-      message: "Internal server error",
+      message: "שגיאת שרת פנימית",
       error: error.message,
       data: null,
     };

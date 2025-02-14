@@ -20,7 +20,7 @@ const getManagers = async (filters = {}) => {
 
       return {
         status: 400,
-        message: "Invalid filters provided",
+        message: "הסינונים שסופקו אינם תקינים",
         errors: formattedErrors,
         data: []
       };
@@ -60,7 +60,7 @@ const getManagers = async (filters = {}) => {
 
     return {
       status: 200,
-      message: "Managers fetched successfully",
+      message: "המנהלים נשלפו בהצלחה",
       data: managers
     };
 
@@ -68,7 +68,7 @@ const getManagers = async (filters = {}) => {
     console.error("Error fetching managers:", error.stack);
     return {
       status: 500,
-      message: "Internal server error",
+      message: "שגיאת שרת פנימית",
       error: error.message,
       data: []
     };

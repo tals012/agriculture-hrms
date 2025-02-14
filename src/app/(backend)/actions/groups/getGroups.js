@@ -22,7 +22,7 @@ export const getGroups = async (input) => {
 
       return {
         status: 400,
-        message: "Invalid data provided",
+        message: "הנתונים שסופקו אינם תקינים",
         errors: formattedErrors,
         data: [],
       };

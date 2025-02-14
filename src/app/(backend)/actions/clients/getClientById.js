@@ -4,46 +4,57 @@ import prisma from "@/lib/prisma";
 import { z } from "zod";
 
 const getClientByIdSchema = z.object({
-  clientId: z.string(),
+  clientId: z.string().min(1, "נדרש מזהה לקוח"),
 });
 
 const getClientById = async ({ payload }) => {
   try {
-    const parsedData = getClientByIdSchema.safeParse(payload);
-    if (!parsedData.success) {
+    if (!payload) {
       return {
         status: 400,
-        message: parsedData.error.errors.map((e) => e.message).join(", "),
+        message: "לא סופק מידע",
         data: null,
       };
     }
 
-    const { clientId } = parsedData.data;
+    const parsedData = getClientByIdSchema.safeParse(payload);
+    
+    if (!parsedData.success) {
+      const formattedErrors = parsedData.error.issues.map(issue => ({
+        field: issue.path.join('.'),
+        message: issue.message
+      }));
+
+      return {
+        status: 400,
+        message: "אימות נכשל",
+        errors: formattedErrors,
+        data: null,
+      };
+    }
 
     const client = await prisma.client.findUnique({
-      where: { id: clientId },
-      include: {
-        city: true,
-      },
+      where: { id: parsedData.data.clientId },
     });
+
     if (!client) {
       return {
         status: 404,
-        message: "Client not found",
+        message: "הלקוח לא נמצא",
         data: null,
       };
     }
 
     return {
       status: 200,
-      message: "Client fetched successfully",
+      message: "לקוח נמצא בהצלחה",
       data: client,
     };
   } catch (error) {
     console.error("Error fetching client:", error);
     return {
       status: 500,
-      message: "Internal server error",
+      message: "שגיאת שרת פנימית",
       data: null,
     };
   }

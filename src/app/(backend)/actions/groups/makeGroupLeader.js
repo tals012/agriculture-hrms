@@ -18,7 +18,7 @@ const makeGroupLeader = async (input) => {
     if (!parsedData.success) {
       return {
         status: 400,
-        message: "Invalid data provided",
+        message: "הנתונים שסופקו אינם תקינים",
         errors: parsedData.error.issues,
       };
     }
@@ -141,7 +141,7 @@ const makeGroupLeader = async (input) => {
       message: "מנהל הקבוצה עודכן בהצלחה",
     };
   } catch (error) {
-    console.error("Error updating group leader:", error);
+    console.error("שגיאה בעדכון מנהל הקבוצה:", error);
     return {
       status: 500,
       message: error.message || "שגיאת שרת פנימית",

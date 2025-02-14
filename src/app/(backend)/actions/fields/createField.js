@@ -30,7 +30,7 @@ const createField = async ({ payload }) => {
     if (!payload) {
       return {
         status: 400,
-        message: "No payload provided",
+        message: "לא סופק מידע",
         data: null,
       };
     }
@@ -45,7 +45,7 @@ const createField = async ({ payload }) => {
 
       return {
         status: 400,
-        message: "Validation failed",
+        message: "אימות נכשל",
         errors: formattedErrors,
         data: null,
       };
@@ -58,7 +58,7 @@ const createField = async ({ payload }) => {
     if (!clientExists) {
       return {
         status: 404,
-        message: "Client not found",
+        message: "הלקוח לא נמצא",
         data: null,
       };
     }
@@ -72,7 +72,7 @@ const createField = async ({ payload }) => {
       if (!managerExists) {
         return {
           status: 404,
-          message: "Manager not found",
+          message: "המנהל לא נמצא",
           data: null,
         };
       }

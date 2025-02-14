@@ -20,7 +20,7 @@ export const deleteGroup = async (input) => {
 
       return {
         status: 400,
-        message: "Invalid data provided",
+        message: "הנתונים שסופקו אינם תקינים",
         errors: formattedErrors
       };
     }
@@ -45,7 +45,7 @@ export const deleteGroup = async (input) => {
     if (!group) {
       return {
         status: 404,
-        message: "Group not found or does not belong to this client"
+        message: "הקבוצה לא נמצאה או לא שייכת ללקוח זה"
       };
     }
 
@@ -53,7 +53,7 @@ export const deleteGroup = async (input) => {
     // if (group.clientPricingCombination.length > 0) {
     //   return {
     //     status: 400,
-    //     message: "Cannot delete group as it is being used in pricing combinations"
+    //     message: "לא ניתן למחוק את הקבוצה מכיוון שהיא בשימוש בשילובי תמחור"
     //   };
     // }
 
@@ -64,14 +64,14 @@ export const deleteGroup = async (input) => {
 
     return {
       status: 200,
-      message: "Group deleted successfully"
+      message: "הקבוצה נמחקה בהצלחה"
     };
 
   } catch (error) {
-    console.error("Error deleting group:", error);
+    console.error("שגיאה במחיקת הקבוצה:", error);
     return {
       status: 500,
-      message: "Internal server error",
+      message: "שגיאת שרת פנימית",
       error: error.message
     };
   }

@@ -4,14 +4,21 @@ import prisma from "@/lib/prisma";
 import { z } from "zod";
 
 const deletePricingSchema = z.object({
-  id: z.string().min(1, "Pricing ID is required"),
-  clientId: z.string().min(1, "Client ID is required"),
+  pricingId: z.string().min(1, "נדרש מזהה תמחור"),
 });
 
-const deletePricing = async (input) => {
+const deletePricing = async ({ payload }) => {
   try {
-    const parsedData = deletePricingSchema.safeParse(input);
+    if (!payload) {
+      return {
+        status: 400,
+        message: "לא סופק מידע",
+        data: null,
+      };
+    }
 
+    const parsedData = deletePricingSchema.safeParse(payload);
+    
     if (!parsedData.success) {
       const formattedErrors = parsedData.error.issues.map(issue => ({
         field: issue.path.join('.'),
@@ -20,41 +27,40 @@ const deletePricing = async (input) => {
 
       return {
         status: 400,
-        message: "Invalid data provided",
+        message: "אימות נכשל",
         errors: formattedErrors,
+        data: null,
       };
     }
 
-    const existingPricing = await prisma.clientPricingCombination.findFirst({
-      where: {
-        id: parsedData.data.id,
-        clientId: parsedData.data.clientId,
-      }
+    const pricing = await prisma.clientPricingCombination.findUnique({
+      where: { id: parsedData.data.pricingId },
     });
 
-    if (!existingPricing) {
+    if (!pricing) {
       return {
         status: 404,
-        message: "Pricing combination not found or doesn't belong to the client",
+        message: "התמחור לא נמצא",
+        data: null,
       };
     }
 
     await prisma.clientPricingCombination.delete({
       where: {
-        id: parsedData.data.id,
+        id: parsedData.data.pricingId,
       }
     });
 
     return {
       status: 200,
-      message: "Pricing combination deleted successfully",
+      message: "התמחור נמחק בהצלחה",
     };
 
   } catch (error) {
     console.error("Error deleting pricing combination:", error);
     return {
       status: 500,
-      message: "Internal server error",
+      message: "שגיאת שרת פנימית",
       error: error.message
     };
   }

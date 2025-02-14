@@ -48,7 +48,7 @@ const updateWorker = async ({ payload }) => {
     if (!payload) {
       return {
         status: 400,
-        message: "No payload provided",
+        message: "לא סופק מידע",
         data: null,
       };
     }
@@ -65,7 +65,7 @@ const updateWorker = async ({ payload }) => {
 
       return {
         status: 400,
-        message: "Validation failed",
+        message: "אימות נכשל",
         errors: formattedErrors,
         data: null,
       };
@@ -81,7 +81,7 @@ const updateWorker = async ({ payload }) => {
     if (!existingWorker) {
       return {
         status: 404,
-        message: "Worker not found",
+        message: "העובד לא נמצא",
         data: null,
       };
     }
@@ -100,7 +100,7 @@ const updateWorker = async ({ payload }) => {
       if (workerWithPassport) {
         return {
           status: 400,
-          message: "Worker with this passport already exists",
+          message: "קיים כבר עובד עם דרכון זה",
           data: null,
         };
       }
