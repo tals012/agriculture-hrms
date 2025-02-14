@@ -112,7 +112,7 @@ export default function CreatePricing({
             });
           });
         } else {
-          toast.error(res?.message || "Failed to create pricing combination", {
+          toast.error(res?.message || "יצירת התמחור נכשלה", {
             position: "top-center",
             autoClose: 3000,
           });
@@ -120,7 +120,7 @@ export default function CreatePricing({
       }
     } catch (error) {
       console.error("Error creating pricing combination:", error);
-      toast.error("Internal server error", {
+      toast.error("שגיאת שרת פנימית", {
         position: "top-center",
         autoClose: 3000,
       });

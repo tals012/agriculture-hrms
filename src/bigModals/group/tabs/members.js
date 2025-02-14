@@ -54,7 +54,7 @@ const Members = ({ groupId, members, onUpdate }) => {
       }
     } catch (error) {
       console.error("Error making group leader:", error);
-      toast.error("Failed to update group leader", {
+      toast.error("עדכון מנהל הקבוצה נכשל", {
         position: "top-center",
         autoClose: 3000,
       });
@@ -78,7 +78,7 @@ const Members = ({ groupId, members, onUpdate }) => {
       }
     } catch (error) {
       console.error("Error removing worker from group:", error);
-      toast.error("Failed to remove worker from group");
+      toast.error("הסרת העובד מהקבוצה נכשלה");
     } finally {
       setLoading(false);
     }

@@ -108,7 +108,7 @@ const createField = async ({ payload }) => {
 
     return {
       status: 201,
-      message: "Field created successfully",
+      message: "השדה נוצר בהצלחה",
       data: newField,
     };
 
@@ -116,7 +116,7 @@ const createField = async ({ payload }) => {
     console.error("Error creating field:", error);
     return {
       status: 500,
-      message: "Internal server error",
+      message: "שגיאת שרת פנימית",
       error: error.message,
       data: null,
     };

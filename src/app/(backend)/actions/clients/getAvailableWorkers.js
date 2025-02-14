@@ -73,14 +73,14 @@ export const getAvailableWorkers = async (input = {}) => {
 
     return {
       status: 200,
-      message: "Available workers fetched successfully",
+      message: "העובדים הזמינים נטענו בהצלחה",
       data: workers,
     };
   } catch (error) {
     console.error("Error fetching available workers:", error.stack);
     return {
       status: 500,
-      message: "Internal server error",
+      message: "שגיאת שרת פנימית",
       error: error.message,
       data: [],
     };

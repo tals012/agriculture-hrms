@@ -97,7 +97,7 @@ const getWorkingHours = async (input = {}) => {
 
     return {
       status: 200,
-      message: "Working hours fetched successfully",
+      message: "שעות העבודה נטענו בהצלחה",
       data: workingHours,
     };
 
@@ -105,7 +105,7 @@ const getWorkingHours = async (input = {}) => {
     console.error("Error fetching working hours:", error);
     return {
       status: 500,
-      message: "Internal server error",
+      message: "שגיאת שרת פנימית",
       error: error.message,
     };
   }

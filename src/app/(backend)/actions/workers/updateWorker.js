@@ -4,17 +4,17 @@ import prisma from "@/lib/prisma";
 import { z } from "zod";
 
 const updateWorkerSchema = z.object({
-  workerId: z.string().min(1, { message: "Worker ID is required" }),
-  name: z.string().optional(1, { message: "Name is required" }).nullable(),
+  workerId: z.string().min(1, { message: "נדרש מזהה עובד" }),
+  name: z.string().optional(1, { message: "נדרש שם" }).nullable(),
   surname: z.string().optional().nullable(),
   fatherName: z.string().optional().nullable(),
   motherName: z.string().optional().nullable(),
   nameSpouse: z.string().optional().nullable(),
   nameHe: z.string().optional().nullable(),
   surnameHe: z.string().optional().nullable(),
-  primaryPhone: z.string().optional(1, { message: "Primary phone is required" }).nullable(),
+  primaryPhone: z.string().optional(1, { message: "נדרש טלפון ראשי" }).nullable(),
   secondaryPhone: z.string().optional().nullable(),
-  email: z.string().email({ message: "Invalid email format" }).optional().nullable(),
+  email: z.string().email({ message: "פורמט אימייל לא תקין" }).optional().nullable(),
   address: z.string().optional().nullable(),
   sex: z.enum(["MALE", "FEMALE"]).optional().nullable(),
   birthday: z.coerce.date().optional().nullable(),
@@ -127,14 +127,14 @@ const updateWorker = async ({ payload }) => {
 
     return {
       status: 200,
-      message: "Worker updated successfully",
+      message: "העובד עודכן בהצלחה",
       data: updatedWorker,
     };
   } catch (error) {
     console.error("Error updating worker:", error.stack);
     return {
       status: 500,
-      message: "Internal server error",
+      message: "שגיאת שרת פנימית",
       error: error.message,
       data: null,
     };

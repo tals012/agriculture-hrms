@@ -4,7 +4,7 @@ import prisma from "@/lib/prisma";
 import { z } from "zod";
 
 const editWorkingHoursSchema = z.object({
-  id: z.string().min(1, "Worker attendance ID is required"),
+  id: z.string().min(1, "נדרש מזהה נוכחות עובד"),
   field: z.enum(['startTime', 'endTime', 'hoursWorked', 'totalWage', 'containersFilled']),
   value: z.union([z.string(), z.number(), z.date()]),
 });
@@ -21,7 +21,7 @@ const editWorkingHours = async (input) => {
 
       return {
         status: 400,
-        message: "Invalid data provided",
+        message: "הנתונים שסופקו אינם תקינים",
         errors: formattedErrors,
       };
     }
@@ -41,7 +41,7 @@ const editWorkingHours = async (input) => {
     if (!currentRecord) {
       return {
         status: 404,
-        message: "Worker attendance record not found",
+        message: "רשומת נוכחות העובד לא נמצאה",
       };
     }
 
@@ -120,7 +120,7 @@ const editWorkingHours = async (input) => {
 
     return {
       status: 200,
-      message: "Working hours updated successfully",
+      message: "שעות העבודה עודכנו בהצלחה",
       data: updatedRecord,
     };
 
@@ -128,7 +128,7 @@ const editWorkingHours = async (input) => {
     console.error("Error updating working hours:", error);
     return {
       status: 500,
-      message: "Internal server error",
+      message: "שגיאת שרת פנימית",
       error: error.message,
     };
   }

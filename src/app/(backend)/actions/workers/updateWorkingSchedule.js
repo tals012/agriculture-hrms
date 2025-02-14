@@ -4,7 +4,7 @@ import { z } from "zod";
 import prisma from "@/lib/prisma";
 
 const timeStringSchema = z.string().regex(/^\d{2}:\d{2}$/, {
-  message: "Time must be in HH:mm format",
+  message: "הזמן חייב להיות בפורמט HH:mm",
 });
 
 const updateWorkingScheduleSchema = z
@@ -114,7 +114,7 @@ const updateWorkingSchedule = async (input) => {
 
       return {
         status: 400,
-        message: "Invalid data provided",
+        message: "הנתונים שסופקו אינם תקינים",
         errors: formattedErrors,
       };
     }
@@ -145,7 +145,7 @@ const updateWorkingSchedule = async (input) => {
     if (existingRecord && existingRecord.status !== 'WORKING' && status === undefined) {
       return {
         status: 400,
-        message: "Cannot update fields when status is not WORKING",
+        message: "לא ניתן לעדכן שדות כאשר הסטטוס אינו 'עובד'",
       };
     }
 
@@ -162,7 +162,7 @@ const updateWorkingSchedule = async (input) => {
       if (!hasPricing || !hasContainers) {
         return {
           status: 400,
-          message: "Cannot update times without pricing combination and containers filled",
+          message: "לא ניתן לעדכן זמנים ללא תמחור ומכלים",
         };
       }
     }
@@ -171,7 +171,7 @@ const updateWorkingSchedule = async (input) => {
     if (!existingRecord && ((combinationId && !inputContainers) || (!combinationId && inputContainers))) {
       return {
         status: 400,
-        message: "Both pricing combination and containers filled must be provided together for new entries",
+        message: "נדרש לספק גם תמחור וגם מכלים עבור רשומות חדשות",
       };
     }
 
@@ -187,7 +187,7 @@ const updateWorkingSchedule = async (input) => {
       if (!combination) {
         return {
           status: 400,
-          message: "Invalid pricing combination ID",
+          message: "מזהה תמחור לא תקין",
         };
       }
     }
@@ -211,7 +211,7 @@ const updateWorkingSchedule = async (input) => {
     if (!worker) {
       return {
         status: 404,
-        message: "Worker not found",
+        message: "העובד לא נמצא",
       };
     }
 
@@ -223,7 +223,7 @@ const updateWorkingSchedule = async (input) => {
     if (!activeGroup) {
       return {
         status: 400,
-        message: "Worker must be assigned to a group",
+        message: "העובד חייב להיות משויך לקבוצה",
       };
     }
 
@@ -234,7 +234,7 @@ const updateWorkingSchedule = async (input) => {
     if (!containerNorm) {
       return {
         status: 400,
-        message: "No container norm found for worker's group or provided combination",
+        message: "לא נמצאה נורמת מכלים עבור קבוצת העובד או התמחור שסופק",
       };
     }
 
@@ -372,14 +372,14 @@ const updateWorkingSchedule = async (input) => {
 
     return {
       status: 200,
-      message: "Attendance record updated successfully",
+      message: "הנוכחות עודכנה בהצלחה",
       data: attendanceRecord,
     };
   } catch (error) {
     console.error("Error updating working schedule:", error.stack);
     return {
       status: 500,
-      message: "Internal server error",
+      message: "שגיאת שרת פנימית",
       error: error.message,
     };
   }

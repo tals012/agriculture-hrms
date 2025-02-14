@@ -31,7 +31,7 @@ const updateClient = async ({ payload }) => {
     if (!payload) {
       return {
         status: 400,
-        message: "No payload provided",
+        message: "לא סופק מידע",
         data: null,
       };
     }
@@ -46,7 +46,7 @@ const updateClient = async ({ payload }) => {
 
       return {
         status: 400,
-        message: "Validation failed",
+        message: "אימות נכשל",
         errors: formattedErrors,
         data: null,
       };
@@ -61,7 +61,7 @@ const updateClient = async ({ payload }) => {
     if (!clientExists) {
       return {
         status: 404,
-        message: "Client not found",
+        message: "הלקוח לא נמצא",
         data: null,
       };
     }
@@ -77,14 +77,14 @@ const updateClient = async ({ payload }) => {
 
     return {
       status: 200,
-      message: "Client updated successfully",
+      message: "הלקוח עודכן בהצלחה",
       data: updatedClient,
     };
   } catch (error) {
     if (error.code === 'P2002') {
       return {
         status: 409,
-        message: "A unique constraint would be violated. Check email or other unique fields.",
+        message: "קיימת התנגשות עם ערכים ייחודיים. בדוק את האימייל או שדות ייחודיים אחרים.",
         data: null,
       };
     }
@@ -92,7 +92,7 @@ const updateClient = async ({ payload }) => {
     console.error("Error updating client:", error);
     return {
       status: 500,
-      message: "Internal server error",
+      message: "שגיאת שרת פנימית",
       error: error.message,
       data: null,
     };

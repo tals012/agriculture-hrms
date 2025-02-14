@@ -221,7 +221,7 @@ export default function CreateGroup({ setModalOpen, setCreateStatus }) {
             });
           });
         } else {
-          toast.error(res?.message || "Failed to create group", {
+          toast.error(res?.message || "יצירת הקבוצה נכשלה", {
             position: "top-center",
             autoClose: 3000,
           });
@@ -229,7 +229,7 @@ export default function CreateGroup({ setModalOpen, setCreateStatus }) {
       }
     } catch (error) {
       console.error("Error creating group:", error);
-      toast.error("Failed to create group", {
+      toast.error("יצירת הקבוצה נכשלה", {
         position: "top-center",
         autoClose: 3000,
       });

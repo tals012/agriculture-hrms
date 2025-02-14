@@ -13,7 +13,7 @@ const assignField = async ({ payload }) => {
     if (!payload) {
       return {
         status: 400,
-        message: "No payload provided",
+        message: "לא סופק מידע",
         data: null,
       };
     }
@@ -28,7 +28,7 @@ const assignField = async ({ payload }) => {
 
       return {
         status: 400,
-        message: "Validation failed",
+        message: "אימות נכשל",
         errors: formattedErrors,
         data: null,
       };
@@ -41,7 +41,7 @@ const assignField = async ({ payload }) => {
     if (!manager) {
       return {
         status: 404,
-        message: "Manager not found",
+        message: "המנהל לא נמצא",
         data: null,
       };
     }
@@ -53,7 +53,7 @@ const assignField = async ({ payload }) => {
     if (!field) {
       return {
         status: 404,
-        message: "Field not found",
+        message: "השדה לא נמצא",
         data: null,
       };
     }
@@ -75,7 +75,7 @@ const assignField = async ({ payload }) => {
 
     return {
       status: 200,
-      message: "Field assigned successfully",
+      message: "השדה הוקצה בהצלחה",
       data: updatedField,
     };
 
@@ -83,7 +83,7 @@ const assignField = async ({ payload }) => {
     console.error("Error assigning field:", error);
     return {
       status: 500,
-      message: "Internal server error",
+      message: "שגיאת שרת פנימית",
       error: error.message,
       data: null,
     };

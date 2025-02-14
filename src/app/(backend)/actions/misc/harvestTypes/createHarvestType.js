@@ -4,7 +4,7 @@ import prisma from "@/lib/prisma";
 import { z } from "zod";
 
 const createHarvestTypeSchema = z.object({
-  name: z.string().min(1, "Name is required").max(100, "Name is too long"),
+  name: z.string().min(1, "נדרש שם").max(100, "השם ארוך מדי"),
 });
 
 export async function createHarvestType(input) {
@@ -16,7 +16,7 @@ export async function createHarvestType(input) {
     });
 
     if (!organization) {
-      throw new Error("No organization found");
+      throw new Error("לא נמצא ארגון");
     }
 
     const harvestType = await prisma.harvestType.create({

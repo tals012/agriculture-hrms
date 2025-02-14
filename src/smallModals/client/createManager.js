@@ -49,7 +49,7 @@ export default function CreateManager({ setModalOpen, setCreateStatus, clientId 
             });
           });
         } else {
-          toast.error(res?.message || "Failed to create manager", {
+          toast.error(res?.message || "יצירת המנהל נכשלה", {
             position: "top-center",
             autoClose: 3000,
           });
@@ -57,7 +57,7 @@ export default function CreateManager({ setModalOpen, setCreateStatus, clientId 
       }
     } catch (error) {
       console.error("Error creating manager:", error);
-      toast.error("Internal server error", {
+      toast.error("שגיאת שרת פנימית", {
         position: "top-center",
         autoClose: 3000,
       });

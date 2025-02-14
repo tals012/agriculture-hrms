@@ -59,7 +59,7 @@ export default function AddWorkersToGroup({
         }
       } catch (error) {
         console.error("Error fetching workers:", error);
-        toast.error("Failed to fetch workers", {
+        toast.error("טעינת העובדים נכשלה", {
           position: "top-center",
           autoClose: 3000,
         });
@@ -87,7 +87,7 @@ export default function AddWorkersToGroup({
       }
     } catch (error) {
       console.error("Error adding workers to group:", error);
-      toast.error("Failed to add workers to group");
+      toast.error("הוספת העובדים לקבוצה נכשלה");
     } finally {
       setLoading(false);
     }

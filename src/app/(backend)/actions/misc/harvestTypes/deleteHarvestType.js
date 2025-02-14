@@ -4,7 +4,7 @@ import prisma from "@/lib/prisma";
 import { z } from "zod";
 
 const deleteHarvestTypeSchema = z.object({
-  id: z.string().min(1, "Harvest Type ID is required"),
+  id: z.string().min(1, "נדרש מזהה סוג קציר"),
 });
 
 export async function deleteHarvestType(input) {
@@ -16,7 +16,7 @@ export async function deleteHarvestType(input) {
     });
 
     if (!organization) {
-      throw new Error("No organization found");
+      throw new Error("לא נמצא ארגון");
     }
 
     const existingHarvestType = await prisma.harvestType.findFirst({
@@ -27,7 +27,7 @@ export async function deleteHarvestType(input) {
     });
 
     if (!existingHarvestType) {
-      throw new Error("Harvest type not found or unauthorized");
+      throw new Error("סוג הקציר לא נמצא או אין הרשאה");
     }
 
     const harvests = await prisma.harvest.findFirst({
@@ -37,7 +37,7 @@ export async function deleteHarvestType(input) {
     });
 
     if (harvests) {
-      throw new Error("Cannot delete harvest type that is being used in harvests");
+      throw new Error("לא ניתן למחוק סוג קציר שנמצא בשימוש בקצירים");
     }
 
     const pricingCombinations = await prisma.clientPricingCombination.findFirst({
@@ -47,7 +47,7 @@ export async function deleteHarvestType(input) {
     });
 
     if (pricingCombinations) {
-      throw new Error("Cannot delete harvest type that is being used in pricing combinations");
+      throw new Error("לא ניתן למחוק סוג קציר שנמצא בשימוש בתמחורים");
     }
 
     await prisma.harvestType.delete({

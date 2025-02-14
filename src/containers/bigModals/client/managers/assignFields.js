@@ -53,7 +53,7 @@ const AssignFields = ({ clientId }) => {
 
   const handleAssign = async (fieldId) => {
     if (!selectedManager) {
-      toast.error("Please select a manager first", {
+      toast.error("אנא בחר מנהל תחילה", {
         position: "top-center",
       });
       return;
@@ -73,13 +73,13 @@ const AssignFields = ({ clientId }) => {
         });
         fetchFields(search);
       } else {
-        toast.error(res?.message || "Failed to assign field", {
+        toast.error(res?.message || "הקצאת השדה נכשלה", {
           position: "top-center",
         });
       }
     } catch (error) {
       console.error("Error assigning field:", error);
-      toast.error("Failed to assign field", {
+      toast.error("הקצאת השדה נכשלה", {
         position: "top-center",
       });
     }

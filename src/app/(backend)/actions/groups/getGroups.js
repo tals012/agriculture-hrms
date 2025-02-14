@@ -87,14 +87,14 @@ export const getGroups = async (input) => {
 
     return {
       status: 200,
-      message: "Groups fetched successfully",
+      message: "הקבוצות נטענו בהצלחה",
       data: groups,
     };
   } catch (error) {
     console.error("Error fetching groups:", error);
     return {
       status: 500,
-      message: "Internal server error",
+      message: "שגיאת שרת פנימית",
       error: error.message,
       data: [],
     };

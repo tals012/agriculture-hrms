@@ -4,10 +4,10 @@ import prisma from "@/lib/prisma";
 import { z } from "zod";
 
 const editGroupSchema = z.object({
-  id: z.string().min(1, "Group ID is required"),
-  name: z.string().min(1, "Name is required"),
+  id: z.string().min(1, "נדרש מזהה קבוצה"),
+  name: z.string().min(1, "נדרש שם"),
   description: z.string().optional(),
-  fieldId: z.string().min(1, "Field ID is required"),
+  fieldId: z.string().min(1, "נדרש מזהה שדה"),
 });
 
 export const editGroup = async (input) => {
@@ -22,7 +22,7 @@ export const editGroup = async (input) => {
 
       return {
         status: 400,
-        message: "Invalid data provided",
+        message: "הנתונים שסופקו אינם תקינים",
         errors: formattedErrors
       };
     }
@@ -42,7 +42,7 @@ export const editGroup = async (input) => {
     if (!existingGroup) {
       return {
         status: 404,
-        message: "Group not found"
+        message: "הקבוצה לא נמצאה"
       };
     }
 
@@ -57,7 +57,7 @@ export const editGroup = async (input) => {
     if (!field) {
       return {
         status: 404,
-        message: "Field not found or does not belong to this client"
+        message: "השדה לא נמצא או לא שייך ללקוח זה"
       };
     }
 
@@ -81,7 +81,7 @@ export const editGroup = async (input) => {
 
     return {
       status: 200,
-      message: "Group updated successfully",
+      message: "הקבוצה עודכנה בהצלחה",
       data: group
     };
 
@@ -89,7 +89,7 @@ export const editGroup = async (input) => {
     console.error("Error updating group:", error);
     return {
       status: 500,
-      message: "Internal server error",
+      message: "שגיאת שרת פנימית",
       error: error.message
     };
   }

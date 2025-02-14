@@ -58,6 +58,13 @@ const SideDetails = ({
           autoClose: 3000,
         });
       }
+
+      if (res.status === 500) {
+        toast.error("שגיאת שרת פנימית", {
+          position: "top-center",
+          autoClose: 3000,
+        });
+      }
     } catch (error) {
       console.log(error);
     } finally {

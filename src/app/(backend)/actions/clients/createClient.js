@@ -4,10 +4,10 @@ import prisma from "@/lib/prisma";
 import { z } from "zod";
 
 const createClientSchema = z.object({
-  name: z.string().min(1, { message: "Name is required" }),
+  name: z.string().min(1, { message: "שם נדרש" }),
   nameEnglish: z.string().optional(),
-  email: z.string().email({ message: "Invalid email format" }),
-  phone: z.string().min(1, { message: "Phone is required" }),
+  email: z.string().email({ message: "פורמט אימייל לא תקין" }),
+  phone: z.string().min(1, { message: "טלפון נדרש" }),
   secondaryPhone: z.string().optional(),
   logo: z.string().optional(),
   openingDate: z.date().optional(),
@@ -43,7 +43,7 @@ const createClient = async ({ payload }) => {
     if (client) {
       return {
         status: 200,
-        message: "Client already exists",
+        message: "לקוח כבר קיים במערכת",
         clientId: client.id,
       };
     }
@@ -57,14 +57,14 @@ const createClient = async ({ payload }) => {
 
     return {
       status: 201,
-      message: "Client created successfully",
+      message: "לקוח נוצר בהצלחה",
       clientId: newClient.id,
     };
   } catch (error) {
     console.error("Error creating client:", error);
     return {
       status: 500,
-      message: "Internal server error",
+      message: "שגיאת שרת פנימית",
     };
   }
 };

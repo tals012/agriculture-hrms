@@ -92,13 +92,13 @@ const ManagersTable = ({
         });
         debouncedFetchData(search);
       } else {
-        toast.error(res?.message || "Failed to delete manager", {
+        toast.error(res?.message || "מחיקת המנהל נכשלה", {
           position: "top-center",
         });
       }
     } catch (error) {
       console.error("Error deleting manager:", error);
-      toast.error("Failed to delete manager", {
+      toast.error("מחיקת המנהל נכשלה", {
         position: "top-center",
       });
     }

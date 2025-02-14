@@ -4,8 +4,8 @@ import prisma from "@/lib/prisma";
 import { z } from "zod";
 
 const editHarvestTypeSchema = z.object({
-  id: z.string().min(1, "Harvest Type ID is required"),
-  name: z.string().min(1, "Name is required").max(100, "Name is too long"),
+  id: z.string().min(1, "נדרש מזהה סוג קציר"),
+  name: z.string().min(1, "נדרש שם").max(100, "השם ארוך מדי"),
 });
 
 export async function editHarvestType(input) {
@@ -17,7 +17,7 @@ export async function editHarvestType(input) {
     });
 
     if (!organization) {
-      throw new Error("No organization found");
+      throw new Error("לא נמצא ארגון");
     }
 
     const existingHarvestType = await prisma.harvestType.findFirst({
@@ -28,7 +28,7 @@ export async function editHarvestType(input) {
     });
 
     if (!existingHarvestType) {
-      throw new Error("Harvest type not found or unauthorized");
+      throw new Error("סוג הקציר לא נמצא או אין הרשאה");
     }
 
     const harvestType = await prisma.harvestType.update({

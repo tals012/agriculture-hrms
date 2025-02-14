@@ -80,14 +80,14 @@ const getClients = async (filters = {}) => {
 
     return {
       status: 200,
-      message: "Clients fetched successfully",
+      message: "הלקוחות נטענו בהצלחה",
       data: clients,
     };
   } catch (error) {
     console.error("Error fetching clients:", error.stack);
     return {
       status: 500,
-      message: "Internal server error",
+      message: "שגיאת שרת פנימית",
       data: [],
     };
   }

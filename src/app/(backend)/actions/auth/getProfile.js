@@ -12,7 +12,7 @@ const getProfile = async ({ token }) => {
     if (!decoded) {
       return {
         status: 400,
-        message: "Invalid token",
+        message: "טוקן לא תקין",
         data: null,
       };
     }
@@ -46,14 +46,14 @@ const getProfile = async ({ token }) => {
 
     return {
       status: 200,
-      message: "Profile fetched successfully",
+      message: "הפרופיל נטען בהצלחה",
       data: user,
     };
   } catch (error) {
     console.error("Error fetching profile:", error);
     return {
       status: 500,
-      message: "Internal server error",
+      message: "שגיאת שרת פנימית",
       data: null,
     };
   }

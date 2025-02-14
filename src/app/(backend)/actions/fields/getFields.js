@@ -93,7 +93,7 @@ const getFields = async (filters = {}) => {
 
     return {
       status: 200,
-      message: "Fields fetched successfully",
+      message: "השדות נטענו בהצלחה",
       data: fields
     };
 
@@ -101,7 +101,7 @@ const getFields = async (filters = {}) => {
     console.error("Error fetching fields:", error);
     return {
       status: 500,
-      message: "Internal server error",
+      message: "שגיאת שרת פנימית",
       error: error.message,
       data: []
     };

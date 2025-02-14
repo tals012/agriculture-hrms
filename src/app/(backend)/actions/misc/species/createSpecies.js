@@ -4,7 +4,7 @@ import prisma from "@/lib/prisma";
 import { z } from "zod";
 
 const createSpeciesSchema = z.object({
-  name: z.string().min(1, "Name is required").max(100, "Name is too long"),
+  name: z.string().min(1, "נדרש שם").max(100, "השם ארוך מדי"),
 });
 
 export async function createSpecies(input) {
@@ -16,7 +16,7 @@ export async function createSpecies(input) {
     });
 
     if (!organization) {
-      throw new Error("No organization found");
+      throw new Error("לא נמצא ארגון");
     }
 
     const species = await prisma.species.create({

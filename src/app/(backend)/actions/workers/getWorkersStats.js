@@ -70,7 +70,7 @@ const getWorkersStats = async (clientId) => {
 
     return {
       status: 200,
-      message: "Workers stats fetched successfully",
+      message: "סטטיסטיקות העובדים נטענו בהצלחה",
       data: {
         totalWorkersCount,
         newWorkersCount,
@@ -86,7 +86,7 @@ const getWorkersStats = async (clientId) => {
     console.error("Error fetching workers stats:", error);
     return {
       status: 500,
-      message: "Internal server error",
+      message: "שגיאת שרת פנימית",
       data: null,
     };
   }

@@ -8,14 +8,14 @@ const getCountries = async () => {
 
     return {
       status: 200,
-      message: "Countries fetched successfully",
+      message: "המדינות נטענו בהצלחה",
       data: countries,
     };
   } catch (error) {
     console.log(error);
     return {
       status: 500,
-      message: "Internal server error",
+      message: "שגיאת שרת פנימית",
       data: null,
     };
   }

@@ -96,13 +96,13 @@ const FieldsTable = ({
         });
         debouncedFetchData(search);
       } else {
-        toast.error(res?.message || "Failed to delete field", {
+        toast.error(res?.message || "מחיקת השדה נכשלה", {
           position: "top-center",
         });
       }
     } catch (error) {
       console.error("Error deleting field:", error);
-      toast.error("Failed to delete field", {
+      toast.error("מחיקת השדה נכשלה", {
         position: "top-center",
       });
     }

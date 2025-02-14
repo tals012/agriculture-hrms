@@ -26,7 +26,7 @@ const generateSchedule = async (input) => {
 
       return {
         status: 400,
-        message: "Invalid data provided",
+        message: "הנתונים שסופקו אינם תקינים",
         errors: formattedErrors,
       };
     }
@@ -70,7 +70,7 @@ const generateSchedule = async (input) => {
     if (!organization) {
       return {
         status: 404,
-        message: "Organization not found",
+        message: "הארגון לא נמצא",
       };
     }
 
@@ -131,14 +131,14 @@ const generateSchedule = async (input) => {
 
     return {
       status: 200,
-      message: "Schedule generated successfully",
+      message: "לוח הזמנים נוצר בהצלחה",
       data: schedule,
     };
   } catch (error) {
     console.error("Error generating schedule:", error.stack);
     return {
       status: 500,
-      message: "Internal server error",
+      message: "שגיאת שרת פנימית",
       error: error.message,
     };
   }

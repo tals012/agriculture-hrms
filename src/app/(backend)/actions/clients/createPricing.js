@@ -5,11 +5,11 @@ import { z } from "zod";
 
 const createPricingSchema = z.object({
   name: z.string().optional(),
-  price: z.number().min(0, "Price must be a positive number"),
-  containerNorm: z.number().min(0, "Container norm must be a positive number").optional(),
-  harvestTypeId: z.string().min(1, "Harvest type is required"),
-  speciesId: z.string().min(1, "Species is required"),
-  clientId: z.string().min(1, "Client is required"),
+  price: z.number().min(0, "המחיר חייב להיות מספר חיובי"),
+  containerNorm: z.number().min(0, "נורמת המכלים חייבת להיות מספר חיובי").optional(),
+  harvestTypeId: z.string().min(1, "סוג הקטיף נדרש"),
+  speciesId: z.string().min(1, "זן נדרש"),
+  clientId: z.string().min(1, "לקוח נדרש"),
 });
 
 const createPricing = async (input) => {
@@ -24,7 +24,7 @@ const createPricing = async (input) => {
 
       return {
         status: 400,
-        message: "Invalid data provided",
+        message: "הנתונים שסופקו אינם תקינים",
         errors: formattedErrors,
       };
     }
@@ -36,7 +36,7 @@ const createPricing = async (input) => {
     if (!harvestType) {
       return {
         status: 404,
-        message: "Harvest type not found",
+        message: "סוג הקטיף לא נמצא",
       };
     }
 
@@ -47,7 +47,7 @@ const createPricing = async (input) => {
     if (!species) {
       return {
         status: 404,
-        message: "Species not found",
+        message: "הזן לא נמצא",
       };
     }
 
@@ -58,7 +58,7 @@ const createPricing = async (input) => {
     if (!client) {
       return {
         status: 404,
-        message: "Client not found",
+        message: "הלקוח לא נמצא",
       };
     }
 
@@ -73,7 +73,7 @@ const createPricing = async (input) => {
     if (existingCombination) {
       return {
         status: 400,
-        message: "A pricing combination with these parameters already exists",
+        message: "קיים כבר תמחור עם פרמטרים אלו",
       };
     }
 
@@ -104,7 +104,7 @@ const createPricing = async (input) => {
 
     return {
       status: 201,
-      message: "Pricing combination created successfully",
+      message: "התמחור נוצר בהצלחה",
       data: pricing
     };
 
@@ -112,7 +112,7 @@ const createPricing = async (input) => {
     console.error("Error creating pricing combination:", error);
     return {
       status: 500,
-      message: "Internal server error",
+      message: "שגיאת שרת פנימית",
       error: error.message
     };
   }

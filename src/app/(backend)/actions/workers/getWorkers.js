@@ -106,14 +106,14 @@ const getWorkers = async (filters = {}) => {
 
     return {
       status: 200,
-      message: "Workers fetched successfully",
+      message: "העובדים נטענו בהצלחה",
       data: workers,
     };
   } catch (error) {
     console.error("Error fetching workers:", error.stack);
     return {
       status: 500,
-      message: "Internal server error",
+      message: "שגיאת שרת פנימית",
       data: [],
     };
   }

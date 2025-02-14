@@ -187,14 +187,14 @@ const SideBox = () => {
         });
         // Optionally redirect or refresh data
       } else {
-        toast.error(response.message, {
+        toast.error("שגיאה ביצירת לוח הזמנים", {
           position: "top-center",
           autoClose: 3000,
         });
       }
     } catch (error) {
       console.error("Error generating schedule:", error);
-      toast.error("Error generating schedule", {
+      toast.error("שגיאה ביצירת לוח הזמנים", {
         position: "top-center",
         autoClose: 3000,
       });

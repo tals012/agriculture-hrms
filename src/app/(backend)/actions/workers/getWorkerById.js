@@ -4,7 +4,7 @@ import prisma from "@/lib/prisma";
 import { z } from "zod";
 
 const getWorkerByIdSchema = z.object({
-  workerId: z.string(),
+  workerId: z.string().min(1, "נדרש מזהה עובד"),
 });
 
 const getWorkerById = async ({ payload }) => {
@@ -13,7 +13,7 @@ const getWorkerById = async ({ payload }) => {
     if (!parsedData.success) {
       return {
         status: 400,
-        message: parsedData.error.errors.map((e) => e.message).join(", "),
+        message: "הנתונים שסופקו אינם תקינים",
         data: null,
       };
     }
@@ -90,21 +90,21 @@ const getWorkerById = async ({ payload }) => {
     if (!worker) {
       return {
         status: 404,
-        message: "Worker not found",
+        message: "העובד לא נמצא",
         data: null,
       };
     }
 
     return {
       status: 200,
-      message: "Worker fetched successfully",
+      message: "העובד נטען בהצלחה",
       data: worker,
     };
   } catch (error) {
     console.error("Error fetching worker:", error.stack);
     return {
       status: 500,
-      message: "Internal server error",
+      message: "שגיאת שרת פנימית",
       data: null,
     };
   }

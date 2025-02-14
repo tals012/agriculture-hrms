@@ -7,8 +7,8 @@ import bcrypt from "bcrypt";
 const SALT_ROUNDS = 10;
 
 const schema = z.object({
-  groupId: z.string().min(1, "Group ID is required"),
-  workerId: z.string().min(1, "Worker ID is required"),
+  groupId: z.string().min(1, "נדרש מזהה קבוצה"),
+  workerId: z.string().min(1, "נדרש מזהה עובד"),
 });
 
 const makeGroupLeader = async (input) => {
@@ -42,7 +42,7 @@ const makeGroupLeader = async (input) => {
       });
 
       if (!group) {
-        throw new Error("Group not found");
+        throw new Error("הקבוצה לא נמצאה");
       }
 
       const worker = await tx.worker.findUnique({
@@ -53,7 +53,7 @@ const makeGroupLeader = async (input) => {
       });
 
       if (!worker) {
-        throw new Error("Worker not found");
+        throw new Error("העובד לא נמצא");
       }
 
       const currentLeaders = group.members.filter(member => member.isGroupLeader);
@@ -78,7 +78,7 @@ const makeGroupLeader = async (input) => {
       if (!worker.userId) {
         const organization = await tx.organization.findFirst();
         if (!organization) {
-          throw new Error("No organization exists");
+          throw new Error("לא קיים ארגון");
         }
 
         const firstName = (worker.name || worker.nameHe || "user").split(' ')[0].toLowerCase();
@@ -138,13 +138,13 @@ const makeGroupLeader = async (input) => {
 
     return {
       status: 200,
-      message: "Group leader updated successfully",
+      message: "מנהל הקבוצה עודכן בהצלחה",
     };
   } catch (error) {
     console.error("Error updating group leader:", error);
     return {
       status: 500,
-      message: error.message || "Internal server error",
+      message: error.message || "שגיאת שרת פנימית",
       data: null,
     };
   } finally {

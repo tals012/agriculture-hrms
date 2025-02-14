@@ -4,7 +4,7 @@ import prisma from "@/lib/prisma";
 import { z } from "zod";
 
 const deleteSpeciesSchema = z.object({
-  id: z.string().min(1, "Species ID is required"),
+  id: z.string().min(1, "נדרש מזהה זן"),
 });
 
 export async function deleteSpecies(input) {
@@ -16,7 +16,7 @@ export async function deleteSpecies(input) {
     });
 
     if (!organization) {
-      throw new Error("No organization found");
+      throw new Error("לא נמצא ארגון");
     }
 
     const existingSpecies = await prisma.species.findFirst({
@@ -27,7 +27,7 @@ export async function deleteSpecies(input) {
     });
 
     if (!existingSpecies) {
-      throw new Error("Species not found or unauthorized");
+      throw new Error("הזן לא נמצא או אין הרשאה");
     }
 
     const harvests = await prisma.harvest.findFirst({
@@ -37,7 +37,7 @@ export async function deleteSpecies(input) {
     });
 
     if (harvests) {
-      throw new Error("Cannot delete species that is being used in harvests");
+      throw new Error("לא ניתן למחוק זן שנמצא בשימוש בקצירים");
     }
 
     const pricingCombinations = await prisma.clientPricingCombination.findFirst({
@@ -47,7 +47,7 @@ export async function deleteSpecies(input) {
     });
 
     if (pricingCombinations) {
-      throw new Error("Cannot delete species that is being used in pricing combinations");
+      throw new Error("לא ניתן למחוק זן שנמצא בשימוש בתמחורים");
     }
 
     await prisma.species.delete({

@@ -4,8 +4,8 @@ import prisma from "@/lib/prisma";
 import { z } from "zod";
 
 const assignWorkersSchema = z.object({
-  clientId: z.string().min(1, "Client ID is required"),
-  workerIds: z.array(z.string()).min(1, "At least one worker must be selected"),
+  clientId: z.string().min(1, "נדרש מזהה לקוח"),
+  workerIds: z.array(z.string()).min(1, "חובה לבחור לפחות עובד אחד"),
   startDate: z.union([z.string(), z.date()]).transform(val => new Date(val)),
   note: z.string().optional(),
 });
@@ -22,7 +22,7 @@ export const assignWorkers = async (input) => {
 
       return {
         status: 400,
-        message: "Invalid data provided",
+        message: "הנתונים שסופקו אינם תקינים",
         errors: formattedErrors
       };
     }
@@ -75,14 +75,14 @@ export const assignWorkers = async (input) => {
 
     return {
       status: 201,
-      message: "Workers assigned successfully"
+      message: "העובדים הוקצו בהצלחה"
     };
 
   } catch (error) {
-    console.error("Error assigning workers:", error.stack);
+    console.error("שגיאה בהקצאת עובדים:", error.stack);
     return {
       status: 500,
-      message: "Internal server error",
+      message: "שגיאת שרת פנימית",
       error: error.message
     };
   }

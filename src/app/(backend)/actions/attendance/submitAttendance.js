@@ -4,15 +4,15 @@ import prisma from "@/lib/prisma";
 import { z } from "zod";
 
 const submitAttendanceSchema = z.object({
-  administratorName: z.string().min(1, "Administrator name is required"),
+  administratorName: z.string().min(1, "נדרש שם מנהל"),
   date: z.date(),
-  combinationId: z.string().min(1, "Combination ID is required"),
+  combinationId: z.string().min(1, "נדרש מזהה תמחור"),
   issues: z.array(z.string()),
-  groupId: z.string().min(1, "Group ID is required"),
+  groupId: z.string().min(1, "נדרש מזהה קבוצה"),
   managerId: z.string().optional(),
   workersAttendance: z.array(z.object({
-    workerId: z.string().min(1, "Worker ID is required"),
-    containersFilled: z.number().min(0, "Containers filled must be a positive number"),
+    workerId: z.string().min(1, "נדרש מזהה עובד"),
+    containersFilled: z.number().min(0, "מספר המכלים חייב להיות מספר חיובי"),
   })),
 });
 
@@ -28,7 +28,7 @@ const submitAttendance = async (input) => {
 
       return {
         status: 400,
-        message: "Invalid data provided",
+        message: "הנתונים שסופקו אינם תקינים",
         errors: formattedErrors,
       };
     }
@@ -44,7 +44,7 @@ const submitAttendance = async (input) => {
     if (!group || !group.field) {
       return {
         status: 404,
-        message: "Group or associated field not found",
+        message: "הקבוצה או השדה המשויך לא נמצאו",
       };
     }
 
@@ -56,7 +56,7 @@ const submitAttendance = async (input) => {
     if (!pricingCombination) {
       return {
         status: 404,
-        message: "Pricing combination not found",
+        message: "תמחור לא נמצא",
       };
     }
 
@@ -79,10 +79,10 @@ const submitAttendance = async (input) => {
     if (invalidWorkerIds.length > 0) {
       return {
         status: 400,
-        message: "Some workers do not exist",
+        message: "חלק מהעובדים אינם קיימים",
         errors: invalidWorkerIds.map(id => ({
           field: 'workerId',
-          message: `Worker with ID ${id} not found`
+          message: `עובד עם מזהה ${id} לא נמצא`
         }))
       };
     }
@@ -202,7 +202,7 @@ const submitAttendance = async (input) => {
 
     return {
       status: 201,
-      message: "Attendance submitted successfully",
+      message: "הנוכחות נשמרה בהצלחה",
       data: attendance,
     };
 
@@ -210,7 +210,7 @@ const submitAttendance = async (input) => {
     console.error("Error submitting attendance:", error.stack);
     return {
       status: 500,
-      message: "Internal server error",
+      message: "שגיאת שרת פנימית",
       error: error.message,
     };
   }

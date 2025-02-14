@@ -4,7 +4,7 @@ import prisma from "@/lib/prisma";
 import { z } from "zod";
 
 const deleteManagerSchema = z.object({
-  managerId: z.string().min(1, "Manager ID is required"),
+  managerId: z.string().min(1, "נדרש מזהה מנהל"),
 });
 
 const deleteManager = async ({ payload }) => {
@@ -12,7 +12,7 @@ const deleteManager = async ({ payload }) => {
     if (!payload) {
       return {
         status: 400,
-        message: "No payload provided",
+        message: "לא סופק מידע",
         data: null,
       };
     }
@@ -27,7 +27,7 @@ const deleteManager = async ({ payload }) => {
 
       return {
         status: 400,
-        message: "Validation failed",
+        message: "אימות נכשל",
         errors: formattedErrors,
         data: null,
       };
@@ -43,7 +43,7 @@ const deleteManager = async ({ payload }) => {
     if (!manager) {
       return {
         status: 404,
-        message: "Manager not found",
+        message: "המנהל לא נמצא",
         data: null,
       };
     }
@@ -62,7 +62,7 @@ const deleteManager = async ({ payload }) => {
 
     return {
       status: 200,
-      message: "Manager and associated user account deleted successfully",
+      message: "המנהל וחשבון המשתמש המשויך נמחקו בהצלחה",
       data: null,
     };
 
@@ -72,14 +72,14 @@ const deleteManager = async ({ payload }) => {
     if (error.code === 'P2025') {
       return {
         status: 404,
-        message: "Manager not found or already deleted",
+        message: "המנהל לא נמצא או כבר נמחק",
         data: null,
       };
     }
 
     return {
       status: 500,
-      message: "Internal server error",
+      message: "שגיאת שרת פנימית",
       error: error.message,
       data: null,
     };

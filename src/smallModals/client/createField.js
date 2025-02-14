@@ -53,7 +53,7 @@ export default function CreateField({ setModalOpen, setCreateStatus, clientId })
             });
           });
         } else {
-          toast.error(res?.message || "Failed to create field", {
+          toast.error(res?.message || "יצירת השדה נכשלה", {
             position: "top-center",
             autoClose: 3000,
           });
@@ -61,7 +61,7 @@ export default function CreateField({ setModalOpen, setCreateStatus, clientId })
       }
     } catch (error) {
       console.error("Error creating field:", error);
-      toast.error("Internal server error", {
+      toast.error("שגיאת שרת פנימית", {
         position: "top-center",
         autoClose: 3000,
       });

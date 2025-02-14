@@ -4,8 +4,8 @@ import prisma from "@/lib/prisma";
 import { z } from "zod";
 
 const editSpeciesSchema = z.object({
-  id: z.string().min(1, "Species ID is required"),
-  name: z.string().min(1, "Name is required").max(100, "Name is too long"),
+  id: z.string().min(1, "נדרש מזהה זן"),
+  name: z.string().min(1, "נדרש שם").max(100, "השם ארוך מדי"),
 });
 
 export async function editSpecies(input) {
@@ -17,7 +17,7 @@ export async function editSpecies(input) {
     });
 
     if (!organization) {
-      throw new Error("No organization found");
+      throw new Error("לא נמצא ארגון");
     }
 
     const existingSpecies = await prisma.species.findFirst({
@@ -28,7 +28,7 @@ export async function editSpecies(input) {
     });
 
     if (!existingSpecies) {
-      throw new Error("Species not found or unauthorized");
+      throw new Error("הזן לא נמצא או אין הרשאה");
     }
 
     const species = await prisma.species.update({

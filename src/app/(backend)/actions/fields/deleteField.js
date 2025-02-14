@@ -4,7 +4,7 @@ import prisma from "@/lib/prisma";
 import { z } from "zod";
 
 const deleteFieldSchema = z.object({
-  fieldId: z.string().min(1, "Field ID is required"),
+  fieldId: z.string().min(1, "נדרש מזהה שדה"),
 });
 
 const deleteField = async ({ payload }) => {
@@ -12,7 +12,7 @@ const deleteField = async ({ payload }) => {
     if (!payload) {
       return {
         status: 400,
-        message: "No payload provided",
+        message: "לא סופק מידע",
         data: null,
       };
     }
@@ -27,7 +27,7 @@ const deleteField = async ({ payload }) => {
 
       return {
         status: 400,
-        message: "Validation failed",
+        message: "אימות נכשל",
         errors: formattedErrors,
         data: null,
       };
@@ -43,7 +43,7 @@ const deleteField = async ({ payload }) => {
     if (!fieldExists) {
       return {
         status: 404,
-        message: "Field not found",
+        message: "השדה לא נמצא",
         data: null,
       };
     }
@@ -54,7 +54,7 @@ const deleteField = async ({ payload }) => {
 
     return {
       status: 200,
-      message: "Field deleted successfully",
+      message: "השדה נמחק בהצלחה",
       data: null,
     };
 
@@ -64,14 +64,14 @@ const deleteField = async ({ payload }) => {
     if (error.code === 'P2025') {
       return {
         status: 404,
-        message: "Field not found or already deleted",
+        message: "השדה לא נמצא או כבר נמחק",
         data: null,
       };
     }
 
     return {
       status: 500,
-      message: "Internal server error",
+      message: "שגיאת שרת פנימית",
       error: error.message,
       data: null,
     };
