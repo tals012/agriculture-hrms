@@ -99,6 +99,19 @@
   }
 }
 
+.totalRow {
+  background-color: #F8FAFC;
+  font-weight: 600;
+  
+  td {
+    border-top: 2px solid #E2E8F0;
+  }
+  
+  &:hover {
+    background-color: #F8FAFC !important;
+  }
+}
+
 .status {
   display: inline-flex;
   align-items: center;

@@ -168,6 +168,7 @@ model Worker {
   attendance         WorkerAttendance[]
   workingSchedule    WorkingSchedule[]
   monthlySubmissions WorkerMonthlyWorkingHoursSubmission[]
+  dailyCalculations  WorkerDailySalaryCalculation[]
 
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
@@ -420,9 +421,10 @@ model ClientPricingCombination {
   clientId String
   client   Client @relation(fields: [clientId], references: [id])
 
-  groups           Group[]
+  groups            Group[]
   // attendance GroupAttendance[]
-  workerAttendance WorkerAttendance[]
+  workerAttendance  WorkerAttendance[]
+  dailyCalculations WorkerDailySalaryCalculation[]
 
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
@@ -506,6 +508,8 @@ model WorkerAttendance {
   leaderId String?
   leader   GroupMember? @relation(fields: [leaderId], references: [id])
 
+  dailyCalculations WorkerDailySalaryCalculation[]
+
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
 }
@@ -528,6 +532,62 @@ enum AttendanceDoneBy {
   ADMIN
   MANAGER
   LEADER
+}
+
+model WorkerDailySalaryCalculation {
+  id              String   @id @default(cuid())
+  calculationDate DateTime
+
+  // Base Data
+  containersFilled Float
+  containerNorm    Float
+  pricePerNorm     Float
+
+  // Window Breakdowns
+  containersWindow100 Float
+  containersWindow125 Float
+  containersWindow150 Float
+
+  // Money
+  baseSalary Float
+  totalBonus Float
+
+  // Status
+  status WorkerAttendanceStatus
+
+  // Relations
+  workerId String
+  worker   Worker @relation(fields: [workerId], references: [id], onDelete: Cascade)
+
+  monthlySubmissionId String
+  monthlySubmission   WorkerMonthlyWorkingHoursSubmission @relation(fields: [monthlySubmissionId], references: [id], onDelete: Cascade)
+
+  attendanceId String?
+  attendance   WorkerAttendance? @relation(fields: [attendanceId], references: [id], onDelete: SetNull)
+
+  combinationId String?
+  combination   ClientPricingCombination? @relation(fields: [combinationId], references: [id], onDelete: SetNull)
+
+  // Timestamps
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  // Unique constraints
+  @@unique([workerId, calculationDate])
+  @@unique([monthlySubmissionId, calculationDate])
+  // Indexes for common queries
+  @@index([workerId])
+  @@index([monthlySubmissionId])
+  @@index([calculationDate])
+  @@index([attendanceId])
+  @@index([combinationId])
+  @@index([workerId, calculationDate])
+  @@index([monthlySubmissionId, calculationDate])
+  @@index([workerId, status])
+  @@index([monthlySubmissionId, status])
+  @@index([workerId, monthlySubmissionId])
+  @@index([status, calculationDate])
+  @@index([workerId, status, calculationDate])
 }
 
 model WorkerMonthlyWorkingHoursSubmission {
@@ -560,7 +620,6 @@ model WorkerMonthlyWorkingHoursSubmission {
   window100Rate                             Float?
   window125Rate                             Float?
   window150Rate                             Float?
-  totalBonus                                Float?
   // salaryReceiptStatus                       SalaryReceiptStatus  @default(PENDING)
   salaryReceiptStatusUpdatedAt              DateTime? // for later use
   smsReminderSentAt                         DateTime? // for later use
@@ -585,6 +644,43 @@ model WorkerMonthlyWorkingHoursSubmission {
   worker                                    Worker         @relation(fields: [workerId], references: [id], onDelete: Cascade)
   workerId                                  String
   // salaryReceipt                             WorkerSalaryReceipt?
+
+  // New Container Fields
+  totalContainersFilled Float?
+  containersWindow100   Float?
+  containersWindow125   Float?
+  containersWindow150   Float?
+
+  // New Money Fields
+  totalBaseSalary Float?
+  totalBonus      Float?
+
+  // New Status Count Fields
+  totalDaysInMonth Int?
+  workingDays      Int?
+  sickDays         Int?
+  holidayDays      Int?
+  absentDays       Int?
+  dayOffDays       Int?
+  interVisaDays    Int?
+  accidentDays     Int?
+  personalDays     Int?
+
+  // New Percentage Fields
+  attendancePercentage Float?
+
+  // Relation to daily calculations
+  dailyCalculations WorkerDailySalaryCalculation[]
+
+  // Unique constraint
+  @@unique([workerId, monthYear])
+  // Indexes
+  @@index([workerId, monthYear])
+  @@index([workerId, firstDayOfMonth])
+  @@index([workerId, approvalStatus])
+  @@index([monthYear, approvalStatus])
+  @@index([firstDayOfMonth, approvalStatus])
+  @@index([workerId, isSentToSalarySystem])
 }
 
 enum ApprovalStatus {
