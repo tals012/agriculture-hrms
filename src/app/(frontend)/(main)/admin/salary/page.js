@@ -37,16 +37,14 @@ export default function Salary() {
             workers: response.data.map(worker => ({
               id: worker.worker.id,
               name: worker.worker.name,
-              totalContainers: worker.totalContainersFilled,
-              totalWage: worker.totalBaseSalary,
-              bonus: worker.totalBonus,
-              workedDays: worker.statusCounts.WORKING || 0,
-              sickDays: worker.statusCounts.SICK_LEAVE || 0,
-              attendancePercentage: worker.attendancePercentage,
-              // Container windows
-              containersWindow100: worker.containersWindow100,
-              containersWindow125: worker.containersWindow125,
-              containersWindow150: worker.containersWindow150,
+              totalContainers: worker.totalContainers || 0,
+              totalWage: worker.totalWage || 0,
+              bonus: worker.bonus || 0,
+              workedDays: worker.workedDays || 0,
+              sickDays: worker.sickDays || 0,
+              totalHours100: worker.totalHours100 || 0,
+              totalHours125: worker.totalHours125 || 0,
+              totalHours150: worker.totalHours150 || 0,
             }))
           }
         }));

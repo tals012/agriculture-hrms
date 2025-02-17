@@ -47,12 +47,30 @@
         alg: "HS256",
       })
       .setIssuedAt()
-      // .setExpirationTime(process.env.JWT_EXPIRATION_TIME) // token expiration time, e.g: "1 day"
+      .setExpirationTime("1d")
       .sign(jwtConfig.secret);
 
-    cookies().set("token", token);
-    cookies().set("role", user.role || "");
-    cookies().set("userId", user.id);
+    cookies().set("token", token, {
+      httpOnly: false,
+      secure: process.env.NODE_ENV === "production",
+      sameSite: "strict",
+      path: "/",
+      maxAge: 24 * 60 * 60
+    });
+    cookies().set("role", user.role || "", {
+      httpOnly: false,
+      secure: process.env.NODE_ENV === "production",
+      sameSite: "strict",
+      path: "/",
+      maxAge: 24 * 60 * 60
+    });
+    cookies().set("userId", user.id, {
+      httpOnly: false,
+      secure: process.env.NODE_ENV === "production",
+      sameSite: "strict",
+      path: "/",
+      maxAge: 24 * 60 * 60
+    });
 
     return {
       ok: true,

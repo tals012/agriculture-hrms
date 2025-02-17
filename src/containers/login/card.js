@@ -14,20 +14,6 @@ export default function Card() {
   const [username, setUsername] = useState("");
   const [password, setPassword] = useState("");
 
-  useEffect(() => {
-    let token = getCookie("token");
-    let role = getCookie("role");
-    if (token) {
-      if (role === "GROUP_LEADER") {
-        router.push("/group-leader/my-group");
-      } else if (role === "FIELD_MANAGER") {
-        router.push("/manager/my-fields");
-      } else {
-        router.push("/admin/clients");
-      }
-    }
-  }, []);
-
   const handleSubmit = async (e) => {
     e.preventDefault();
 

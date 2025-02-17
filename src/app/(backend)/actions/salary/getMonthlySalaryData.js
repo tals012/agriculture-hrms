@@ -14,7 +14,7 @@ const getMonthlySalaryDataSchema = z.object({
 
 async function getMonthlySalaryData(input) {
   try {
-    // Validate input
+    // * Validate input
     const parsedData = getMonthlySalaryDataSchema.safeParse(input);
     if (!parsedData.success) {
       return {
@@ -26,11 +26,11 @@ async function getMonthlySalaryData(input) {
 
     const { month, year, workerId, groupId, fieldId, clientId } = parsedData.data;
 
-    // Build the date range for the month
+    // * Build the date range for the month
     const startDate = new Date(Date.UTC(year, month - 1, 1, 0, 0, 0));
     const endDate = new Date(Date.UTC(year, month, 0, 23, 59, 59));
 
-    // Build worker filter based on input parameters
+    // * Build worker filter based on input parameters
     const workerFilter = {
       AND: [
         workerId ? { id: workerId } : {},
@@ -55,7 +55,7 @@ async function getMonthlySalaryData(input) {
       ]
     };
 
-    // 1. Get all relevant workers
+    // * 1. Get all relevant workers
     const workers = await prisma.worker.findMany({
       where: workerFilter,
       include: {
@@ -72,9 +72,9 @@ async function getMonthlySalaryData(input) {
       }
     });
 
-    // Process each worker
+    // * Process each worker
     const monthlyData = await Promise.all(workers.map(async (worker) => {
-      // 2. Get or create monthly submission
+      // * 2. Get or create monthly submission
       const monthYear = `${month}/${year}`;
       let monthlySubmission = await prisma.workerMonthlyWorkingHoursSubmission.findUnique({
         where: {
@@ -100,7 +100,7 @@ async function getMonthlySalaryData(input) {
         });
       }
 
-      // 3. Get attendance records for the month
+      // * 3. Get attendance records for the month
       const attendanceRecords = await prisma.workerAttendance.findMany({
         where: {
           workerId: worker.id,
@@ -117,7 +117,7 @@ async function getMonthlySalaryData(input) {
         }
       });
 
-      // 4. Calculate or update daily calculations
+      // * 4. Calculate or update daily calculations
       const dailyCalculations = await Promise.all(
         attendanceRecords.map(async (attendance) => {
           if (!attendance.combination) return null;
@@ -125,7 +125,7 @@ async function getMonthlySalaryData(input) {
           const calculationDate = new Date(attendance.attendanceDate);
           calculationDate.setUTCHours(0, 0, 0, 0);
 
-          // Calculate windows based on containers filled
+          // * Calculate windows based on containers filled
           const containersFilled = attendance.totalContainersFilled || 0;
           const containerNorm = attendance.combination.containerNorm || 0;
           const pricePerNorm = attendance.combination.price || 0;
@@ -138,13 +138,13 @@ async function getMonthlySalaryData(input) {
             ? containersFilled - (containerNorm * 1.25)
             : 0;
 
-          // Calculate salary and bonus
+          // * Calculate salary and bonus
           const baseSalary = (window100 / containerNorm) * pricePerNorm;
           const bonus125 = (window125 / containerNorm) * pricePerNorm * 1.25;
           const bonus150 = (window150 / containerNorm) * pricePerNorm * 1.5;
           const totalBonus = bonus125 + bonus150;
 
-          // Create or update daily calculation
+          // * Create or update daily calculation
           return await prisma.workerDailySalaryCalculation.upsert({
             where: {
               workerId_calculationDate: {
@@ -178,12 +178,15 @@ async function getMonthlySalaryData(input) {
               baseSalary,
               totalBonus,
               status: attendance.status
+            },
+            include: {
+              attendance: true
             }
           });
         })
       );
 
-      // 5. Calculate monthly totals
+      // * 5. Calculate monthly totals
       const validCalculations = dailyCalculations.filter(Boolean);
       const monthlyTotals = validCalculations.reduce((acc, calc) => ({
         totalContainersFilled: acc.totalContainersFilled + calc.containersFilled,
@@ -192,6 +195,9 @@ async function getMonthlySalaryData(input) {
         containersWindow150: acc.containersWindow150 + calc.containersWindow150,
         totalBaseSalary: acc.totalBaseSalary + calc.baseSalary,
         totalBonus: acc.totalBonus + calc.totalBonus,
+        totalMonthlyHours100: acc.totalMonthlyHours100 + (calc.attendance?.totalHoursWorkedWindow100 || 0),
+        totalMonthlyHours125: acc.totalMonthlyHours125 + (calc.attendance?.totalHoursWorkedWindow125 || 0),
+        totalMonthlyHours150: acc.totalMonthlyHours150 + (calc.attendance?.totalHoursWorkedWindow150 || 0),
       }), {
         totalContainersFilled: 0,
         containersWindow100: 0,
@@ -199,19 +205,30 @@ async function getMonthlySalaryData(input) {
         containersWindow150: 0,
         totalBaseSalary: 0,
         totalBonus: 0,
+        totalMonthlyHours100: 0,
+        totalMonthlyHours125: 0,
+        totalMonthlyHours150: 0,
       });
 
-      // Calculate status counts
+      // * Calculate status counts
       const statusCounts = attendanceRecords.reduce((acc, record) => {
         acc[record.status] = (acc[record.status] || 0) + 1;
         return acc;
       }, {});
 
-      // 6. Update monthly submission
+      // * 6. Update monthly submission
       await prisma.workerMonthlyWorkingHoursSubmission.update({
         where: { id: monthlySubmission.id },
         data: {
-          ...monthlyTotals,
+          totalContainersFilled: monthlyTotals.totalContainersFilled,
+          containersWindow100: monthlyTotals.containersWindow100,
+          containersWindow125: monthlyTotals.containersWindow125,
+          containersWindow150: monthlyTotals.containersWindow150,
+          totalBaseSalary: monthlyTotals.totalBaseSalary,
+          totalBonus: monthlyTotals.totalBonus,
+          totalMonthlyHours100: monthlyTotals.totalMonthlyHours100,
+          totalMonthlyHours125: monthlyTotals.totalMonthlyHours125,
+          totalMonthlyHours150: monthlyTotals.totalMonthlyHours150,
           workingDays: statusCounts.WORKING || 0,
           sickDays: statusCounts.SICK_LEAVE || 0,
           holidayDays: statusCounts.HOLIDAY || 0,
@@ -224,14 +241,30 @@ async function getMonthlySalaryData(input) {
         }
       });
 
+      // Calculate total hours from attendance records
+      const totalHours = attendanceRecords.reduce((acc, record) => ({
+        totalHours100: acc.totalHours100 + (record.totalHoursWorkedWindow100 || 0),
+        totalHours125: acc.totalHours125 + (record.totalHoursWorkedWindow125 || 0),
+        totalHours150: acc.totalHours150 + (record.totalHoursWorkedWindow150 || 0),
+      }), {
+        totalHours100: 0,
+        totalHours125: 0,
+        totalHours150: 0,
+      });
+
       return {
         worker: {
           id: worker.id,
           name: worker.nameHe,
         },
-        ...monthlyTotals,
-        statusCounts,
-        attendancePercentage: ((statusCounts.WORKING || 0) / endDate.getDate()) * 100
+        totalContainers: monthlyTotals.totalContainersFilled,
+        totalWage: monthlyTotals.totalBaseSalary,
+        bonus: monthlyTotals.totalBonus,
+        workedDays: statusCounts.WORKING || 0,
+        sickDays: statusCounts.SICK_LEAVE || 0,
+        totalHours100: totalHours.totalHours100,
+        totalHours125: totalHours.totalHours125,
+        totalHours150: totalHours.totalHours150,
       };
     }));
 

@@ -16,27 +16,10 @@ const formatNumber = (number, decimals = 2) => {
   return number.toFixed(decimals);
 };
 
-const formatPercentage = (value) => {
-  if (!value && value !== 0) return "-";
-  return `${value.toFixed(1)}%`;
-};
-
 const Table = memo(({ data }) => {
   if (!data?.workers?.length) return null;
 
-  const totals = data.workers.reduce(
-    (acc, worker) => ({
-      totalContainers: (acc.totalContainers || 0) + (worker.totalContainers || 0),
-      containersWindow100: (acc.containersWindow100 || 0) + (worker.containersWindow100 || 0),
-      containersWindow125: (acc.containersWindow125 || 0) + (worker.containersWindow125 || 0),
-      containersWindow150: (acc.containersWindow150 || 0) + (worker.containersWindow150 || 0),
-      totalWage: (acc.totalWage || 0) + (worker.totalWage || 0),
-      bonus: (acc.bonus || 0) + (worker.bonus || 0),
-      workedDays: (acc.workedDays || 0) + (worker.workedDays || 0),
-      sickDays: (acc.sickDays || 0) + (worker.sickDays || 0),
-    }),
-    {}
-  );
+  console.log(data, "salary data");
 
   return (
     <div className={styles.container}>
@@ -47,11 +30,10 @@ const Table = memo(({ data }) => {
               <th>שם העובד</th>
               <th>ימי עבודה</th>
               <th>ימי מחלה</th>
-              {/* <th>אחוז נוכחות</th> */}
               <th>סה״כ מיכלים</th>
-              <th>מיכלים 100%</th>
-              <th>מיכלים 125%</th>
-              <th>מיכלים 150%</th>
+              <th>שעות רגילות</th>
+              <th>שעות נוספות 125%</th>
+              <th>שעות נוספות 150%</th>
               <th>שכר בסיס</th>
               <th>בונוס</th>
               <th>סה״כ שכר</th>
@@ -63,29 +45,15 @@ const Table = memo(({ data }) => {
                 <td>{worker.name}</td>
                 <td>{worker.workedDays || "-"}</td>
                 <td>{worker.sickDays || "-"}</td>
-                {/* <td>{formatPercentage(worker.attendancePercentage)}</td> */}
                 <td>{formatNumber(worker.totalContainers, 0)}</td>
-                <td>{formatNumber(worker.containersWindow100, 0)}</td>
-                <td>{formatNumber(worker.containersWindow125, 0)}</td>
-                <td>{formatNumber(worker.containersWindow150, 0)}</td>
+                <td>{formatNumber(worker.totalHours100, 2)}</td>
+                <td>{formatNumber(worker.totalHours125, 2)}</td>
+                <td>{formatNumber(worker.totalHours150, 2)}</td>
                 <td>{formatCurrency(worker.totalWage)}</td>
                 <td>{formatCurrency(worker.bonus)}</td>
                 <td>{formatCurrency((worker.totalWage || 0) + (worker.bonus || 0))}</td>
               </tr>
             ))}
-            <tr className={styles.totalRow}>
-              <td>סה״כ</td>
-              <td>{totals.workedDays || "-"}</td>
-              <td>{totals.sickDays || "-"}</td>
-              {/* <td>-</td> */}
-              <td>{formatNumber(totals.totalContainers, 0)}</td>
-              <td>{formatNumber(totals.containersWindow100, 0)}</td>
-              <td>{formatNumber(totals.containersWindow125, 0)}</td>
-              <td>{formatNumber(totals.containersWindow150, 0)}</td>
-              <td>{formatCurrency(totals.totalWage)}</td>
-              <td>{formatCurrency(totals.bonus)}</td>
-              <td>{formatCurrency((totals.totalWage || 0) + (totals.bonus || 0))}</td>
-            </tr>
           </tbody>
         </table>
       </div>

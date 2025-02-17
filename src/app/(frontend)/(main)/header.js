@@ -15,6 +15,7 @@ const Header = () => {
   const handleLogout = () => {
     document.cookie = "token=; Path=/; Expires=Thu, 01 Jan 1970 00:00:01 GMT;";
     document.cookie = "role=; Path=/; Expires=Thu, 01 Jan 1970 00:00:01 GMT;";
+    document.cookie = "userId=; Path=/; Expires=Thu, 01 Jan 1970 00:00:01 GMT;";
     router.push("/login");
   };
   const [role, setRole] = useState("");
@@ -24,18 +25,56 @@ const Header = () => {
   // * fetch logged in user details
   useEffect(() => {
     const fetchData = async () => {
-      setLoading(true);
-      const token = getCookie("token");
-      const { data } = await getProfile({ token });
-      setRole(data.role);
-      setName(data.name);
-      setLoading(false);
+      try {
+        setLoading(true);
+        const token = getCookie("token");
+        console.log("Token from cookie:", token); // Debug token
+
+        if (!token) {
+          console.log("No token found, redirecting to login");
+          router.push("/login");
+          return;
+        }
+
+        console.log("Calling getProfile with token");
+        const response = await getProfile({ token });
+        console.log("getProfile response:", response);
+
+        if (response?.status === 200 && response?.data) {
+          console.log("Setting user data:", response.data);
+          setRole(response.data.role);
+          setName(response.data.name);
+        } else {
+          console.log("Invalid response:", response);
+          router.push("/login");
+        }
+      } catch (error) {
+        console.error("Error in fetchData:", error);
+        router.push("/login");
+      } finally {
+        setLoading(false);
+      }
     };
+
     fetchData();
-  }, []);
+  }, [router]); // Add router to dependencies
 
   if (loading) {
-    return;
+    return (
+      <header className={styles.container}>
+        <div className={styles.wrapper}>
+          <div className={styles.right}>
+            <Image
+              src="/assets/icons/logowave.png"
+              alt="logo"
+              width={130}
+              height={50}
+              className={styles.logo}
+            />
+          </div>
+        </div>
+      </header>
+    );
   }
 
   return (
@@ -83,6 +122,42 @@ const Header = () => {
                 </li>
               </Link> */}
 
+              <Link href="/admin/groups">
+                <li
+                  className={pathname === "/admin/groups" ? styles.active : ""}
+                >
+                  קבוצות
+                </li>
+              </Link>
+
+              <Link href="/admin/schedule-builder">
+                <li
+                  className={
+                    pathname === "/admin/schedule-builder" ? styles.active : ""
+                  }
+                >
+                  בנאי תיאורית
+                </li>
+              </Link>
+
+              <Link href="/admin/working-hours">
+                <li
+                  className={
+                    pathname === "/admin/working-hours" ? styles.active : ""
+                  }
+                >
+                  שעות עבודה
+                </li>
+              </Link>
+
+              <Link href="/admin/salary">
+                <li
+                  className={pathname === "/admin/salary" ? styles.active : ""}
+                >
+                  שכר
+                </li>
+              </Link>
+
               <Link href="/admin/settings">
                 <li
                   className={
@@ -90,13 +165,6 @@ const Header = () => {
                   }
                 >
                   הגדרות
-                </li>
-              </Link>
-              <Link href="/admin/groups">
-                <li
-                  className={pathname === "/admin/groups" ? styles.active : ""}
-                >
-                  קבוצות
                 </li>
               </Link>
             </ul>
