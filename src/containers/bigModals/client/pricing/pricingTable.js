@@ -147,7 +147,7 @@ const PricingTable = ({
             {data.length === 0 && (
               <tr>
                 <td colSpan="6" style={{ textAlign: "center" }}>
-                  <p>No pricing combinations found</p>
+                  <p>לא נמצאו שילובי תמחורים</p>
                 </td>
               </tr>
             )}
