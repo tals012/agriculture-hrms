@@ -53,59 +53,38 @@ const getFields = async (filters = {}) => {
       where: where.AND.length > 0 ? where : {},
       select: {
         id: true,
-        serialNumber: true,
         name: true,
         typeOfProduct: true,
         contactPhone: true,
         contactPersonName: true,
-        additionalPhone: true,
-        withholdingAccountNumber: true,
         address: true,
-        fieldTax: true,
-        fieldCode: true,
-        size: true,
         status: true,
-        latitude: true,
-        longitude: true,
-        fieldOpenTime: true,
-        fieldCloseTime: true,
-        note: true,
-        cityId: true,
+        createdAt: true,
         city: {
           select: {
-            nameInHebrew: true,
-          }
-        },
-        manager: {
-          select: {
             id: true,
-            name: true,
-          }
+            nameInHebrew: true,
+          },
         },
-        harvests: true,
-        createdAt: true,
-        updatedAt: true,
       },
       orderBy: {
-        serialNumber: 'asc'
-      }
+        createdAt: "desc",
+      },
     });
 
     return {
       status: 200,
-      message: "שדות נשלפו בהצלחה",
-      data: fields
+      message: "השדות נטענו בהצלחה",
+      data: fields,
     };
-
   } catch (error) {
     console.error("Error fetching fields:", error);
     return {
       status: 500,
       message: "שגיאת שרת פנימית",
-      error: error.message,
-      data: []
+      data: [],
     };
   }
-}; 
+};
 
 export default getFields;

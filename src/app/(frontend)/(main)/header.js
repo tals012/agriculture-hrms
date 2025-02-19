@@ -136,7 +136,7 @@ const Header = () => {
                     pathname === "/admin/schedule-builder" ? styles.active : ""
                   }
                 >
-                  בנאי תיאורית
+                  בונה הגדרות יומן נוכחות
                 </li>
               </Link>
 

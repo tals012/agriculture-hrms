@@ -40,7 +40,7 @@ export default function WorkingHours() {
   }, []);
 
   const handleDataUpdate = useCallback(async (updatedData) => {
-    if (state.currentWorkerId) {
+    if (!state.loading && state.currentWorkerId) {
       const currentDate = new Date();
       await handleFilterChange({
         workerId: state.currentWorkerId,
@@ -48,7 +48,7 @@ export default function WorkingHours() {
         year: currentDate.getFullYear(),
       });
     }
-  }, [state.currentWorkerId, handleFilterChange]);
+  }, [state.currentWorkerId, state.loading, handleFilterChange]);
 
   const tableProps = useMemo(() => ({
     data: state.scheduleData,

@@ -9,7 +9,7 @@ import Spinner from "@/components/spinner";
 import { debounce } from "@/lib/debounce";
 import { useRouter } from "next/navigation";
 import { getCookie } from "@/lib/getCookie";
-import { getGroups } from "@/app/(backend)/actions/groups/getGroups";
+import getGroups from "@/app/(backend)/actions/groups/getGroups";
 import getGroupsStats from "@/app/(backend)/actions/groups/getGroupsStats";
 import getClients from "@/app/(backend)/actions/clients/getClients";
 import getFields from "@/app/(backend)/actions/fields/getFields";

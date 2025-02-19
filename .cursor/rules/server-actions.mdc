@@ -1,0 +1,175 @@
+---
+description: These rules govern how server actions and related modules should be written, validated, and maintained. Following these guidelines helps ensure consistent, secure, and performant back-end functionality.
+globs: *.js
+---
+
+```markdown
+# Cursor Project Rules
+
+These rules govern how server actions and related modules should be written, validated, and maintained. Following these guidelines helps ensure consistent, secure, and performant back-end functionality.
+
+---
+[prisma.js](mdc:src/lib/prisma.js) תמיד להתיחס ל
+
+## 1. Server Action Structure
+
+All server actions should:
+
+```js
+"use server";
+import prisma from "@/lib/prisma";
+import { z } from "zod";
+import formatZodErrors from "@/lib/formatZodErrors"; // or your local helper
+
+// 1. Define the Zod schema
+const actionSchema = z.object({
+  // example: field: z.string().min(1, "שדה זה הוא חובה")
+});
+
+// 2. Main action function
+export const someAction = async (input) => {
+  try {
+    // 3. Validate input
+    const parsedData = actionSchema.safeParse(input);
+    if (!parsedData.success) {
+      return {
+        status: 400,
+        message: "המידע שהוזן אינו תקין",
+        errors: formatZodErrors(parsedData.error),
+      };
+    }
+
+    // 4. Business logic & DB operations
+    const result = await prisma.someModel.someOperation({
+      // ...
+    });
+
+    // 5. Return success response (Hebrew messages)
+    return {
+      status: 200,
+      message: "בקשה בוצעה בהצלחה",
+      data: result,
+    };
+
+  } catch (error) {
+    // 6. Error handling
+    console.error(`Error in someAction:`, error);
+    return {
+      status: 500,
+      message: "שגיאת שרת פנימית",
+      error: error.message,
+    };
+  }
+};
+```
+
+### 1.1 Response Object
+
+All server actions must return:
+
+---
+
+## 2. Data Validation Rules
+
+- **Zod for Validation**:  
+  - All fields must be defined in a Zod schema.  
+  - Required fields use `.min(1, "שדה זה הוא חובה")` or `.nonempty("...")`.  
+  - Optional fields use `.optional()`.  
+  - Numeric fields should have `.min(0, "הערך חייב להיות חיובי")` if needed.  
+  - Enums must be declared with `z.enum(...)` to restrict values.  
+
+- **Date Handling**:  
+  - Use `z.date()` or transform strings to `Date` objects:  
+    ```js
+    z.string().transform((val) => new Date(val))
+    ```
+
+---
+
+## 3. Database Operations
+
+- **Transactions**: Wrap related operations in `prisma.$transaction([...])` to maintain data integrity.  
+- **Entity Existence**: Always verify that relevant entities exist before performing further actions:
+  ```js
+  const entity = await prisma.model.findFirst({
+    where: { id: input.id, clientId: input.clientId },
+  });
+  if (!entity) {
+    return { status: 404, message: "לא נמצא" };
+  }
+  ```
+- **Selective Fields**: Use `select` to fetch only the fields needed.  
+- **Relations**: Use `include` only if you absolutely need related data to reduce unnecessary payload.
+
+---
+
+## 4. Error Handling & Messages
+
+1. **Hebrew Messages**: All user-facing errors, warnings, and success messages must be in Hebrew.  
+2. **Technical Logging**: Use `console.error` for internal logs and avoid exposing stack traces or internal details in the response.  
+3. **Validation Errors**: Map Zod errors to a structured array of `{ field, message }` for each invalid field.  
+4. **Status Codes**:  
+   - **200 / 201**: Success  
+   - **400**: Validation error or bad input  
+   - **404**: Resource not found  
+   - **500**: Server/internal errors  
+
+---
+
+## 5. Security Practices
+
+- **Ownership & Permissions**: Verify that the requesting user or client has permission to access or modify the entity.  
+- **Relationship Validation**: Ensure that requested entities belong to the correct parent or user.  
+- **Sanitization**: Rely on Zod to sanitize and validate input data; never trust raw user input.
+
+---
+
+## 6. Performance Considerations
+
+- **Minimal Queries**: Use `select` to reduce data transfer.  
+- **Efficient Lookups**: Keep frequently filtered fields indexed in the database (handled in migrations).  
+- **Transaction Batching**: Bundle multiple writes into a single `prisma.$transaction([...])` to reduce round trips.
+
+---
+
+## 7. Common Patterns
+
+1. **Formatting Zod Errors**  
+   ```js
+   const formattedErrors = error.issues.map((issue) => ({
+     field: issue.path.join("."),
+     message: issue.message,
+   }));
+   ```
+
+2. **Entity Existence Check**  
+   ```js
+   const entity = await prisma.model.findFirst({
+     where: { id: input.id, clientId: input.clientId },
+   });
+   if (!entity) {
+     return { status: 404, message: "לא נמצא" };
+   }
+   ```
+
+3. **Disconnect (If Needed)**  
+   ```js
+   try {
+     // operation
+   } finally {
+     await prisma.$disconnect();
+   }
+   ```
+
+---
+
+## 8. Summary
+
+By adhering to these Cursor Project Rules, we ensure:
+
+- **Consistency** across all server actions  
+- **Reliability** with strict data validation and structured error handling  
+- **Security** via ownership and relationship checks  
+- **Performance** thanks to efficient database operations and minimal data fetching  
+
+```

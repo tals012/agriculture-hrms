@@ -10,7 +10,7 @@ import "react-datepicker/dist/react-datepicker.css";
 import { toast } from "react-toastify";
 import { BsArrowLeft } from "react-icons/bs";
 import styles from "@/styles/containers/attendance/general.module.scss";
-import { getGroups } from "@/app/(backend)/actions/groups/getGroups";
+import getGroups from "@/app/(backend)/actions/groups/getGroups";
 import getPricing from "@/app/(backend)/actions/groups/getPricing";
 
 const selectStyle = {

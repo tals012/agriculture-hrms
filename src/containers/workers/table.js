@@ -22,6 +22,7 @@ const statusColorMap = {
   COMMITTEE: { text: "#E65100", bg: "#FFF3E0" },
   HIDDEN: { text: "#424242", bg: "#F5F5F5" },
   IN_TRANSIT: { text: "#4A148C", bg: "#EDE7F6" },
+  DEFAULT: { text: "#424242", bg: "#F5F5F5" } // Fallback for unknown status
 };
 
 const Table = ({ data = [], setWorkerId }) => {
@@ -35,86 +36,54 @@ const Table = ({ data = [], setWorkerId }) => {
                 <th>
                   <input type="checkbox" />
                 </th>
-                <th>שם</th>
-                <th>טלפון</th>
+                <th>שם העובד</th>
                 <th>דרכון</th>
-                <th>תוקף ויזה</th>
-                <th>מדינה</th>
+                <th>טלפון</th>
                 <th>סטטוס</th>
-                <th></th>
+                <th>פעולות</th>
               </tr>
             </thead>
-            <tbody>
-              {data.length === 0 && (
-                <tr>
-                  <td colSpan="11">
-                    <p>אין תוצאות</p>
-                  </td>
-                </tr>
-              )}
 
-              {data.map((worker) => (
-                <tr key={worker.id}>
-                  <td>
-                    <input type="checkbox" />
-                  </td>
-                  <td onClick={() => setWorkerId(worker.id)}>
-                    <div className={styles.user}>
-                      <InitialsCircle
-                        name={`${worker.nameHe} ${worker.surnameHe}`}
-                        width={32}
-                        height={32}
-                        fontSize={15}
-                        fontWeight={400}
-                        lineHeight={24}
-                        letterSpacing={-0.15}
-                        textAlign="center"
-                      />
+            <tbody>
+              {data.map((item, index) => {
+                const status = item.status || 'DEFAULT';
+                const colors = statusColorMap[status] || statusColorMap.DEFAULT;
+                
+                return (
+                  <tr key={index}>
+                    <td>
+                      <input type="checkbox" />
+                    </td>
+                    <td onClick={() => setWorkerId(item.id)}>
                       <div className={styles.name}>
-                        <p>
-                          {worker.nameHe} {worker.surnameHe}
-                        </p>
+                        <InitialsCircle name={item.nameHe || item.name} />
+                        <p>{item.nameHe || item.name}</p>
                       </div>
-                    </div>
-                  </td>
-                  <td>
-                    <div className={styles.phones}>
-                      <p>{worker.primaryPhone}</p>
-                      {worker.secondaryPhone && (
-                        <span>{worker.secondaryPhone}</span>
-                      )}
-                    </div>
-                  </td>
-                  <td>
-                    <p>{worker.passport || "-"}</p>
-                  </td>
-                  <td>
-                    <p>
-                      {worker.visaValidity
-                        ? format(new Date(worker.visaValidity), "dd-MM-yyyy")
-                        : "-"}
-                    </p>
-                  </td>
-                  <td>
-                    <p>{worker.country?.nameInHebrew || "-"}</p>
-                  </td>
-                  <td>
-                    <Chip
-                      text={statusMap[worker.workerStatus]}
-                      bgColor={statusColorMap[worker.workerStatus].bg}
-                      textColor={statusColorMap[worker.workerStatus].text}
-                    />
-                  </td>
-                  <td onClick={() => setWorkerId(worker.id)}>
-                    <Image
-                      src="/assets/icons/menu-2.svg"
-                      alt="menu"
-                      width={16}
-                      height={16}
-                    />
-                  </td>
-                </tr>
-              ))}
+                    </td>
+                    <td>
+                      <p>{item.passport || "-"}</p>
+                    </td>
+                    <td>
+                      <p>{item.primaryPhone || "-"}</p>
+                    </td>
+                    <td>
+                      <Chip
+                        text={statusMap[status] || status}
+                        textColor={colors.text}
+                        bgColor={colors.bg}
+                      />
+                    </td>
+                    <td onClick={() => setWorkerId(item.id)}>
+                      <Image
+                        src="/assets/icons/menu-2.svg"
+                        alt="menu"
+                        width={16}
+                        height={16}
+                      />
+                    </td>
+                  </tr>
+                );
+              })}
             </tbody>
           </table>
         </div>

@@ -10,7 +10,7 @@ const getGroupsSchema = z.object({
   managerId: z.string().optional(),
 });
 
-export const getGroups = async (input) => {
+const getGroups = async (input) => {
   try {
     const parsedData = getGroupsSchema.safeParse(input);
 
@@ -95,8 +95,9 @@ export const getGroups = async (input) => {
     return {
       status: 500,
       message: "שגיאת שרת פנימית",
-      error: error.message,
       data: [],
     };
   }
 };
+
+export default getGroups;

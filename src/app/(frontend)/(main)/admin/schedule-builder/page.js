@@ -48,7 +48,7 @@ export default function ScheduleBuilder() {
     <div className={styles.container}>
       <div className={styles.wrapper}>
         <ScreenHead
-          title="בנאי סדרות"
+          title="בונה הגדרות יומן נוכחות"
           desc="כאן תוכל לבנות סדרות עבור כל הסוגים של קטיפים שלך"
           stats={[]}
         />
