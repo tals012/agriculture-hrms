@@ -1,3 +1,5 @@
+@use 'sass:color';
+
 .container {
   background: white;
   border-radius: 12px;
@@ -45,7 +47,7 @@
   height: 40px;
 
   &:hover {
-    background: darken(#2b85ff, 5%);
+    background: color.adjust(#2b85ff, $lightness: -5%);
   }
 
   &:disabled {

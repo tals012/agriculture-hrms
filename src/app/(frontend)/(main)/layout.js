@@ -16,7 +16,7 @@ const ibm = IBM_Plex_Sans_Hebrew({
   weight: ["200", "300", "400", "500", "600", "700"],
 });
 
-export default async function AppLayout({ children }) {
+export default function AppLayout({ children }) {
   const cookieStore = cookies();
   const token = cookieStore.get("token");
   const role = cookieStore.get("role")?.value;
@@ -39,11 +39,9 @@ export default async function AppLayout({ children }) {
   };
 
   return (
-    <html lang="en" className={ibm.className}>
-      <body>
-        {getHeader()}
-        {children}
-      </body>
-    </html>
+    <div className="app-layout">
+      {getHeader()}
+      {children}
+    </div>
   );
 }

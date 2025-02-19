@@ -5,7 +5,7 @@ import ReactSelect from "react-select";
 import styles from "@/styles/containers/schedule-builder/filterRow.module.scss";
 import getWorkers from "@/app/(backend)/actions/workers/getWorkers";
 import getClients from "@/app/(backend)/actions/clients/getClients";
-import { getGroups } from "@/app/(backend)/actions/groups/getGroups";
+import getGroups from "@/app/(backend)/actions/groups/getGroups";
 
 const months = [
   { value: 1, label: "ינואר" },

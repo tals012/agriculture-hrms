@@ -8,7 +8,7 @@ import TextField from "@/components/textField";
 import styles from "@/styles/containers/schedule-builder/sideBox.module.scss";
 import getWorkers from "@/app/(backend)/actions/workers/getWorkers";
 import getClients from "@/app/(backend)/actions/clients/getClients";
-import { getGroups } from "@/app/(backend)/actions/groups/getGroups";
+import getGroups from "@/app/(backend)/actions/groups/getGroups";
 import generateSchedule from "@/app/(backend)/actions/schedule/generateSchedule";
 import Spinner from "@/components/spinner";
 
