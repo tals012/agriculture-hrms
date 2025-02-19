@@ -41,6 +41,13 @@ const updateWorkerSchema = z.object({
   note: z.string().optional().nullable(),
   countryId: z.string().optional().nullable(),
   cityId: z.string().optional().nullable(),
+  bankId: z.string().optional().nullable(),
+  branchId: z.string().optional().nullable(),
+  bankAccountNumber: z.string().optional().nullable(),
+  street: z.string().optional().nullable(),
+  houseNumber: z.string().optional().nullable(),
+  apartment: z.string().optional().nullable(),
+  postalCode: z.string().optional().nullable(),
 });
 
 const updateWorker = async ({ payload }) => {
@@ -60,8 +67,6 @@ const updateWorker = async ({ payload }) => {
         field: issue.path.join('.'),
         message: issue.message
       }));
-
-      console.log(formattedErrors);
 
       return {
         status: 400,

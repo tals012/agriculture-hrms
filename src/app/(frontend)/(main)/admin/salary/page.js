@@ -15,6 +15,12 @@ export default function Salary() {
     salaryData: null,
     loading: false,
     sendingToSystem: false,
+    selectedWorkers: new Set()
+  });
+
+  const [filters, setFilters] = useState({
+    month: null,
+    year: null
   });
 
   const handleFilterChange = useCallback(async (filters) => {
@@ -48,6 +54,10 @@ export default function Salary() {
             }))
           }
         }));
+        setFilters({
+          month: filters.month,
+          year: filters.year
+        });
       } else {
         toast.error(response.message || "שגיאה בטעינת נתוני השכר");
         setState(prev => ({
@@ -67,14 +77,61 @@ export default function Salary() {
     }
   }, []);
 
+  const handleWorkerSelection = useCallback((workerId, isSelected) => {
+    setState(prev => {
+      const newSelectedWorkers = new Set(prev.selectedWorkers);
+      if (isSelected) {
+        newSelectedWorkers.add(workerId);
+      } else {
+        newSelectedWorkers.delete(workerId);
+      }
+      return { ...prev, selectedWorkers: newSelectedWorkers };
+    });
+  }, []);
+
+  const handleSelectAll = useCallback((isSelected) => {
+    setState(prev => {
+      const newSelectedWorkers = new Set();
+      if (isSelected && prev.salaryData?.workers) {
+        prev.salaryData.workers.forEach(worker => newSelectedWorkers.add(worker.id));
+      }
+      return { ...prev, selectedWorkers: newSelectedWorkers };
+    });
+  }, []);
+
   const handleSendToSystem = async () => {
-    if (!state.salaryData) return;
+    if (!filters.month || !filters.year) {
+      toast.error("נא לבחור חודש ושנה");
+      return;
+    }
+
+    if (state.selectedWorkers.size === 0) {
+      toast.error("נא לבחור לפחות עובד אחד");
+      return;
+    }
 
     setState(prev => ({ ...prev, sendingToSystem: true }));
     try {
-      // TODO: Implement sending to salary system
-      await new Promise(resolve => setTimeout(resolve, 2000));
-      toast.success("הנתונים נשלחו בהצלחה למערכת השכר");
+      const response = await fetch("/api/salary/send-to-salary-system", {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json"
+        },
+        body: JSON.stringify({
+          month: filters.month,
+          year: filters.year,
+          selectedWorkerIds: Array.from(state.selectedWorkers)
+        })
+      });
+
+      const data = await response.json();
+
+      if (response.ok) {
+        toast.success(data.message || "הנתונים נשלחו בהצלחה למערכת השכר");
+        setState(prev => ({ ...prev, selectedWorkers: new Set() }));
+      } else {
+        toast.error(data.message || "שגיאה בשליחת הנתונים למערכת השכר");
+      }
     } catch (error) {
       console.error("Error sending to salary system:", error);
       toast.error("שגיאה בשליחת הנתונים למערכת השכר");
@@ -101,12 +158,17 @@ export default function Salary() {
               </div>
             ) : state.salaryData ? (
               <>
-                <Table data={state.salaryData} />
+                <Table 
+                  data={state.salaryData} 
+                  selectedWorkers={state.selectedWorkers}
+                  onWorkerSelect={handleWorkerSelection}
+                  onSelectAll={handleSelectAll}
+                />
                 <div className={styles.actions}>
                   <button 
                     className={styles.sendButton}
                     onClick={handleSendToSystem}
-                    disabled={state.sendingToSystem}
+                    disabled={state.sendingToSystem || state.selectedWorkers.size === 0}
                   >
                     {state.sendingToSystem ? "שולח..." : "שלח למערכת שכר"}
                   </button>

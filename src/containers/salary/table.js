@@ -16,10 +16,19 @@ const formatNumber = (number, decimals = 2) => {
   return number.toFixed(decimals);
 };
 
-const Table = memo(({ data }) => {
+const Table = memo(({ data, selectedWorkers, onWorkerSelect, onSelectAll }) => {
   if (!data?.workers?.length) return null;
 
-  console.log(data, "salary data");
+  const handleSelectAll = (e) => {
+    onSelectAll?.(e.target.checked);
+  };
+
+  const handleWorkerSelect = (workerId, e) => {
+    onWorkerSelect?.(workerId, e.target.checked);
+  };
+
+  const allSelected = data.workers.length > 0 && 
+    data.workers.every(worker => selectedWorkers.has(worker.id));
 
   return (
     <div className={styles.container}>
@@ -27,6 +36,14 @@ const Table = memo(({ data }) => {
         <table className={styles.table}>
           <thead>
             <tr>
+              <th>
+                <input
+                  type="checkbox"
+                  checked={allSelected}
+                  onChange={handleSelectAll}
+                  className={styles.checkbox}
+                />
+              </th>
               <th>שם העובד</th>
               <th>ימי עבודה</th>
               <th>ימי מחלה</th>
@@ -41,7 +58,18 @@ const Table = memo(({ data }) => {
           </thead>
           <tbody>
             {data.workers.map((worker) => (
-              <tr key={worker.id} className={styles.tableRow}>
+              <tr 
+                key={worker.id} 
+                className={`${styles.tableRow} ${selectedWorkers.has(worker.id) ? styles.selected : ''}`}
+              >
+                <td>
+                  <input
+                    type="checkbox"
+                    checked={selectedWorkers.has(worker.id)}
+                    onChange={(e) => handleWorkerSelect(worker.id, e)}
+                    className={styles.checkbox}
+                  />
+                </td>
                 <td>{worker.name}</td>
                 <td>{worker.workedDays || "-"}</td>
                 <td>{worker.sickDays || "-"}</td>
@@ -60,7 +88,8 @@ const Table = memo(({ data }) => {
     </div>
   );
 }, (prevProps, nextProps) => {
-  return prevProps.data === nextProps.data;
+  return prevProps.data === nextProps.data && 
+    prevProps.selectedWorkers === nextProps.selectedWorkers;
 });
 
 export default Table;

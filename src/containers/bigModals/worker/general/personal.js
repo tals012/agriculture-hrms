@@ -11,6 +11,8 @@ import getClients from "@/app/(backend)/actions/clients/getClients";
 import updateWorker from "@/app/(backend)/actions/workers/updateWorker";
 import Spinner from "@/components/spinner";
 import styles from "@/styles/containers/bigModals/worker/general/personal.module.scss";
+import { getBranches } from "@/app/(backend)/actions/branch/getBranches";
+import { getBanks } from "@/app/(backend)/actions/bank/getBanks";
 
 const selectStyle = {
   control: (baseStyles, state) => ({
@@ -30,7 +32,13 @@ const selectStyle = {
 
 const Personal = ({ personalData, setPersonalData }) => {
   const handleChange = (e, key) => {
-    if (key === "birthday" || key === "passportValidity" || key === "visaValidity" || key === "inscriptionDate" || key === "entryDate") {
+    if (
+      key === "birthday" ||
+      key === "passportValidity" ||
+      key === "visaValidity" ||
+      key === "inscriptionDate" ||
+      key === "entryDate"
+    ) {
       return setPersonalData({ ...personalData, [key]: e });
     }
     setPersonalData({ ...personalData, [key]: e.target.value });
@@ -39,16 +47,21 @@ const Personal = ({ personalData, setPersonalData }) => {
   const [cities, setCities] = useState(null);
   const [countries, setCountries] = useState(null);
   const [clients, setClients] = useState(null);
+  const [banks, setBanks] = useState(null);
+  const [branches, setBranches] = useState(null);
   const [loading, setLoading] = useState(false);
 
   useEffect(() => {
     const fetchData = async () => {
       try {
-        const [citiesRes, countriesRes, clientsRes] = await Promise.all([
-          getCities(),
-          getCountries(),
-          getClients(),
-        ]);
+        const [citiesRes, countriesRes, clientsRes, banksRes, branchesRes] =
+          await Promise.all([
+            getCities(),
+            getCountries(),
+            getClients(),
+            getBanks(),
+            getBranches(),
+          ]);
 
         if (citiesRes.status === 200) {
           setCities(citiesRes.data);
@@ -58,6 +71,12 @@ const Personal = ({ personalData, setPersonalData }) => {
         }
         if (clientsRes.status === 200) {
           setClients(clientsRes.data);
+        }
+        if (banksRes.status === 200) {
+          setBanks(banksRes.data);
+        }
+        if (branchesRes.status === 200) {
+          setBranches(branchesRes.data);
         }
       } catch (error) {
         console.log(error);
@@ -73,7 +92,7 @@ const Personal = ({ personalData, setPersonalData }) => {
       const res = await updateWorker({
         payload: {
           ...personalData,
-          workerId: personalData.id
+          workerId: personalData.id,
         },
       });
 
@@ -193,7 +212,9 @@ const Personal = ({ personalData, setPersonalData }) => {
                     personalData.countryId
                       ? {
                           value: personalData.countryId,
-                          label: countries.find((c) => c.id === personalData.countryId)?.nameInHebrew,
+                          label: countries.find(
+                            (c) => c.id === personalData.countryId
+                          )?.nameInHebrew,
                         }
                       : null
                   }
@@ -224,7 +245,9 @@ const Personal = ({ personalData, setPersonalData }) => {
                     personalData.cityId
                       ? {
                           value: personalData.cityId,
-                          label: cities.find((c) => c.id === personalData.cityId)?.nameInHebrew,
+                          label: cities.find(
+                            (c) => c.id === personalData.cityId
+                          )?.nameInHebrew,
                         }
                       : null
                   }
@@ -240,6 +263,116 @@ const Personal = ({ personalData, setPersonalData }) => {
                 />
               </div>
             )}
+            {banks && (
+              <div style={{ width: "48.3%" }}>
+                <ReactSelect
+                  options={banks.map((bank) => ({
+                    value: bank.id,
+                    label: bank.hebrewName,
+                  }))}
+                  components={{
+                    IndicatorSeparator: () => null,
+                  }}
+                  placeholder="בנק"
+                  value={
+                    personalData.bankId
+                      ? {
+                          value: personalData.bankId,
+                          label: banks.find((b) => b.id === personalData.bankId)
+                            ?.hebrewName,
+                        }
+                      : null
+                  }
+                  onChange={(option) =>
+                    setPersonalData({
+                      ...personalData,
+                      bankId: option ? option.value : null,
+                    })
+                  }
+                  menuPortalTarget={document.body}
+                  menuPosition={"fixed"}
+                  styles={selectStyle}
+                  isClearable={true}
+                  isSearchable={true}
+                  isMulti={false}
+                  isLoading={loading}
+                  isDisabled={loading}
+                />
+              </div>
+            )}
+            {branches && (
+              <div style={{ width: "48.3%" }}>
+                <ReactSelect
+                  options={branches.map((branch) => ({
+                    value: branch.id,
+                    label: branch.hebrewName,
+                  }))}
+                  components={{
+                    IndicatorSeparator: () => null,
+                  }}
+                  placeholder="סניף"
+                  value={
+                    personalData.branchId
+                      ? {
+                          value: personalData.branchId,
+                          label: branches.find(
+                            (b) => b.id === personalData.branchId
+                          )?.hebrewName,
+                        }
+                      : null
+                  }
+                  onChange={(option) =>
+                    setPersonalData({
+                      ...personalData,
+                      branchId: option ? option.value : null,
+                    })
+                  }
+                  menuPortalTarget={document.body}
+                  menuPosition={"fixed"}
+                  styles={selectStyle}
+                  isClearable={true}
+                  isSearchable={true}
+                  isMulti={false}
+                  isLoading={loading}
+                  isDisabled={loading}
+                />
+              </div>
+            )}
+
+            <TextField
+              label="מספר חשבון בנק"
+              width="48.3%"
+              value={personalData.bankAccountNumber}
+              onChange={(e) => handleChange(e, "bankAccountNumber")}
+            />
+
+            <TextField
+              label="רחוב"
+              width="48.3%"
+              value={personalData.street}
+              onChange={(e) => handleChange(e, "street")}
+            />
+
+            <TextField
+              label="מספר בית"
+              width="48.3%"
+              value={personalData.houseNumber}
+              onChange={(e) => handleChange(e, "houseNumber")}
+            />
+
+            <TextField
+              label="מספר דירה"
+              width="48.3%"
+              value={personalData.apartment}
+              onChange={(e) => handleChange(e, "apartment")}
+            />
+
+            <TextField
+              label="מיקוד"
+              width="48.3%"
+              value={personalData.postalCode}
+              onChange={(e) => handleChange(e, "postalCode")}
+            />
           </div>
         </div>
       </div>
@@ -381,4 +514,4 @@ const Personal = ({ personalData, setPersonalData }) => {
   );
 };
 
-export default Personal; 
+export default Personal;

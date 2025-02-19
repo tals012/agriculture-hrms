@@ -69,6 +69,8 @@
 
     &:first-child {
       border-top-right-radius: 12px;
+      width: 40px;
+      padding: 20px 12px;
     }
 
     &:last-child {
@@ -82,6 +84,10 @@
     color: #1E293B;
     border-bottom: 1px solid #F1F5F9;
     white-space: nowrap;
+
+    &:first-child {
+      padding: 16px 12px;
+    }
   }
 
   .tableRow {
@@ -94,6 +100,14 @@
     &:last-child {
       td {
         border-bottom: none;
+      }
+    }
+
+    &.selected {
+      background-color: #EFF6FF;
+
+      &:hover {
+        background-color: #DBEAFE;
       }
     }
   }
@@ -134,5 +148,44 @@
   &.statusRejected {
     background-color: #FEEEF0;
     color: #DC3545;
+  }
+}
+
+.checkbox {
+  appearance: none;
+  -webkit-appearance: none;
+  -moz-appearance: none;
+  width: 18px;
+  height: 18px;
+  border: 2px solid #CBD5E1;
+  border-radius: 4px;
+  outline: none;
+  cursor: pointer;
+  position: relative;
+  transition: all 0.2s ease;
+
+  &:checked {
+    background-color: #2563EB;
+    border-color: #2563EB;
+
+    &::after {
+      content: '';
+      position: absolute;
+      left: 5px;
+      top: 2px;
+      width: 6px;
+      height: 10px;
+      border: solid white;
+      border-width: 0 2px 2px 0;
+      transform: rotate(45deg);
+    }
+  }
+
+  &:hover:not(:checked) {
+    border-color: #94A3B8;
+  }
+
+  &:focus {
+    box-shadow: 0 0 0 2px rgba(37, 99, 235, 0.2);
   }
 } 

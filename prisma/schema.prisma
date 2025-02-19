@@ -24,6 +24,7 @@ model Organization {
   city                   String?
   zip                    String?
   internalOrganizationId String?
+  isBonusPaid            Boolean @default(false)
 
   users        User[]
   species      Species[]
@@ -164,6 +165,17 @@ model Worker {
 
   city   City?   @relation(fields: [cityId], references: [id])
   cityId String?
+
+  bank              Bank?   @relation(fields: [bankId], references: [id])
+  bankId            String?
+  branch            Branch? @relation(fields: [branchId], references: [id])
+  branchId          String?
+  bankAccountNumber String?
+
+  street      String?
+  houseNumber String?
+  apartment   String?
+  postalCode  String?
 
   attendance         WorkerAttendance[]
   workingSchedule    WorkingSchedule[]
@@ -687,4 +699,36 @@ enum ApprovalStatus {
   PENDING
   APPROVED
   REJECTED
+}
+
+model Bank {
+  id          String   @id @default(cuid())
+  bankId      String
+  hebrewName  String
+  englishName String?
+  bankNumber  String?
+  countryId   String?
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+  branches    Branch[]
+  workers     Worker[]
+}
+
+model Branch {
+  id             String   @id @default(cuid())
+  branchId       String
+  hebrewName     String
+  englishName    String?
+  code           String?
+  address        String?
+  phone          String?
+  secondaryPhone String?
+  fax            String?
+  email          String?
+  comment        String?
+  createdAt      DateTime @default(now())
+  updatedAt      DateTime @updatedAt
+  bankId         String?
+  bank           Bank?    @relation(fields: [bankId], references: [id])
+  workers        Worker[]
 }
