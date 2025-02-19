@@ -3,6 +3,10 @@
 import { useState, useEffect } from "react";
 import ReactSelect from "react-select";
 import styles from "@/styles/containers/salary/filterRow.module.scss";
+import getClients from "@/app/(backend)/actions/clients/getClients";
+import getFields from "@/app/(backend)/actions/fields/getFields";
+import getGroups from "@/app/(backend)/actions/groups/getGroups";
+import getWorkers from "@/app/(backend)/actions/workers/getWorkers";
 
 const months = [
   { value: 1, label: "ינואר" },
@@ -80,20 +84,20 @@ const FilterRow = ({ onFilterChange }) => {
     submit: false,
   });
 
-  // Mock data loading - Replace with actual API calls later
   useEffect(() => {
     const loadClients = async () => {
       setLoading(prev => ({ ...prev, clients: true }));
       try {
-        // Simulate API call
-        await new Promise(resolve => setTimeout(resolve, 500));
-        setOptions(prev => ({
-          ...prev,
-          clients: [
-            { value: 1, label: "Client 1" },
-            { value: 2, label: "Client 2" },
-          ],
-        }));
+        const response = await getClients();
+        if (response.status === 200) {
+          setOptions(prev => ({
+            ...prev,
+            clients: response.data.map(client => ({
+              value: client.id,
+              label: client.name
+            }))
+          }));
+        }
       } finally {
         setLoading(prev => ({ ...prev, clients: false }));
       }
@@ -102,7 +106,6 @@ const FilterRow = ({ onFilterChange }) => {
     loadClients();
   }, []);
 
-  // Load fields when client changes
   useEffect(() => {
     if (!filters.selectedClient) {
       setOptions(prev => ({ ...prev, fields: [] }));
@@ -112,15 +115,16 @@ const FilterRow = ({ onFilterChange }) => {
     const loadFields = async () => {
       setLoading(prev => ({ ...prev, fields: true }));
       try {
-        // Simulate API call
-        await new Promise(resolve => setTimeout(resolve, 500));
-        setOptions(prev => ({
-          ...prev,
-          fields: [
-            { value: 1, label: "Field 1" },
-            { value: 2, label: "Field 2" },
-          ],
-        }));
+        const response = await getFields({ clientId: filters.selectedClient.value });
+        if (response.status === 200) {
+          setOptions(prev => ({
+            ...prev,
+            fields: response.data.map(field => ({
+              value: field.id,
+              label: field.name
+            }))
+          }));
+        }
       } finally {
         setLoading(prev => ({ ...prev, fields: false }));
       }
@@ -129,7 +133,6 @@ const FilterRow = ({ onFilterChange }) => {
     loadFields();
   }, [filters.selectedClient]);
 
-  // Load groups when client changes
   useEffect(() => {
     if (!filters.selectedClient) {
       setOptions(prev => ({ ...prev, groups: [] }));
@@ -139,43 +142,62 @@ const FilterRow = ({ onFilterChange }) => {
     const loadGroups = async () => {
       setLoading(prev => ({ ...prev, groups: true }));
       try {
-        // Simulate API call
-        await new Promise(resolve => setTimeout(resolve, 500));
-        setOptions(prev => ({
-          ...prev,
-          groups: [
-            { value: 1, label: "Group 1" },
-            { value: 2, label: "Group 2" },
-          ],
-        }));
+        const response = await getGroups({ 
+          clientId: filters.selectedClient.value,
+          ...(filters.selectedField ? { fieldId: filters.selectedField.value } : {})
+        });
+        if (response.status === 200) {
+          setOptions(prev => ({
+            ...prev,
+            groups: response.data.map(group => ({
+              value: group.id,
+              label: group.name
+            }))
+          }));
+        }
       } finally {
         setLoading(prev => ({ ...prev, groups: false }));
       }
     };
 
     loadGroups();
-  }, [filters.selectedClient]);
+  }, [filters.selectedClient, filters.selectedField]);
 
-  // Load workers when client, field, or group changes
   useEffect(() => {
     const loadWorkers = async () => {
       setLoading(prev => ({ ...prev, workers: true }));
       try {
-        // Simulate API call
-        await new Promise(resolve => setTimeout(resolve, 500));
-        setOptions(prev => ({
-          ...prev,
-          workers: [
-            { value: 1, label: "Worker 1" },
-            { value: 2, label: "Worker 2" },
-          ],
-        }));
+        const response = await getWorkers({
+          clientId: filters.selectedClient?.value,
+          ...(filters.selectedField ? { fieldId: filters.selectedField.value } : {}),
+          ...(filters.selectedGroup ? { groupId: filters.selectedGroup.value } : {})
+        });
+        if (response.status === 200) {
+          console.log("Workers response:", response.data);
+          setOptions(prev => ({
+            ...prev,
+            workers: response.data.map(worker => {
+              const fullName = `${worker.nameHe || ''} ${worker.surnameHe || ''}`.trim();
+              const label = worker.passport ? 
+                `${fullName} - ${worker.passport}` :
+                fullName;
+              return {
+                value: worker.id,
+                label: label || 'עובד ללא שם'
+              };
+            })
+          }));
+        }
       } finally {
         setLoading(prev => ({ ...prev, workers: false }));
       }
     };
 
-    loadWorkers();
+    if (filters.selectedClient) {
+      loadWorkers();
+    } else {
+      setOptions(prev => ({ ...prev, workers: [] }));
+    }
   }, [filters.selectedClient, filters.selectedField, filters.selectedGroup]);
 
   const handleFilterChange = (value, field) => {

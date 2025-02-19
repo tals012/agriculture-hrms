@@ -26,6 +26,30 @@ const getWorkers = async (filters = {}) => {
       where.AND.push({ currentClientId: filters.clientId });
     }
 
+    if (filters.fieldId) {
+      where.AND.push({
+        groups: {
+          some: {
+            group: {
+              fieldId: filters.fieldId,
+            },
+            endDate: null,
+          },
+        },
+      });
+    }
+
+    if (filters.groupId) {
+      where.AND.push({
+        groups: {
+          some: {
+            groupId: filters.groupId,
+            endDate: null,
+          },
+        },
+      });
+    }
+
     if (filters.name?.trim()) {
       where.AND.push({
         OR: [
@@ -55,62 +79,17 @@ const getWorkers = async (filters = {}) => {
       where: where.AND.length > 0 ? where : {},
       select: {
         id: true,
-        name: true,
-        surname: true,
-        fatherName: true,
-        motherName: true,
-        nameSpouse: true,
         nameHe: true,
         surnameHe: true,
-        primaryPhone: true,
-        secondaryPhone: true,
-        email: true,
-        address: true,
-        sex: true,
-        birthday: true,
-        maritalStatus: true,
-        primaryLanguage: true,
-        primaryLanguages: true,
-        secondaryLanguage: true,
-        secondaryLanguages: true,
-        additionalLanguages: true,
-        countryArea: true,
-        religion: true,
-        workerStatus: true,
-        company: true,
-        metapelCode: true,
         passport: true,
-        passportValidity: true,
-        visa: true,
-        visaValidity: true,
-        inscriptionDate: true,
-        entryDate: true,
-        favoritePlace: true,
-        favoriteSex: true,
-        partnerPlace: true,
-        note: true,
-        currentClientId: true,
-        country: {
-          select: {
-            id: true,
-            nameInHebrew: true,
-            nameInEnglish: true,
-          },
-        },
-        city: {
-          select: {
-            id: true,
-            nameInHebrew: true,
-            nameInEnglish: true,
-          },
-        },
-        createdAt: true,
-        updatedAt: true,
       },
-      orderBy: {
-        createdAt: "desc",
-      },
+      orderBy: [
+        { nameHe: "asc" },
+        { surnameHe: "asc" },
+      ],
     });
+
+    console.log("Workers found:", workers);
 
     return {
       status: 200,
