@@ -171,7 +171,7 @@ export default function CreatePricing({
                 components={{
                   IndicatorSeparator: () => null,
                 }}
-                placeholder="בחר מין"
+                placeholder="בחירת סוג"
                 value={
                   formData.speciesId && species?.length
                     ? {

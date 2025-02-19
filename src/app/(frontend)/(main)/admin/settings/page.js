@@ -4,6 +4,7 @@ import ScreenHead from "@/components/screenHead";
 import SideBox from "@/containers/settings/sideBox";
 import Species from "@/containers/settings/species";
 import HarvestTypes from "@/containers/settings/harvestTypes";
+import OrganizationSettings from "@/containers/settings/organization";
 import styles from "@/styles/screens/settings.module.scss";
 import { useSearchParams } from "next/navigation";
 
@@ -14,13 +15,13 @@ export default function Settings() {
   const renderContent = () => {
     switch (tab) {
       case "organization":
-        return <div>Organization Settings Content</div>;
+        return <OrganizationSettings />;
       case "species":
         return <Species />;
       case "harvest-types":
         return <HarvestTypes />;
       default:
-        return <div>Organization Settings Content</div>;
+        return <OrganizationSettings />;
     }
   };
 

@@ -70,7 +70,7 @@ const PricingTable = ({
           </div>
           <button className={styles.button}>
             <Plus color="#ffffff" />
-            הוספת שמחור
+            הוספת תמחור
           </button>
         </div>
         <div className={styles.loading}>
@@ -127,7 +127,7 @@ const PricingTable = ({
           onClick={() => setIsCreatePricingModalOpen(true)}
         >
           <Plus color="#ffffff" />
-          הוספת שמחור
+          הוספת תמחור
         </button>
       </div>
       <div className={styles.tableContainer}>

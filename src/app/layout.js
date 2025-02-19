@@ -1,4 +1,5 @@
 import { IBM_Plex_Sans_Hebrew } from "next/font/google";
+import { Toaster } from "react-hot-toast";
 import "react-datepicker/dist/react-datepicker.css";
 import "@/styles/globals.scss";
 import "@/styles/override.scss";
@@ -14,11 +15,11 @@ const ibm = IBM_Plex_Sans_Hebrew({
   weight: ["200", "300", "400", "500", "600", "700"],
 });
 
-
 export default function RootLayout({ children }) {
   return (
     <html lang="en">
       <body className={ibm.className}>
+        <Toaster position="top-center" />
         {children}
       </body>
     </html>
