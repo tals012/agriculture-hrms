@@ -10,14 +10,16 @@ export const metadata = {
 };
 
 const ibm = IBM_Plex_Sans_Hebrew({
-  subsets: ["latin"],
+  subsets: ["hebrew", "latin"],
   display: "swap",
   weight: ["200", "300", "400", "500", "600", "700"],
+  variable: "--font-ibm-plex",
+  preload: true,
 });
 
 export default function RootLayout({ children }) {
   return (
-    <html lang="en">
+    <html lang="he" className={ibm.variable}>
       <body className={ibm.className}>
         <Toaster position="top-center" />
         {children}

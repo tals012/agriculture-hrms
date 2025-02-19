@@ -5,7 +5,7 @@ import { getCookie } from "@/lib/getCookie";
 import getProfile from "@/app/(backend)/actions/auth/getProfile";
 import Spinner from "@/components/spinner";
 import Image from "next/image";
-import { getGroups } from "@/app/(backend)/actions/groups/getGroups";
+import getGroups from "@/app/(backend)/actions/groups/getGroups";
 import styles from "@/styles/screens/my-fields.module.scss";
 
 export default function MyGroupsPage() {

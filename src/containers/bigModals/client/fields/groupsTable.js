@@ -7,7 +7,7 @@ import Spinner from "@/components/spinner";
 import { toast } from "react-toastify";
 import { BsPencil, BsTrash } from "react-icons/bs";
 import { debounce } from "@/lib/debounce";
-import { getGroups } from "@/app/(backend)/actions/groups/getGroups";
+import getGroups from "@/app/(backend)/actions/groups/getGroups";
 import { deleteGroup } from "@/app/(backend)/actions/groups/deleteGroup";
 import getManagers from "@/app/(backend)/actions/managers/getManagers";
 import ReactSelect from "react-select";

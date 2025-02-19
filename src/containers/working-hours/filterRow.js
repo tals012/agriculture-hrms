@@ -90,16 +90,31 @@ const FilterRow = ({ onFilterChange }) => {
   }, []);
 
   const handleFilterChange = (value, field) => {
-    setFilters(prev => ({ ...prev, [field]: value }));
+    const newFilters = { ...filters, [field]: value };
+    setFilters(newFilters);
+    
+    // Only trigger API call if we have all required fields
+    if (newFilters.month?.value && 
+        newFilters.year?.value && 
+        newFilters.selectedWorker?.value) {
+      handleSubmit(newFilters);
+    }
   };
 
-  const handleSubmit = async () => {
+  const handleSubmit = async (currentFilters = filters) => {
+    if (!currentFilters.month?.value || 
+        !currentFilters.year?.value || 
+        !currentFilters.selectedWorker?.value || 
+        loading.submit) {
+      return;
+    }
+
     setLoading(prev => ({ ...prev, submit: true }));
     try {
       await onFilterChange({
-        month: filters.month.value,
-        year: filters.year.value,
-        workerId: filters.selectedWorker?.value,
+        month: currentFilters.month.value,
+        year: currentFilters.year.value,
+        workerId: currentFilters.selectedWorker.value,
       });
     } finally {
       setLoading(prev => ({ ...prev, submit: false }));
@@ -154,7 +169,7 @@ const FilterRow = ({ onFilterChange }) => {
 
         <button 
           className={styles.submitButton}
-          onClick={handleSubmit}
+          onClick={() => handleSubmit()}
           disabled={loading.submit || !filters.selectedWorker}
         >
           {loading.submit ? "טוען..." : "הצג"}

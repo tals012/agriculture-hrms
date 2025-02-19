@@ -6,7 +6,7 @@ import getProfile from "@/app/(backend)/actions/auth/getProfile";
 import Spinner from "@/components/spinner";
 import Image from "next/image";
 import getManagerGroupMembers from "@/app/(backend)/actions/groups/getManagerGroupMembers";
-import { getGroups } from "@/app/(backend)/actions/groups/getGroups";
+import getGroups from "@/app/(backend)/actions/groups/getGroups";
 import getAvailableWorkers from "@/app/(backend)/actions/groups/getAvailableWorkers";
 import addWorkersToGroup from "@/app/(backend)/actions/groups/addWorkersToGroup";
 import InitialsCircle from "@/components/initialsCircle";
