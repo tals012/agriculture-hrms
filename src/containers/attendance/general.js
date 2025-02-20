@@ -163,6 +163,9 @@ export default function General({ data, onUpdate, onStepChange, managerId }) {
         </div>
 
         <div style={{ width: "100%" }}>
+          {formData.reportDate && (
+            <label className={styles.label}>תאריך דיווח</label>
+          )}
           <DatePicker
             selected={formData.reportDate}
             onChange={(date) => handleChange(date, "reportDate")}

@@ -80,7 +80,6 @@ export default function Card() {
             className="cursor-pointer"
             onClick={() => router.push("/forgot-password")}
           >
-            לשכוח סיסמה?
           </a>
         </div>
 
