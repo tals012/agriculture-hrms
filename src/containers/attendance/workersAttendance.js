@@ -74,48 +74,45 @@ export default function WorkersAttendance({
   };
 
   const handleAttendanceSelect = (workerId, optionId) => {
-    setWorkersAttendance((prev) => {
-      const newAttendance = {
-        ...prev,
-        [workerId]: optionId,
-      };
-      onUpdate({
-        workersAttendance: newAttendance,
-        customContainers,
-      });
-      return newAttendance;
+    const newAttendance = {
+      ...workersAttendance,
+      [workerId]: optionId,
+    };
+    setWorkersAttendance(newAttendance);
+    onUpdate({
+      workersAttendance: newAttendance,
+      customContainers,
     });
   };
 
   const handleCustomContainers = (workerId, value) => {
     const sanitizedValue = value.replace(/[^0-9.]/g, "");
-
-    setCustomContainers((prev) => {
-      const newCustom = {
-        ...prev,
-        [workerId]: sanitizedValue,
-      };
-      onUpdate({
-        workersAttendance,
-        customContainers: newCustom,
-      });
-      return newCustom;
+    const newCustom = {
+      ...customContainers,
+      [workerId]: sanitizedValue,
+    };
+    setCustomContainers(newCustom);
+    onUpdate({
+      workersAttendance,
+      customContainers: newCustom,
     });
   };
 
   const getDisplayLabel = (optionId, workerId) => {
+    if (!optionId) return "";
+    
     if (optionId === "custom" && customContainers[workerId]) {
       return `${customContainers[workerId]} מכלים`;
     }
 
-    const option = attendanceOptions.find((opt) => opt.id === optionId);
+    const option = attendanceOptions?.find((opt) => opt?.id === optionId);
     if (!option) return "";
 
     // For numeric options, show just the number with מכלים
     if (!isNaN(parseFloat(optionId))) {
       return `${optionId} מכלים`;
     }
-    return option.label;
+    return option.label || "";
   };
 
   const handleNext = () => {

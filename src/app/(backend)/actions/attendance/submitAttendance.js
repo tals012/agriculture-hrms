@@ -88,126 +88,47 @@ const submitAttendance = async (input) => {
     }
 
     // Calculate total work hours for the field
-    const totalWorkHours = (group.field.fieldCloseTime - group.field.fieldOpenTime) / 60; // Convert minutes to hours
+    const totalWorkHours = (group.field.fieldCloseTime - group.field.fieldOpenTime) / 60;
 
-    // Calculate total containers and wages for each worker based on container norm
-    const workersWithWages = parsedData.data.workersAttendance.map(worker => {
-      // If no container norm is set, use direct multiplication and full hours
-      if (!pricingCombination.containerNorm) {
-        const startTime = new Date(parsedData.data.date);
-        startTime.setHours(Math.floor(group.field.fieldOpenTime / 60));
-        startTime.setMinutes(group.field.fieldOpenTime % 60);
-
-        const endTime = new Date(parsedData.data.date);
-        endTime.setHours(Math.floor(group.field.fieldCloseTime / 60));
-        endTime.setMinutes(group.field.fieldCloseTime % 60);
-
-        return {
-          ...worker,
-          totalWage: worker.containersFilled * pricingCombination.price,
-          hoursWorked: totalWorkHours,
-          startTime,
-          endTime,
-        };
-      }
-
-      // Calculate performance ratio against the norm
-      const performanceRatio = worker.containersFilled / pricingCombination.containerNorm;
-      
-      // Calculate wage based on performance ratio
-      const totalWage = pricingCombination.price * performanceRatio;
-
-      // Calculate worked hours based on performance ratio
-      const hoursWorked = totalWorkHours * performanceRatio;
-
-      // Calculate start and end times based on performance ratio
-      const startTime = new Date(parsedData.data.date);
-      startTime.setHours(Math.floor(group.field.fieldOpenTime / 60));
-      startTime.setMinutes(group.field.fieldOpenTime % 60);
-
-      const endTime = new Date(parsedData.data.date);
-      const totalMinutesWorked = hoursWorked * 60;
-      const endTimeMinutes = group.field.fieldOpenTime + totalMinutesWorked;
-      endTime.setHours(Math.floor(endTimeMinutes / 60));
-      endTime.setMinutes(endTimeMinutes % 60);
-
-      return {
-        ...worker,
-        totalWage,
-        hoursWorked,
-        startTime,
-        endTime,
-      };
-    });
-
-    // Calculate total income and containers
-    const totalContainersFilled = workersWithWages.reduce(
-      (sum, worker) => sum + worker.containersFilled,
-      0
-    );
-    const totalIncome = workersWithWages.reduce(
-      (sum, worker) => sum + worker.totalWage,
-      0
-    );
-
-    // Create the group attendance record with worker attendance
-    const attendance = await prisma.groupAttendance.create({
-      data: {
-        administratorName: parsedData.data.administratorName,
-        date: parsedData.data.date,
-        issues: parsedData.data.issues,
-        totalIncome,
-        totalContainersFilled,
-        combination: {
-          connect: {
-            id: parsedData.data.combinationId
-          }
-        },
-        group: {
-          connect: {
-            id: parsedData.data.groupId
-          }
-        },
-        manager: parsedData.data.managerId ? {
-          connect: {
-            id: parsedData.data.managerId
-          }
-        } : undefined,
-        workersAttendance: {
-          create: workersWithWages.map(worker => ({
-            worker: {
-              connect: {
-                id: worker.workerId
-              }
-            },
-            containersFilled: worker.containersFilled,
-            totalWage: worker.totalWage,
-            hoursWorked: worker.hoursWorked,
-            startTime: worker.startTime,
-            endTime: worker.endTime,
-          })),
-        },
-      },
-      include: {
-        workersAttendance: {
+    // Create attendance records for each worker
+    const attendanceRecords = await Promise.all(
+      parsedData.data.workersAttendance.map(async (workerData) => {
+        const status = workerData.containersFilled > 0 ? 'WORKING' : 'ABSENT';
+        
+        return prisma.workerAttendance.create({
+          data: {
+            workerId: workerData.workerId,
+            status,
+            attendanceAdministratorName: parsedData.data.administratorName,
+            attendanceDate: parsedData.data.date,
+            combinationId: parsedData.data.combinationId,
+            issues: parsedData.data.issues,
+            totalContainersFilled: workerData.containersFilled,
+            totalWage: workerData.containersFilled * pricingCombination.price,
+            groupId: parsedData.data.groupId,
+            managerId: parsedData.data.managerId,
+            startTimeInMinutes: group.field.fieldOpenTime,
+            endTimeInMinutes: group.field.fieldCloseTime,
+            totalHoursWorked: totalWorkHours,
+          },
           include: {
-            worker: true
-          }
-        },
-        combination: true,
-        group: true,
-        manager: true,
-      },
-    });
+            worker: true,
+            combination: true,
+            group: true,
+            manager: true,
+          },
+        });
+      })
+    );
 
     return {
       status: 201,
       message: "הנוכחות נשמרה בהצלחה",
-      data: attendance,
+      data: attendanceRecords,
     };
 
   } catch (error) {
-    console.error("Error submitting attendance:", error.stack);
+    console.error('Error in submitAttendance:', error);
     return {
       status: 500,
       message: "שגיאת שרת פנימית",
