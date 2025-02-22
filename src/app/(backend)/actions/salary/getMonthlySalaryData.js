@@ -12,6 +12,7 @@ const getMonthlySalaryDataSchema = z.object({
   month: z.number().min(1).max(12),
   year: z.number().min(2024).max(2100),
   workerId: z.string().optional(),
+  workerIds: z.array(z.string()).optional(),
   groupId: z.string().optional(),
   fieldId: z.string().optional(),
   clientId: z.string().optional(),
@@ -35,7 +36,7 @@ async function getMonthlySalaryData(input) {
       return orgSettings;
     }
 
-    const { month, year, workerId, groupId, fieldId, clientId } =
+    const { month, year, workerId, groupId, fieldId, clientId, workerIds } =
       parsedData.data;
 
     // * Build the date range for the month
@@ -46,6 +47,7 @@ async function getMonthlySalaryData(input) {
     const workerFilter = {
       AND: [
         workerId ? { id: workerId } : {},
+        workerIds ? { id: { in: workerIds } } : {},
         groupId
           ? {
               groups: {
