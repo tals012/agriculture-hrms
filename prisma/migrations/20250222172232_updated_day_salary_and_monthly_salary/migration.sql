@@ -1,0 +1,11 @@
+-- AlterTable
+ALTER TABLE "WorkerDailySalaryCalculation" ADD COLUMN     "hours125Salary" DOUBLE PRECISION NOT NULL DEFAULT 0,
+ADD COLUMN     "hours150Salary" DOUBLE PRECISION NOT NULL DEFAULT 0,
+ADD COLUMN     "totalSalary" DOUBLE PRECISION NOT NULL DEFAULT 0,
+ALTER COLUMN "baseSalary" SET DEFAULT 0,
+ALTER COLUMN "totalBonus" SET DEFAULT 0;
+
+-- AlterTable
+ALTER TABLE "WorkerMonthlyWorkingHoursSubmission" ADD COLUMN     "totalHours125Salary" DOUBLE PRECISION,
+ADD COLUMN     "totalHours150Salary" DOUBLE PRECISION,
+ADD COLUMN     "totalSalary" DOUBLE PRECISION;

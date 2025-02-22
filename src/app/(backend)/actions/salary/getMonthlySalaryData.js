@@ -144,7 +144,6 @@ async function getMonthlySalaryData(input) {
             const calculationDate = new Date(attendance.attendanceDate);
             calculationDate.setUTCHours(0, 0, 0, 0);
 
-            // * Calculate windows based on containers filled
             const containersFilled = attendance.totalContainersFilled || 0;
             const containerNorm = attendance.combination.containerNorm || 0;
             const pricePerNorm = attendance.combination.price || 0;
@@ -162,8 +161,6 @@ async function getMonthlySalaryData(input) {
             // const window150 = containersFilled > (containerNorm * 1.25)
             //   ? containersFilled - (containerNorm * 1.25)
             //   : 0;
-
-            // * Calculate salary and bonus
             // const baseSalary = (window100 / containerNorm) * pricePerNorm;
             // const bonus125 = (window125 / containerNorm) * pricePerNorm * 1.25;
             // const bonus150 = (window150 / containerNorm) * pricePerNorm * 1.5;
@@ -205,6 +202,9 @@ async function getMonthlySalaryData(input) {
             const totalBonus = orgSettings.data.isBonusPaid
               ? dailySalaryCalculation.overtimeHoursValue
               : 0;
+            const totalSalary = dailySalaryCalculation.total;
+            const hours125Salary = dailySalaryCalculation.hours125Value;
+            const hours150Salary = dailySalaryCalculation.hours150Value;
 
             // * Create or update daily calculation
             return await prisma.workerDailySalaryCalculation.upsert({
@@ -226,6 +226,9 @@ async function getMonthlySalaryData(input) {
                 containersWindow150,
                 baseSalary,
                 totalBonus,
+                totalSalary,
+                hours125Salary,
+                hours150Salary,
                 status: attendance.status,
                 attendanceId: attendance.id,
                 combinationId: attendance.combinationId,
@@ -239,6 +242,9 @@ async function getMonthlySalaryData(input) {
                 containersWindow150,
                 baseSalary,
                 totalBonus,
+                totalSalary,
+                hours125Salary,
+                hours150Salary,
                 status: attendance.status,
               },
               include: {
@@ -262,6 +268,11 @@ async function getMonthlySalaryData(input) {
               acc.containersWindow150 + calc.containersWindow150,
             totalBaseSalary: acc.totalBaseSalary + calc.baseSalary,
             totalBonus: acc.totalBonus + calc.totalBonus,
+            totalSalary: acc.totalSalary + calc.totalSalary,
+            hours125Salary: acc.hours125Salary + calc.hours125Salary,
+            hours150Salary: acc.hours150Salary + calc.hours150Salary,
+            totalHoursWorked:
+              acc.totalHoursWorked + calc.attendance?.totalHoursWorked,
             totalMonthlyHours100:
               acc.totalMonthlyHours100 +
               (calc.attendance?.totalHoursWorkedWindow100 || 0),
@@ -279,6 +290,10 @@ async function getMonthlySalaryData(input) {
             containersWindow150: 0,
             totalBaseSalary: 0,
             totalBonus: 0,
+            totalSalary: 0,
+            hours125Salary: 0,
+            hours150Salary: 0,
+            totalHoursWorked: 0,
             totalMonthlyHours100: 0,
             totalMonthlyHours125: 0,
             totalMonthlyHours150: 0,
@@ -286,34 +301,50 @@ async function getMonthlySalaryData(input) {
         );
 
         // Calculate total hours from attendance records
-        const totalHours = attendanceRecords.reduce(
-          (acc, record) => ({
-            totalHours100:
-              acc.totalHours100 + (record.totalHoursWorkedWindow100 || 0),
-            totalHours125:
-              acc.totalHours125 + (record.totalHoursWorkedWindow125 || 0),
-            totalHours150:
-              acc.totalHours150 + (record.totalHoursWorkedWindow150 || 0),
-          }),
-          {
-            totalHours100: 0,
-            totalHours125: 0,
-            totalHours150: 0,
-          }
-        );
+        // const totalHours = attendanceRecords.reduce(
+        //   (acc, record) => ({
+        //     totalHours100:
+        //       acc.totalHours100 + (record.totalHoursWorkedWindow100 || 0),
+        //     totalHours125:
+        //       acc.totalHours125 + (record.totalHoursWorkedWindow125 || 0),
+        //     totalHours150:
+        //       acc.totalHours150 + (record.totalHoursWorkedWindow150 || 0),
+        //   }),
+        //   {
+        //     totalHours100: 0,
+        //     totalHours125: 0,
+        //     totalHours150: 0,
+        //   }
+        // );
 
         // Calculate salary based on bonus setting
-        const salaryCalculation = orgSettings.data.isBonusPaid
-          ? calculateSalaryWithBonus({
-              hours100: totalHours.totalHours100,
-              hours125: totalHours.totalHours125,
-              hours150: totalHours.totalHours150,
-            })
-          : calculateSalaryWithoutBonus({
-              hours100: totalHours.totalHours100,
-              hours125: totalHours.totalHours125,
-              hours150: totalHours.totalHours150,
-            });
+        // const salaryCalculation = orgSettings.data.isBonusPaid
+        //   ? calculateSalaryWithBonus({
+        //       hours100: totalHours.totalHours100,
+        //       hours125: totalHours.totalHours125,
+        //       hours150: totalHours.totalHours150,
+        //     })
+        //   : calculateSalaryWithoutBonus({
+        //       hours100: totalHours.totalHours100,
+        //       hours125: totalHours.totalHours125,
+        //       hours150: totalHours.totalHours150,
+        //     });
+
+        const {
+          totalContainersFilled,
+          containersWindow100,
+          containersWindow125,
+          containersWindow150,
+          totalBaseSalary,
+          totalBonus,
+          totalSalary,
+          hours125Salary,
+          hours150Salary,
+          totalHoursWorked,
+          totalMonthlyHours100,
+          totalMonthlyHours125,
+          totalMonthlyHours150,
+        } = monthlyTotals;
 
         // Calculate status counts
         const statusCounts = attendanceRecords.reduce((acc, record) => {
@@ -325,16 +356,26 @@ async function getMonthlySalaryData(input) {
         await prisma.workerMonthlyWorkingHoursSubmission.update({
           where: { id: monthlySubmission.id },
           data: {
-            totalMonthlyHours100: totalHours.totalHours100,
-            totalMonthlyHours125: totalHours.totalHours125,
-            totalMonthlyHours150: totalHours.totalHours150,
-            totalBaseSalary: orgSettings.data.isBonusPaid
-              ? salaryCalculation.regularHoursValue
-              : salaryCalculation.regularHoursValue,
-            totalBonus: orgSettings.data.isBonusPaid
-              ? salaryCalculation.overtimeHoursValue
-              : salaryCalculation.hours125Value +
-                salaryCalculation.hours150Value,
+            // ! MONTHLY WORKING HOURS
+            totalMonthlyHours: totalHoursWorked,
+            totalMonthlyHours100,
+            totalMonthlyHours125,
+            totalMonthlyHours150,
+
+            // ! MONTHLY CONTAINERS
+            totalContainersFilled,
+            containersWindow100,
+            containersWindow125,
+            containersWindow150,
+
+            // ! MONTHLY SALARY
+            totalBaseSalary,
+            totalBonus,
+            totalSalary,
+            totalHours125Salary: hours125Salary,
+            totalHours150Salary: hours150Salary,
+
+            // ! STATUS COUNTS
             workingDays: statusCounts.WORKING || 0,
             sickDays: statusCounts.SICK_LEAVE || 0,
             holidayDays: statusCounts.HOLIDAY || 0,
@@ -343,6 +384,8 @@ async function getMonthlySalaryData(input) {
             interVisaDays: statusCounts.INTER_VISA || 0,
             accidentDays: statusCounts.ACCIDENT || 0,
             personalDays: statusCounts.DAY_OFF_PERSONAL_REASON || 0,
+
+            // ! ATTENDANCE PERCENTAGE (NOT NECESSARY FOR NOW)
             attendancePercentage:
               ((statusCounts.WORKING || 0) / endDate.getDate()) * 100,
           },
@@ -353,18 +396,14 @@ async function getMonthlySalaryData(input) {
             id: worker.id,
             name: worker.nameHe,
           },
-          totalContainers: monthlyTotals.totalContainersFilled,
-          totalWage: orgSettings.data.isBonusPaid
-            ? salaryCalculation.regularHoursValue
-            : salaryCalculation.regularHoursValue,
-          bonus: orgSettings.data.isBonusPaid
-            ? salaryCalculation.overtimeHoursValue
-            : salaryCalculation.hours125Value + salaryCalculation.hours150Value,
+          totalContainers: totalContainersFilled,
+          totalWage: totalSalary,
+          bonus: totalBonus,
           workedDays: statusCounts.WORKING || 0,
           sickDays: statusCounts.SICK_LEAVE || 0,
-          totalHours100: totalHours.totalHours100,
-          totalHours125: totalHours.totalHours125,
-          totalHours150: totalHours.totalHours150,
+          totalHours100: totalMonthlyHours100,
+          totalHours125: totalMonthlyHours125,
+          totalHours150: totalMonthlyHours150,
         };
       })
     );

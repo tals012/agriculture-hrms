@@ -20,10 +20,14 @@ export function calculateSalaryWithBonus({
 }) {
   const regularHoursValue = hours100 * LAW_RATES.RATE_100;
   const overtimeHoursValue = (hours125 + hours150) * LAW_RATES.RATE_100;
+  const hours125Value = hours125 * LAW_RATES.RATE_125;
+  const hours150Value = hours150 * LAW_RATES.RATE_150;
   
   return {
     regularHoursValue,
     overtimeHoursValue,
+    hours125Value,
+    hours150Value,
     total: regularHoursValue + overtimeHoursValue
   };
 }

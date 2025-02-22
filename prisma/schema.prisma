@@ -561,8 +561,11 @@ model WorkerDailySalaryCalculation {
   containersWindow150 Float
 
   // Money
-  baseSalary Float
-  totalBonus Float
+  baseSalary     Float @default(0) // 100%
+  totalBonus     Float @default(0)
+  totalSalary    Float @default(0) // total
+  hours125Salary Float @default(0) // 125%
+  hours150Salary Float @default(0) // 150%
 
   // Status
   status WorkerAttendanceStatus
@@ -664,8 +667,11 @@ model WorkerMonthlyWorkingHoursSubmission {
   containersWindow150   Float?
 
   // New Money Fields
-  totalBaseSalary Float?
-  totalBonus      Float?
+  totalBaseSalary     Float?
+  totalBonus          Float?
+  totalSalary         Float?
+  totalHours125Salary Float?
+  totalHours150Salary Float?
 
   // New Status Count Fields
   totalDaysInMonth Int?
