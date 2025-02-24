@@ -138,7 +138,7 @@ const SideBox = () => {
           setWorkers(
             response.data.map((worker) => ({
               value: worker.id,
-              label: `${worker.name} ${worker.surname || ""}`.trim(),
+              label: `${worker.nameHe} ${worker.surnameHe || ""}`.trim(),
               data: worker,
             }))
           );
@@ -157,8 +157,20 @@ const SideBox = () => {
     setFormData({ ...formData, [field]: e.target.value });
   };
 
-  const handleCheckboxChange = (e) => {
-    setFormData({ ...formData, isBreakTimePaid: e.target.checked });
+  const handleBreakTimeCheckboxChange = (e) => {
+    if (e.target.checked) {
+      setFormData({ ...formData, isBreakTimePaid: true });
+    } else {
+      setFormData({ ...formData, isBreakTimePaid: false });
+    }
+  };
+
+  const handleBonusCheckboxChange = (e) => {
+    if (e.target.checked) {
+      setFormData({ ...formData, isBonusPaid: true });
+    } else {
+      setFormData({ ...formData, isBonusPaid: false });
+    }
   };
 
   const handleClientChange = (option) => {
@@ -266,7 +278,7 @@ const SideBox = () => {
             <input
               type="checkbox"
               checked={formData.isBreakTimePaid}
-              onChange={handleCheckboxChange}
+              onChange={handleBreakTimeCheckboxChange}
             />
             <span>הפסקה בתשלום</span>
           </label>
@@ -277,7 +289,7 @@ const SideBox = () => {
             <input
               type="checkbox"
               checked={formData.isBonusPaid}
-              onChange={handleCheckboxChange}
+              onChange={handleBonusCheckboxChange}
             />
             <span>הזינוק בתשלום</span>
           </label>

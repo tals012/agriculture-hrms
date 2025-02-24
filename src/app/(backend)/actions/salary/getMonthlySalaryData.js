@@ -21,6 +21,7 @@ const getMonthlySalaryDataSchema = z.object({
 async function getMonthlySalaryData(input) {
   try {
     // * Validate input
+    console.log(input, "input");
     const parsedData = getMonthlySalaryDataSchema.safeParse(input);
     if (!parsedData.success) {
       return {
@@ -28,12 +29,6 @@ async function getMonthlySalaryData(input) {
         message: "נתונים לא תקינים",
         errors: parsedData.error.issues,
       };
-    }
-
-    // * Get organization settings for bonus calculation
-    const orgSettings = await getOrganizationSettings();
-    if (orgSettings.status !== 200) {
-      return orgSettings;
     }
 
     const { month, year, workerId, groupId, fieldId, clientId, workerIds } =
@@ -141,7 +136,7 @@ async function getMonthlySalaryData(input) {
         // * 4. Calculate or update daily calculations
         const dailyCalculations = await Promise.all(
           attendanceRecords.map(async (attendance) => {
-            // if (!attendance.combination) return null;
+            if (!attendance.combination) return null;
 
             const calculationDate = new Date(attendance.attendanceDate);
             calculationDate.setUTCHours(0, 0, 0, 0);
@@ -168,8 +163,6 @@ async function getMonthlySalaryData(input) {
             // const bonus150 = (window150 / containerNorm) * pricePerNorm * 1.5;
             // const totalBonus = bonus125 + bonus150;
 
-            // const baseSalary = orgSettings.data.isBonusPaid
-
             // * calculate containers filled in each window
             const containersWindow100 = Math.min(
               containersFilled,
@@ -187,8 +180,46 @@ async function getMonthlySalaryData(input) {
                 ? containersFilled - containerNorm * 1.25
                 : 0;
 
+            // Get existing schedule for default values
+            const existingPersonalSchedule =
+              await prisma.workingSchedule.findFirst({
+                where: { workerId: worker.id },
+                orderBy: { createdAt: "desc" },
+              });
+
+            // Get current schedule following priority system if no personal schedule exists
+            let currentSchedule;
+            if (!existingPersonalSchedule) {
+              currentSchedule = await prisma.workingSchedule.findFirst({
+                where: {
+                  OR: [
+                    { groupId: worker.groups[0].groupId },
+                    { fieldId: worker.groups[0].group.fieldId },
+                    { clientId: worker.currentClientId },
+                    { organizationId: { not: null } },
+                  ],
+                },
+                orderBy: [
+                  { workerId: "desc" },
+                  { groupId: "desc" },
+                  { fieldId: "desc" },
+                  { clientId: "desc" },
+                  { organizationId: "desc" },
+                  { createdAt: "desc" },
+                ],
+              });
+            }
+
+            let isBonusPaid = false;
+
+            if (existingPersonalSchedule) {
+              isBonusPaid = existingPersonalSchedule.isBonusPaid;
+            } else if (currentSchedule) {
+              isBonusPaid = currentSchedule.isBonusPaid;
+            }
+
             // * calculate base salary and total bonus if bonus is paid
-            const dailySalaryCalculation = orgSettings.data.isBonusPaid
+            const dailySalaryCalculation = isBonusPaid
               ? calculateSalaryWithBonus({
                   hours100: totalHoursWorkedWindow100,
                   hours125: totalHoursWorkedWindow125,
@@ -201,7 +232,7 @@ async function getMonthlySalaryData(input) {
                 });
 
             const baseSalary = dailySalaryCalculation.regularHoursValue;
-            const totalBonus = orgSettings.data.isBonusPaid
+            const totalBonus = isBonusPaid
               ? dailySalaryCalculation.overtimeHoursValue
               : 0;
             const totalSalary = dailySalaryCalculation.total;
@@ -421,7 +452,7 @@ async function getMonthlySalaryData(input) {
       data: monthlyData,
     };
   } catch (error) {
-    console.error("Error fetching monthly salary data:", error);
+    console.error("Error fetching monthly salary data:", error.stack);
     return {
       status: 500,
       message: "שגיאה בשליחת הנתונים",

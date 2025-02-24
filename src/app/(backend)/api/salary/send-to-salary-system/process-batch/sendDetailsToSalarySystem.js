@@ -96,6 +96,43 @@ export async function sendDetailsToSalarySystem({
       return orgSettings;
     }
 
+    // Get existing schedule for default values
+    const existingPersonalSchedule = await prisma.workingSchedule.findFirst({
+      where: { workerId: worker.id },
+      orderBy: { createdAt: "desc" },
+    });
+
+    // Get current schedule following priority system if no personal schedule exists
+    let currentSchedule;
+    if (!existingPersonalSchedule) {
+      currentSchedule = await prisma.workingSchedule.findFirst({
+        where: {
+          OR: [
+            { groupId: worker.groups[0].groupId },
+            { fieldId: worker.groups[0].group.fieldId },
+            { clientId: worker.currentClientId },
+            { organizationId: { not: null } },
+          ],
+        },
+        orderBy: [
+          { workerId: "desc" },
+          { groupId: "desc" },
+          { fieldId: "desc" },
+          { clientId: "desc" },
+          { organizationId: "desc" },
+          { createdAt: "desc" },
+        ],
+      });
+    }
+
+    let isBonusPaid = false;
+
+    if (existingPersonalSchedule) {
+      isBonusPaid = existingPersonalSchedule.isBonusPaid;
+    } else if (currentSchedule) {
+      isBonusPaid = currentSchedule.isBonusPaid;
+    }
+
     // ! Calculate project/field time distribution
     const projectTimeData = attendanceRecords.reduce((acc, record) => {
       if (!record.groupId) return acc;
@@ -189,7 +226,7 @@ export async function sendDetailsToSalarySystem({
           teur: "",
           teur_same_line: true,
         },
-        ...(!orgSettings.data.isBonusPaid && {
+        ...(!isBonusPaid && {
           shem: "שעות נוספות 125%",
           kod: "1001",
           taarif: Number(LAW_RATES.RATE_125), // & law rate
@@ -199,7 +236,7 @@ export async function sendDetailsToSalarySystem({
           teur: "",
           teur_same_line: true,
         }),
-        ...(!orgSettings.data.isBonusPaid && {
+        ...(!isBonusPaid && {
           shem: "שעות נוספות 150%",
           kod: "1002",
           taarif: Number(LAW_RATES.RATE_150), // & law rate
@@ -209,7 +246,7 @@ export async function sendDetailsToSalarySystem({
           teur: "",
           teur_same_line: true,
         }),
-        ...(orgSettings.data.isBonusPaid && {
+        ...(isBonusPaid && {
           shem: "בונוס",
           kod: "1003",
           taarif: Number(LAW_RATES.RATE_100), // & law rate
