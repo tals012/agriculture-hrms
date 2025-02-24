@@ -24,13 +24,13 @@ const createSelectStyle = (zIndex) => ({
     background: "transparent",
     zIndex,
   }),
-  menuPortal: (provided) => ({ 
-    ...provided, 
-    zIndex: zIndex + 1 
+  menuPortal: (provided) => ({
+    ...provided,
+    zIndex: zIndex + 1,
   }),
-  menu: (provided) => ({ 
-    ...provided, 
-    zIndex: zIndex + 1 
+  menu: (provided) => ({
+    ...provided,
+    zIndex: zIndex + 1,
   }),
 });
 
@@ -48,6 +48,7 @@ const SideBox = () => {
     startTimeInMinutes: "480",
     breakTimeInMinutes: "30",
     isBreakTimePaid: false,
+    isBonusPaid: false,
     selectedClient: null,
     selectedGroup: null,
     selectedWorker: null,
@@ -66,20 +67,22 @@ const SideBox = () => {
   // Fetch clients
   useEffect(() => {
     const fetchClients = async () => {
-      setLoading(prev => ({ ...prev, clients: true }));
+      setLoading((prev) => ({ ...prev, clients: true }));
       try {
         const response = await getClients();
         if (response.status === 200) {
-          setClients(response.data.map(client => ({
-            value: client.id,
-            label: client.name,
-            data: client
-          })));
+          setClients(
+            response.data.map((client) => ({
+              value: client.id,
+              label: client.name,
+              data: client,
+            }))
+          );
         }
       } catch (error) {
         console.error("Error fetching clients:", error);
       } finally {
-        setLoading(prev => ({ ...prev, clients: false }));
+        setLoading((prev) => ({ ...prev, clients: false }));
       }
     };
 
@@ -94,22 +97,24 @@ const SideBox = () => {
         return;
       }
 
-      setLoading(prev => ({ ...prev, groups: true }));
+      setLoading((prev) => ({ ...prev, groups: true }));
       try {
         const response = await getGroups({
-          clientId: formData.selectedClient.value
+          clientId: formData.selectedClient.value,
         });
         if (response.status === 200) {
-          setGroups(response.data.map(group => ({
-            value: group.id,
-            label: group.name,
-            data: group
-          })));
+          setGroups(
+            response.data.map((group) => ({
+              value: group.id,
+              label: group.name,
+              data: group,
+            }))
+          );
         }
       } catch (error) {
         console.error("Error fetching groups:", error);
       } finally {
-        setLoading(prev => ({ ...prev, groups: false }));
+        setLoading((prev) => ({ ...prev, groups: false }));
       }
     };
 
@@ -124,22 +129,24 @@ const SideBox = () => {
         return;
       }
 
-      setLoading(prev => ({ ...prev, workers: true }));
+      setLoading((prev) => ({ ...prev, workers: true }));
       try {
         const response = await getWorkers({
-          clientId: formData.selectedClient.value
+          clientId: formData.selectedClient.value,
         });
         if (response.status === 200) {
-          setWorkers(response.data.map(worker => ({
-            value: worker.id,
-            label: `${worker.name} ${worker.surname || ""}`.trim(),
-            data: worker
-          })));
+          setWorkers(
+            response.data.map((worker) => ({
+              value: worker.id,
+              label: `${worker.name} ${worker.surname || ""}`.trim(),
+              data: worker,
+            }))
+          );
         }
       } catch (error) {
         console.error("Error fetching workers:", error);
       } finally {
-        setLoading(prev => ({ ...prev, workers: false }));
+        setLoading((prev) => ({ ...prev, workers: false }));
       }
     };
 
@@ -159,13 +166,13 @@ const SideBox = () => {
       ...formData,
       selectedClient: option,
       selectedGroup: null,
-      selectedWorker: null
+      selectedWorker: null,
     });
   };
 
   const handleGenerate = async () => {
     try {
-      setLoading(prev => ({ ...prev, generate: true }));
+      setLoading((prev) => ({ ...prev, generate: true }));
 
       const payload = {
         numberOfTotalHoursPerDay: parseFloat(formData.numberOfTotalHoursPerDay),
@@ -173,9 +180,16 @@ const SideBox = () => {
         startTimeInMinutes: parseFloat(formData.startTimeInMinutes),
         breakTimeInMinutes: parseFloat(formData.breakTimeInMinutes),
         isBreakTimePaid: formData.isBreakTimePaid,
-        ...(formData.selectedClient && { clientId: formData.selectedClient.value }),
-        ...(formData.selectedGroup && { groupId: formData.selectedGroup.value }),
-        ...(formData.selectedWorker && { workerId: formData.selectedWorker.value }),
+        isBonusPaid: formData.isBonusPaid,
+        ...(formData.selectedClient && {
+          clientId: formData.selectedClient.value,
+        }),
+        ...(formData.selectedGroup && {
+          groupId: formData.selectedGroup.value,
+        }),
+        ...(formData.selectedWorker && {
+          workerId: formData.selectedWorker.value,
+        }),
       };
 
       const response = await generateSchedule(payload);
@@ -199,7 +213,7 @@ const SideBox = () => {
         autoClose: 3000,
       });
     } finally {
-      setLoading(prev => ({ ...prev, generate: false }));
+      setLoading((prev) => ({ ...prev, generate: false }));
     }
   };
 
@@ -258,6 +272,17 @@ const SideBox = () => {
           </label>
         </div>
 
+        <div className={styles.checkboxGroup}>
+          <label>
+            <input
+              type="checkbox"
+              checked={formData.isBonusPaid}
+              onChange={handleCheckboxChange}
+            />
+            <span>הזינוק בתשלום</span>
+          </label>
+        </div>
+
         <div className={styles.formGroup}>
           <ReactSelect
             options={clients}
@@ -312,7 +337,7 @@ const SideBox = () => {
           />
         </div>
 
-        <button 
+        <button
           className={styles.generateButton}
           onClick={handleGenerate}
           disabled={loading.generate}
