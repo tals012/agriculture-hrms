@@ -24,7 +24,9 @@ model Organization {
   city                   String?
   zip                    String?
   internalOrganizationId String?
-  isBonusPaid            Boolean @default(false)
+  lawRate100             Float?
+  lawRate125             Float?
+  lawRate150             Float?
 
   users        User[]
   species      Species[]
@@ -457,6 +459,7 @@ model WorkingSchedule {
   endTimeInMinutes                  Float   @default(1020)
   breakTimeInMinutes                Float   @default(30)
   isBreakTimePaid                   Boolean @default(false)
+  isBonusPaid                       Boolean @default(false)
 
   organizationId String?
   organization   Organization? @relation(fields: [organizationId], references: [id], onDelete: Cascade)
