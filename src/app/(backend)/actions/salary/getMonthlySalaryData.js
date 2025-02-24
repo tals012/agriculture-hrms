@@ -399,8 +399,13 @@ async function getMonthlySalaryData(input) {
             name: worker.nameHe,
           },
           totalContainers: totalContainersFilled,
-          totalWage: totalSalary,
+
+          totalBaseSalary,
+          totalSalary,
           bonus: totalBonus,
+          totalHours125Salary: hours125Salary,
+          totalHours150Salary: hours150Salary,
+
           workedDays: statusCounts.WORKING || 0,
           sickDays: statusCounts.SICK_LEAVE || 0,
           totalHours100: totalMonthlyHours100,

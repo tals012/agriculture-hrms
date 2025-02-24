@@ -30,6 +30,8 @@ const Table = memo(({ data, selectedWorkers, onWorkerSelect, onSelectAll }) => {
   const allSelected = data.workers.length > 0 && 
     data.workers.every(worker => selectedWorkers.has(worker.id));
 
+    console.log(data, "response");
+
   return (
     <div className={styles.container}>
       <div className={styles.tableWrapper}>
@@ -51,9 +53,9 @@ const Table = memo(({ data, selectedWorkers, onWorkerSelect, onSelectAll }) => {
               <th>שעות רגילות</th>
               <th>שעות נוספות 125%</th>
               <th>שעות נוספות 150%</th>
-              <th>שכר בסיס</th>
-              <th>בונוס</th>
-              <th>סה״כ שכר</th>
+              {/* <th>שכר בסיס</th> */}
+              {/* <th>בונוס</th>
+              <th>סה״כ שכר</th> */}
             </tr>
           </thead>
           <tbody>
@@ -77,9 +79,9 @@ const Table = memo(({ data, selectedWorkers, onWorkerSelect, onSelectAll }) => {
                 <td>{formatNumber(worker.totalHours100, 2)}</td>
                 <td>{formatNumber(worker.totalHours125, 2)}</td>
                 <td>{formatNumber(worker.totalHours150, 2)}</td>
-                <td>{formatCurrency(worker.totalWage)}</td>
-                <td>{formatCurrency(worker.bonus)}</td>
-                <td>{formatCurrency((worker.totalWage || 0) + (worker.bonus || 0))}</td>
+                {/* <td>{formatCurrency(worker.totalBaseSalary)}</td> */}
+                {/* <td>{formatCurrency(worker.bonus)}</td> */}
+                {/* <td>{formatCurrency((worker.totalSalary || 0))}</td> */}
               </tr>
             ))}
           </tbody>

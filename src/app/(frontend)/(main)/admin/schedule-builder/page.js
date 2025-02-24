@@ -8,9 +8,9 @@ import Table from "@/containers/schedule-builder/table";
 import { useSearchParams } from "next/navigation";
 import { ToastContainer } from "react-toastify";
 import "react-toastify/dist/ReactToastify.css";
-import styles from "@/styles/screens/schedule-builder.module.scss";
 import getSchedule from "@/app/(backend)/actions/schedule/getSchedule";
 import Spinner from "@/components/spinner";
+import styles from "@/styles/screens/schedule-builder.module.scss";
 
 export default function ScheduleBuilder() {
   const searchParams = useSearchParams();

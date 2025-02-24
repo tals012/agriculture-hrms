@@ -43,9 +43,15 @@ export default function Salary() {
             workers: response.data.map(worker => ({
               id: worker.worker.id,
               name: worker.worker.name,
+
               totalContainers: worker.totalContainers || 0,
-              totalWage: worker.totalWage || 0,
+
+              totalBaseSalary: worker.totalBaseSalary || 0,
+              totalSalary: worker.totalSalary || 0,
               bonus: worker.bonus || 0,
+              totalHours125Salary: worker.totalHours125Salary || 0,
+              totalHours150Salary: worker.totalHours150Salary || 0,
+
               workedDays: worker.workedDays || 0,
               sickDays: worker.sickDays || 0,
               totalHours100: worker.totalHours100 || 0,

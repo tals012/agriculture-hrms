@@ -10,8 +10,8 @@ export const LAW_RATES = {
 };
 
 /**
- * Calculates salary when bonus is paid.
- * In this case, all hours (regular and overtime) are paid at the base rate.
+ * ! Calculates salary when bonus is paid.
+ * ! In this case, all hours (regular and overtime) are paid at the base rate.
  */
 export function calculateSalaryWithBonus({
   hours100 = 0,
@@ -33,8 +33,8 @@ export function calculateSalaryWithBonus({
 }
 
 /**
- * Calculates salary when bonus is not paid.
- * Each type of hour is paid at its respective law-mandated rate.
+ * ! Calculates salary when bonus is not paid.
+ * ! Each type of hour is paid at its respective law-mandated rate.
  */
 export function calculateSalaryWithoutBonus({
   hours100 = 0,

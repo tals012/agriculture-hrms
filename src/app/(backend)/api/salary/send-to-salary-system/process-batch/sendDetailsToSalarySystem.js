@@ -7,6 +7,9 @@ import timezone from "dayjs/plugin/timezone";
 import { extractNumberFromPassport } from "@/lib/utils/salarySystem";
 import axios from "axios";
 import https from "https";
+import { LAW_RATES } from "@/lib/utils/salaryCalculation";
+import { getOrganizationSettings } from "@/app/(backend)/actions/settings/getOrganizationSettings";
+import { createDayStatusRanges } from "@/lib/utils/createDayStatusRanges";
 
 dayjs.extend(utc);
 dayjs.extend(timezone);
@@ -42,6 +45,9 @@ export async function sendDetailsToSalarySystem({
                   },
                 },
               },
+              workingSchedule: true,
+              bank: true,
+              branch: true,
             },
           },
         },
@@ -58,7 +64,39 @@ export async function sendDetailsToSalarySystem({
       throw new Error("Invalid passport number");
     }
 
-    // Calculate project/field time distribution
+    // ! ===================================================================
+    const weatherDays = attendanceRecords.filter(
+      (i) => i.status === "NOT_WORKING_BUT_PAID" && !!i.isAvailable
+    );
+
+    const intervisaHolidaysAndDayOffDays = attendanceRecords.filter(
+      (i) => i.status === "INTER_VISA" || i.status === "DAY_OFF"
+    );
+
+    const accidentDays = attendanceRecords.filter(
+      (i) => i.status === "ACCIDENT"
+    );
+
+    const intervisaHolidaysAndDayOffConsecutiveDaysRange =
+      createDayStatusRanges(intervisaHolidaysAndDayOffDays);
+
+    const accidentDaysConsecutiveDaysRange =
+      createDayStatusRanges(accidentDays);
+
+    const sickDays = attendanceRecords.filter((i) => i.status === "SICK_LEAVE");
+
+    const sickDaysConsecutiveDaysRange = createDayStatusRanges(sickDays);
+
+    const holidays = attendanceRecords.filter((i) => i.status === "HOLIDAY");
+    // ! ===================================================================
+
+    // * Get organization settings
+    const orgSettings = await getOrganizationSettings();
+    if (orgSettings.status !== 200) {
+      return orgSettings;
+    }
+
+    // ! Calculate project/field time distribution
     const projectTimeData = attendanceRecords.reduce((acc, record) => {
       if (!record.groupId) return acc;
 
@@ -80,109 +118,205 @@ export async function sendDetailsToSalarySystem({
       return acc;
     }, {});
 
-    // Format data for salary system
-    const baseMASKORET = {
+    // ! Format data for salary system
+    let baseMASKORET = {
       sug: "MASKORET",
-      mispar_tz: String(passportNumberOnly),
-      shem_mishpacha: worker.surname || worker.surnameHe || "",
-      shem_praty: worker.name || worker.nameHe || "",
-      chodesh: Number(date.month),
-      shana: Number(date.year),
+      mispar_tz: String(passportNumberOnly), // & Worker's passport number (only numbers)
+      shem_mishpacha: worker.surname || worker.surnameHe || "", // & Worker's last name
+      shem_praty: worker.name || worker.nameHe || "", // & Worker's name
+      chodesh: Number(date.month) + 1, // & Month (1-12)
+      shana: Number(date.year), // & Year (YYYY)
       misra: {
-        sug: 2, // Hourly payment
-        taarif: worker.groups[0]?.group?.clientPricingCombination?.price || 0,
-        taarif_zurat_chishuv: 1,
-        shaot_avoda:
-          submission.totalMonthlyHours100 +
-          submission.totalMonthlyHours125 +
-          submission.totalMonthlyHours150,
-        yamim_avoda: submission.workingDays || 0,
-        shaot_teken_chodesh: 186, // Standard monthly hours
-        shaot_teken_yom: 8.6, // Standard daily hours
-        yamim_teken: 22, // Standard monthly working days
-        yamim_shavua: 6, // Working days per week
-        hekef_misra: 100,
+        sug: 2, // & 2 for Hourly payment
+        taarif: Number(LAW_RATES.RATE_100), // & Hourly rate
+        taarif_zurat_chishuv: 1, // & Calculation basis (always 1 for yadani)
+        // shaot_avoda:
+        //   submission.totalMonthlyHours100 +
+        //   submission.totalMonthlyHours125 +
+        //   submission.totalMonthlyHours150,
+        shaot_avoda: submission.totalMonthlyHours, // & total hours worked this month
+        yamim_avoda: submission.workingDays || 0, // & days worked this month
+        shaot_teken_chodesh:
+          (worker.workingSchedule.numberOfTotalDaysPerMonth || 0) *
+          (worker.workingSchedule.numberOfTotalHoursPerDay || 0), // & Standard monthly hours
+        shaot_teken_yom: worker.workingSchedule.numberOfTotalHoursPerDay || 0, // & Standard daily hours
+        yamim_teken: worker.workingSchedule.numberOfTotalDaysPerMonth || 0, // & Standard monthly working days
+        yamim_shavua: worker.workingSchedule.numberOfTotalDaysPerWeek || 0, // & Working days per week
+        hekef_misra: 100, // & Percentage increase in salary
       },
       avoda: {
-        shiyuch: worker.currentClient?.name || "",
-        shiyuch2: worker.groups[0]?.group?.field?.name || "",
+        shiyuch: worker.currentClient?.name || "", // & Primary project or department
+        shiyuch2: worker.groups[0]?.group?.field?.name || "", // & Secondary project or department
         pizul_shiyuch: Object.values(projectTimeData).map((data) => ({
           shem_shiyuch: data.clientName,
           shaot: data.hours,
           yamim: data.days,
-          achuz: (
-            (data.hours /
-              (submission.totalMonthlyHours100 +
-                submission.totalMonthlyHours125 +
-                submission.totalMonthlyHours150)) *
-            100
-          ).toFixed(2),
+          // achuz: (
+          //   (data.hours /
+          //     (submission.totalMonthlyHours100 +
+          //       submission.totalMonthlyHours125 +
+          //       submission.totalMonthlyHours150)) *
+          //   100
+          // ).toFixed(2),
+          achuz: ((data.hours / submission.totalMonthlyHours) * 100).toFixed(2),
         })),
         pizul_shiyuch2: Object.values(projectTimeData).map((data) => ({
           shem_shiyuch: `${data.clientName} - ${data.fieldName}`,
           shaot: data.hours,
           yamim: data.days,
-          achuz: (
-            (data.hours /
-              (submission.totalMonthlyHours100 +
-                submission.totalMonthlyHours125 +
-                submission.totalMonthlyHours150)) *
-            100
-          ).toFixed(2),
+          // achuz: (
+          //   (data.hours /
+          //     (submission.totalMonthlyHours100 +
+          //       submission.totalMonthlyHours125 +
+          //       submission.totalMonthlyHours150)) *
+          //   100
+          // ).toFixed(2),
+          achuz: ((data.hours / submission.totalMonthlyHours) * 100).toFixed(2),
         })),
         taarich_vetek: dayjs(worker.inscriptionDate || worker.entryDate)
           .tz("Asia/Jerusalem")
-          .format("YYYY-MM-DD"),
+          .format("YYYY-MM-DD"), // & Start date of employment (YYYY-MM-DD)
         sium_avoda: false,
       },
       tashlumim: [
         {
           shem: "שעות רגילות 100%",
           kod: "1000",
-          taarif: worker.groups[0]?.group?.clientPricingCombination?.price || 0,
-          kamut: submission.totalMonthlyHours100 || 0,
+          taarif: Number(LAW_RATES.RATE_100), // & law rate
+          kamut: Number(submission.totalMonthlyHours100).toFixed(2) || 0,
           gilum: false,
           kovea_kizva: 1,
+          teur: "",
+          teur_same_line: true,
         },
-        {
+        ...(!orgSettings.data.isBonusPaid && {
           shem: "שעות נוספות 125%",
           kod: "1001",
-          taarif:
-            (worker.groups[0]?.group?.clientPricingCombination?.price || 0) *
-            1.25,
-          kamut: submission.totalMonthlyHours125 || 0,
+          taarif: Number(LAW_RATES.RATE_125), // & law rate
+          kamut: Number(submission.totalMonthlyHours125).toFixed(2) || 0,
           gilum: false,
           kovea_kizva: 1,
-        },
-        {
+          teur: "",
+          teur_same_line: true,
+        }),
+        ...(!orgSettings.data.isBonusPaid && {
           shem: "שעות נוספות 150%",
           kod: "1002",
-          taarif:
-            (worker.groups[0]?.group?.clientPricingCombination?.price || 0) *
-            1.5, // it needs tob
-          kamut: submission.totalMonthlyHours150 || 0,
+          taarif: Number(LAW_RATES.RATE_150), // & law rate
+          kamut: Number(submission.totalMonthlyHours150).toFixed(2) || 0,
           gilum: false,
           kovea_kizva: 1,
-        },
-
-
-
+          teur: "",
+          teur_same_line: true,
+        }),
+        ...(orgSettings.data.isBonusPaid && {
+          shem: "בונוס",
+          kod: "1003",
+          taarif: Number(LAW_RATES.RATE_100), // & law rate
+          kamut: Number(submission.totalBonus).toFixed(2) || 0,
+          gilum: false,
+          kovea_kizva: 1,
+          teur: "",
+          teur_same_line: true,
+        }),
       ],
       shovayim: [],
       nikuyim: [],
-      chufsha: [],
-      machala: [],
+      chufsha: intervisaHolidaysAndDayOffConsecutiveDaysRange.map((day) => {
+        return {
+          taarich_hatchala: dayjs(day.startDate)
+            .tz("Asia/Jerusalem")
+            .format("YYYY-MM-DD"),
+          taarich_sium: dayjs(day.endDate)
+            .tz("Asia/Jerusalem")
+            .format("YYYY-MM-DD"),
+          zakaut: 0,
+          zakaut_auto: true,
+
+          nizul: 0,
+          nizul_auto: true,
+          yitra_kodemet: 0,
+          yitra_kodemet_auto: true,
+          teur: "",
+          ...(day.status === "INTER_VISA" && { zarim_sug: 4 }),
+        };
+      }),
+
+      machala: sickDaysConsecutiveDaysRange.map((day) => {
+        return {
+          taarich_hatchala: dayjs(day.startDate)
+            .tz("Asia/Jerusalem")
+            .format("YYYY-MM-DD"),
+          taarich_sium: dayjs(day.endDate)
+            .tz("Asia/Jerusalem")
+            .format("YYYY-MM-DD"),
+          zakaut: 0,
+          zakaut_auto: true,
+          nizul: 0,
+          nizul_auto: true,
+          yitra_kodemet: 0,
+          yitra_kodemet_auto: true,
+          teur: "",
+        };
+      }),
+      zurat_tashlum: 1,
       bank: [
         {
-          bank: 0,
-          snif: 0,
-          cheshbon: "",
+          bank: Number(worker?.bank?.bankNumber || 0),
+          snif: Number(worker?.branch?.branchId || 0),
+          cheshbon: Number(worker?.bankAccountNumber || 0),
           achuz: 100,
         },
       ],
     };
 
-    // Send to salary system
+    if (weatherDays.length > 0) {
+      baseMASKORET.tashlumim.unshift({
+        shem: "WEATHER", // Premia
+        kod: "1008",
+        taarif: Number(LAW_RATES.RATE_100),
+        kamut: Number(
+          weatherDays.reduce(
+            (acc, day) => acc + (day.totalHoursWorked || 0),
+            0
+          ) || 0
+        ).toFixed(2), // always 0
+        gilum: false, // always true
+        kovea_kizva: 1,
+        teur: "WEATHER",
+        teur_same_line: true,
+      });
+    }
+
+    if (accidentDaysConsecutiveDaysRange.length > 0) {
+      accidentDaysConsecutiveDaysRange.forEach((day) => {
+        baseMASKORET.chufsha.unshift({
+          taarich_hatchala: dayjs(day.startDate)
+            .tz("Asia/Jerusalem")
+            .format("YYYY-MM-DD"),
+          taarich_sium: dayjs(day.endDate)
+            .tz("Asia/Jerusalem")
+            .format("YYYY-MM-DD"),
+          zakaut: 0,
+          zakaut_auto: true,
+          nizul: 0,
+          nizul_auto: true,
+          yitra_kodemet: 0,
+          yitra_kodemet_auto: true,
+          teur: "",
+          // ...(day.status === "ACCIDENT"
+          //   ? payingForWorkerAccident
+          //     ? { teunat_avoda_tashlum: 6 }
+          //     : { teunat_avoda_lelo_tashlum: 7 }
+          //   : {}),
+          ...(day.status === "ACCIDENT" && {
+            teunat_avoda_tashlum: 6,
+          }),
+        });
+      });
+    }
+
+    // ! Send to salary system
     const response = await axios.post(
       `https://salary.wavesmartflow.co.il/php/api.php?user=${process.env.SALARY_SYSTEM_USER_ID}&pass=${process.env.SALARY_SYSTEM_API_PASSWORD}`,
       baseMASKORET,
