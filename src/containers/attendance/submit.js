@@ -37,13 +37,45 @@ export default function Submit({ data, onUpdate, managerId }) {
   };
 
   const handleSubmit = async () => {
+    // Pre-submission validation
+    if (!data.fullName) {
+      toast.error("חסר שם המנהל", {
+        position: "top-center",
+        autoClose: 3000,
+        rtl: true
+      });
+      return;
+    }
+
+    if (!data.selectedGroup || !data.selectedPricing) {
+      toast.error("חסרים פרטי קבוצה או סוג קטיף", {
+        position: "top-center",
+        autoClose: 3000,
+        rtl: true
+      });
+      return;
+    }
+
+    if (Object.keys(data.workersAttendance || {}).length === 0) {
+      toast.error("לא נבחרו עובדים", {
+        position: "top-center",
+        autoClose: 3000,
+        rtl: true
+      });
+      return;
+    }
+
     setIsSubmitting(true);
     try {
       // Transform the workers attendance data
       const workersAttendance = Object.entries(data.workersAttendance || {}).map(([workerId, status]) => {
         let containersFilled = 0;
+        let workerStatus = "WORKING";
         
-        if (status === 'custom') {
+        if (status === 'absent') {
+          workerStatus = "ABSENT";
+          containersFilled = 0;
+        } else if (status === 'custom') {
           containersFilled = parseFloat(data.customContainers[workerId]) || 0;
         } else if (status !== 'absent') {
           containersFilled = parseFloat(status) || 0;
@@ -51,6 +83,7 @@ export default function Submit({ data, onUpdate, managerId }) {
 
         return {
           workerId,
+          status: workerStatus,
           containersFilled,
         };
       });
@@ -61,6 +94,7 @@ export default function Submit({ data, onUpdate, managerId }) {
         date: data.reportDate,
         combinationId: data.selectedPricing.value,
         issues: data.selectedIssues || [],
+        otherIssueText: data.otherIssueText,
         groupId: data.selectedGroup.value,
         managerId: managerId,
         workersAttendance,
@@ -126,8 +160,8 @@ export default function Submit({ data, onUpdate, managerId }) {
             {Object.entries(data.workersAttendance || {}).map(([workerId, status]) => (
               <div key={workerId} className={styles.workerCard}>
                 <div className={styles.workerName}>
-                  {/* TODO: Get actual worker name */}
-                  Worker {workerId}
+                  {/* Get worker name from groupWorkers */}
+                  {data.groupWorkers.find(worker => worker.worker.id === workerId)?.worker.nameHe} {data.groupWorkers.find(worker => worker.worker.id === workerId)?.worker.surnameHe}
                 </div>
                 <div className={styles.workerStatus}>
                   {getDisplayLabel(status, workerId)}

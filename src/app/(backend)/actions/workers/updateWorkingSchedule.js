@@ -419,6 +419,8 @@ const updateWorkingSchedule = async (input) => {
       attendanceData.groupId = activeGroup.id;
     }
 
+    attendanceData.approvalStatus = "APPROVED";
+
     console.log(attendanceData, "attendanceData");
 
     const attendanceRecord = await prisma.workerAttendance.upsert({

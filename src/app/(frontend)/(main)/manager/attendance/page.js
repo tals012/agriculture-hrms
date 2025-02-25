@@ -1,5 +1,5 @@
 "use client";
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { format } from 'date-fns';
 import { he } from 'date-fns/locale';
 import { BsArrowLeftCircleFill } from 'react-icons/bs';
@@ -11,14 +11,55 @@ import Submit from "@/containers/attendance/submit";
 import { ToastContainer } from "react-toastify";
 import styles from "@/styles/screens/attendance.module.scss";
 import useProfile from "@/hooks/useProfile";
+import getGroupMembers from "@/app/(backend)/actions/groups/getGroupMembers";
 
 export default function AttendancePage() {
   const [isWizardStarted, setIsWizardStarted] = useState(false);
   const [currentStep, setCurrentStep] = useState("general");
-  const [formData, setFormData] = useState({});
+  const [formData, setFormData] = useState({
+    // General step data
+    administratorName: "",
+    reportDate: new Date(),
+    selectedGroup: null,
+    selectedPricing: null,
+    defaultSchedule: null,
+    
+    // Workers attendance data
+    workersData: {},
+    containersFilled: {},
+    workersAttendance: [],
+    groupWorkers: [],
+    
+    // Issues data
+    selectedIssues: [],
+    otherIssueText: "",
+  });
+  
   const { profile, loading } = useProfile();
 
-  console.log(formData, "formData");
+  // Fetch group members when group is selected
+  useEffect(() => {
+    const fetchGroupMembers = async () => {
+      if (!formData.selectedGroup) return;
+      
+      try {
+        const response = await getGroupMembers({
+          groupId: formData.selectedGroup.value,
+        });
+        
+        if (response.status === 200) {
+          setFormData(prev => ({
+            ...prev,
+            groupWorkers: response.data
+          }));
+        }
+      } catch (error) {
+        console.error("Error fetching group members:", error);
+      }
+    };
+    
+    fetchGroupMembers();
+  }, [formData.selectedGroup]);
 
   const handleStepChange = (step) => {
     setCurrentStep(step);

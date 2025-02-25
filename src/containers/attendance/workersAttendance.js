@@ -82,6 +82,7 @@ export default function WorkersAttendance({
     onUpdate({
       workersAttendance: newAttendance,
       customContainers,
+      groupWorkers
     });
   };
 
@@ -95,6 +96,7 @@ export default function WorkersAttendance({
     onUpdate({
       workersAttendance,
       customContainers: newCustom,
+      groupWorkers
     });
   };
 
@@ -143,6 +145,16 @@ export default function WorkersAttendance({
 
     onStepChange("issues");
   };
+
+  useEffect(() => {
+    if (groupWorkers.length > 0) {
+      onUpdate({
+        workersAttendance,
+        customContainers,
+        groupWorkers
+      });
+    }
+  }, [groupWorkers]);
 
   if (groupWorkersLoading) {
     return (
