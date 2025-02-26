@@ -1,0 +1,246 @@
+// Define the variables locally since we can't find the shared imports
+$primary-color: #10b981; // Emerald green (like in the file)
+$success-color: #10b981; // Same as primary
+$warning-color: #f59e0b; // Amber
+$danger-color: #ef4444; // Red
+$text-color: #4b5563; // Gray 600
+$text-color-dark: #111827; // Gray 900
+$text-color-light: #9ca3af; // Gray 400
+$gray-50: #f9fafb;
+$gray-100: #f3f4f6;
+$gray-200: #e5e7eb;
+$gray-300: #d1d5db;
+$gray-500: #6b7280;
+
+// Import color module for modern color functions
+@use "sass:color";
+
+.container {
+  width: 100%;
+  
+  .wrapper {
+    display: flex;
+    flex-direction: column;
+    gap: 1.5rem;
+    min-height: calc(100vh - 120px);
+    
+    .row {
+      display: flex;
+      flex-direction: column;
+      gap: 1.5rem;
+    }
+    
+    .content {
+      padding: 64px 50px 32px 50px;
+      display: flex;
+      flex-direction: column;
+      gap: 1.5rem;
+    }
+  }
+}
+
+// Loader styles
+.loader {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  padding: 3rem 1rem;
+  background-color: white;
+  border-radius: 0.5rem;
+  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
+  margin-top: 1rem;
+  
+  .spinnerContainer {
+    margin-bottom: 1rem;
+  }
+  
+  .spinner {
+    width: 40px;
+    height: 40px;
+    border: 3px solid rgba(0, 0, 0, 0.1);
+    border-radius: 50%;
+    border-top-color: $primary-color;
+    animation: spin 1s ease-in-out infinite;
+  }
+  
+  @keyframes spin {
+    to {
+      transform: rotate(360deg);
+    }
+  }
+  
+  p {
+    color: $text-color;
+    font-size: 1rem;
+  }
+}
+
+// No data message
+.noData {
+  display: flex;
+  justify-content: center;
+  padding: 3rem 1rem;
+  background-color: white;
+  border-radius: 0.5rem;
+  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
+  margin-top: 1rem;
+  
+  p {
+    color: $text-color;
+    font-size: 1rem;
+    text-align: center;
+  }
+}
+
+// New modern filter section
+.filterSection {
+  background-color: white;
+  border-radius: 0.75rem;
+  box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.05), 0 2px 4px -1px rgba(0, 0, 0, 0.03);
+  padding: 1.5rem;
+  transition: all 0.3s ease;
+  direction: rtl;
+  
+  &:hover {
+    box-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.05), 0 4px 6px -2px rgba(0, 0, 0, 0.02);
+  }
+  
+  .filterRow {
+    display: flex;
+    flex-direction: column;
+    gap: 1.25rem;
+    
+    .filterHeader {
+      display: flex;
+      align-items: center;
+      gap: 0.75rem;
+      padding-bottom: 1rem;
+      border-bottom: 1px solid $gray-200;
+      
+      .icon {
+        color: $primary-color;
+        font-size: 1.25rem;
+      }
+      
+      .title {
+        font-size: 1.125rem;
+        font-weight: 600;
+        color: $text-color-dark;
+        margin: 0;
+      }
+    }
+    
+    .filterControls {
+      display: grid;
+      grid-template-columns: repeat(auto-fill, minmax(180px, 1fr));
+      gap: 1rem;
+      
+      .filterItem {
+        display: flex;
+        flex-direction: column;
+        gap: 0.5rem;
+        
+        .label {
+          font-size: 0.875rem;
+          font-weight: 500;
+          color: $text-color;
+          margin-bottom: 0.25rem;
+        }
+        
+        &:hover .label {
+          color: $primary-color;
+        }
+      }
+    }
+    
+    .actionButtons {
+      display: flex;
+      justify-content: flex-end;
+      gap: 1rem;
+      margin-top: 0.5rem;
+      padding-top: 1.25rem;
+      border-top: 1px solid $gray-200;
+      
+      .button {
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        gap: 0.5rem;
+        padding: 0.625rem 1.25rem;
+        border-radius: 0.5rem;
+        font-size: 0.875rem;
+        font-weight: 500;
+        cursor: pointer;
+        transition: all 0.2s ease;
+        
+        .actionIcon {
+          font-size: 0.875rem;
+        }
+        
+        &.reset {
+          background-color: $gray-100;
+          color: $text-color;
+          border: 1px solid $gray-200;
+          
+          &:hover {
+            background-color: $gray-200;
+            color: $text-color-dark;
+          }
+        }
+        
+        &.apply {
+          background-color: $primary-color;
+          color: white;
+          border: 1px solid $primary-color;
+          
+          &:hover {
+            background-color: color.adjust($primary-color, $lightness: -5%);
+          }
+          
+          &:disabled {
+            opacity: 0.7;
+            cursor: not-allowed;
+          }
+        }
+      }
+    }
+  }
+}
+
+// History link
+.historyLink {
+  &:hover {
+    background-color: $gray-200 !important;
+    color: $text-color-dark !important;
+  }
+}
+
+// Responsive adjustments
+@media (max-width: 768px) {
+  .container {
+    .wrapper {
+      .content {
+        padding: 32px 16px 24px 16px;
+      }
+    }
+  }
+  
+  .filterSection {
+    padding: 1rem;
+    
+    .filterRow {
+      .filterControls {
+        grid-template-columns: 1fr;
+      }
+      
+      .actionButtons {
+        flex-direction: column;
+        
+        .button {
+          width: 100%;
+        }
+      }
+    }
+  }
+} 

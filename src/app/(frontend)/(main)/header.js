@@ -5,8 +5,8 @@ import Link from "next/link";
 import { usePathname, useRouter } from "next/navigation";
 import getProfile from "@/app/(backend)/actions/auth/getProfile";
 import { getCookie } from "@/lib/getCookie";
-import styles from "@/styles/layout/header.module.scss";
 import InitialsCircle from "@/components/initialsCircle";
+import styles from "@/styles/layout/header.module.scss";
 
 const Header = () => {
   const router = useRouter();
@@ -157,6 +157,37 @@ const Header = () => {
                   שכר
                 </li>
               </Link>
+
+              <div className={styles.dropdownContainer}>
+                <li 
+                  className={[
+                    pathname === "/admin/attendance-requests" || 
+                    pathname === "/admin/attendance-groups" || 
+                    pathname === "/admin/attendance-history" 
+                      ? styles.active 
+                      : ""
+                  ].join(" ")}
+                >
+                  נוכחות
+                </li>
+                <div className={styles.dropdownContent}>
+                  <Link href="/admin/attendance-requests">
+                    <div className={pathname === "/admin/attendance-requests" ? styles.activeDropItem : ""}>
+                      דיווחים ממתינים
+                    </div>
+                  </Link>
+                  <Link href="/admin/attendance-groups">
+                    <div className={pathname === "/admin/attendance-groups" ? styles.activeDropItem : ""}>
+                      דיווחי קבוצות
+                    </div>
+                  </Link>
+                  <Link href="/admin/attendance-history">
+                    <div className={pathname === "/admin/attendance-history" ? styles.activeDropItem : ""}>
+                      היסטוריית דיווחים
+                    </div>
+                  </Link>
+                </div>
+              </div>
 
               <Link href="/admin/settings">
                 <li

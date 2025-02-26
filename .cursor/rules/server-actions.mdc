@@ -1,4 +1,9 @@
 ---
+description: 
+globs: 
+alwaysApply: false
+---
+---
 description: These rules govern how server actions and related modules should be written, validated, and maintained. Following these guidelines helps ensure consistent, secure, and performant back-end functionality.
 globs: *.js
 ---

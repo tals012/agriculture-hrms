@@ -487,7 +487,10 @@ enum WorkingScheduleSource {
 model WorkerAttendance {
   id String @id @default(cuid())
 
-  approvalStatus              ApprovalStatus            @default(PENDING)
+  approvalStatus  ApprovalStatus @default(PENDING)
+  approvalDate    DateTime?
+  rejectionReason String?
+
   attendanceDoneBy            AttendanceDoneBy          @default(ADMIN)
   attendanceAdministratorName String?
   attendanceDate              DateTime                  @default(now())

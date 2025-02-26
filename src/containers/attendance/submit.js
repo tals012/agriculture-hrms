@@ -103,9 +103,9 @@ export default function Submit({ data, onUpdate, managerId }) {
       const response = await submitAttendance(submissionData);
 
       if (response.status === 201) {
-        toast.success("הדיווח נשלח בהצלחה!", {
+        toast.success("הדיווח נשלח בהצלחה! ממתין לאישור מנהל המערכת", {
           position: "top-center",
-          autoClose: 3000,
+          autoClose: 5000,
           rtl: true
         });
         // Reset form or redirect
@@ -199,6 +199,10 @@ export default function Submit({ data, onUpdate, managerId }) {
           {isSubmitting ? 'שולח...' : 'שלח דיווח'}
           <BsArrowLeft size={20} />
         </button>
+        
+        <div className={styles.approvalNote}>
+          <small>הערה: דיווח זה יועבר למנהל המערכת לאישור לפני שיתווסף לחישוב השכר</small>
+        </div>
       </div>
     </div>
   );

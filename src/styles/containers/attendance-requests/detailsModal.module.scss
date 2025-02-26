@@ -1,0 +1,388 @@
+// Variables
+$primary-color: #10b981; // Green
+$border-color: #e5e7eb;
+$bg-color: white;
+$overlay-bg: rgba(0, 0, 0, 0.5);
+$text-dark: #111827;
+$text-muted: #6b7280;
+$text-light: #9ca3af;
+$approved-color: #10b981;
+$rejected-color: #ef4444;
+$pending-color: #f59e0b;
+$radius: 8px;
+$radius-sm: 4px;
+$transition: all 0.2s ease;
+
+// Modal overlay (background)
+.modalOverlay {
+  position: fixed;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background-color: $overlay-bg;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  z-index: 1000;
+  padding: 1rem;
+  direction: rtl;
+  overflow-y: auto;
+  backdrop-filter: blur(3px);
+  animation: fadeIn 0.2s ease-out;
+}
+
+// Modal container
+.modalContent {
+  background-color: $bg-color;
+  border-radius: $radius;
+  box-shadow: 0 10px 25px -5px rgba(0, 0, 0, 0.2),
+              0 10px 10px -5px rgba(0, 0, 0, 0.1);
+  width: 100%;
+  max-width: 800px;
+  max-height: 90vh;
+  overflow-y: auto;
+  display: flex;
+  flex-direction: column;
+  animation: modalFadeIn 0.3s cubic-bezier(0.16, 1, 0.3, 1) forwards;
+  
+  @media (max-width: 768px) {
+    max-width: 100%;
+    max-height: 100vh;
+    border-radius: 0;
+  }
+}
+
+// Header of the modal
+.modalHeader {
+  padding: 1.25rem 1.5rem;
+  border-bottom: 1px solid $border-color;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  position: sticky;
+  top: 0;
+  background-color: $bg-color;
+  z-index: 10;
+  
+  .headerContent {
+    display: flex;
+    flex-direction: column;
+    gap: 0.25rem;
+    
+    h3 {
+      margin: 0;
+      font-size: 1.25rem;
+      font-weight: 600;
+      color: $text-dark;
+    }
+    
+    .reportId {
+      font-size: 0.75rem;
+      color: $text-muted;
+      font-family: monospace;
+      font-weight: 500;
+    }
+  }
+}
+
+// Close button in header
+.closeButton {
+  background: transparent;
+  border: none;
+  color: $text-muted;
+  font-size: 1.25rem;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 2.25rem;
+  height: 2.25rem;
+  border-radius: 50%;
+  cursor: pointer;
+  transition: $transition;
+  
+  &:hover {
+    background-color: #f3f4f6;
+    color: $text-dark;
+    transform: scale(1.05);
+  }
+  
+  &:active {
+    transform: scale(0.95);
+  }
+}
+
+// Status badge
+.statusBadge {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  padding: 0.5rem 1rem;
+  margin-bottom: 1.5rem;
+  border-radius: $radius;
+  font-weight: 600;
+  font-size: 0.875rem;
+  letter-spacing: 0.025em;
+  position: relative;
+  
+  &::before {
+    content: "";
+    display: inline-block;
+    width: 0.5rem;
+    height: 0.5rem;
+    border-radius: 50%;
+    margin-left: 0.5rem;
+  }
+  
+  &[data-status="APPROVED"] {
+    background-color: rgba($approved-color, 0.1);
+    color: $approved-color;
+    border: 1px solid rgba($approved-color, 0.2);
+    
+    &::before {
+      background-color: $approved-color;
+    }
+  }
+  
+  &[data-status="REJECTED"] {
+    background-color: rgba($rejected-color, 0.1);
+    color: $rejected-color;
+    border: 1px solid rgba($rejected-color, 0.2);
+    
+    &::before {
+      background-color: $rejected-color;
+    }
+  }
+  
+  &[data-status="PENDING"] {
+    background-color: rgba($pending-color, 0.1);
+    color: $pending-color;
+    border: 1px solid rgba($pending-color, 0.2);
+    
+    &::before {
+      background-color: $pending-color;
+    }
+  }
+}
+
+// Body of the modal
+.modalBody {
+  padding: 1.5rem;
+  overflow-y: auto;
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  gap: 2rem;
+}
+
+// Sections
+.section {
+  border-radius: $radius;
+  background-color: #fafafa;
+  padding: 1.25rem;
+  transition: $transition;
+  
+  &:hover {
+    background-color: #f9fafb;
+    box-shadow: 0 1px 3px rgba(0, 0, 0, 0.05);
+  }
+}
+
+// Section titles
+.sectionTitle {
+  font-size: 1rem;
+  font-weight: 600;
+  color: $text-dark;
+  margin-top: 0;
+  margin-bottom: 1rem;
+  padding-bottom: 0.5rem;
+  border-bottom: 1px solid $border-color;
+  display: flex;
+  align-items: center;
+  
+  &::before {
+    content: "";
+    display: inline-block;
+    width: 0.25rem;
+    height: 1rem;
+    background-color: $primary-color;
+    margin-left: 0.5rem;
+    border-radius: $radius-sm;
+  }
+}
+
+// Grid for details
+.detailsGrid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(240px, 1fr));
+  gap: 1.25rem 1rem;
+  
+  @media (max-width: 640px) {
+    grid-template-columns: 1fr;
+  }
+}
+
+// Each detail item
+.detailItem {
+  display: flex;
+  flex-direction: column;
+  gap: 0.25rem;
+  padding: 0.75rem;
+  border-radius: $radius-sm;
+  background-color: white;
+  border: 1px solid $border-color;
+  transition: $transition;
+  
+  &:hover {
+    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.05);
+    transform: translateY(-1px);
+    border-color: rgba($primary-color, 0.3);
+  }
+  
+  &.rejectionReason {
+    grid-column: 1 / -1;
+    background-color: rgba($rejected-color, 0.05);
+    border-color: rgba($rejected-color, 0.2);
+  }
+}
+
+// Label for detail item
+.detailLabel {
+  font-size: 0.75rem;
+  color: $text-muted;
+  font-weight: 500;
+}
+
+// Value for detail item
+.detailValue {
+  font-size: 0.938rem;
+  color: $text-dark;
+  font-weight: 500;
+  
+  // Status colors
+  &.approved {
+    color: $approved-color;
+    font-weight: 600;
+  }
+  
+  &.rejected {
+    color: $rejected-color;
+    font-weight: 600;
+  }
+  
+  &.pending {
+    color: $pending-color;
+    font-weight: 600;
+  }
+}
+
+// Section for issues
+.issuesSection {
+  margin-top: 1rem;
+  
+  h4 {
+    font-size: 1rem;
+    font-weight: 600;
+    color: $text-dark;
+    margin-bottom: 0.75rem;
+    padding-bottom: 0.5rem;
+    border-bottom: 1px solid $border-color;
+  }
+}
+
+// List of issues
+.issuesList {
+  list-style-type: none;
+  padding: 0;
+  margin: 0;
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.75rem;
+  
+  li {
+    padding: 0.5rem 0.75rem;
+    background-color: rgba($primary-color, 0.08);
+    border: 1px solid rgba($primary-color, 0.15);
+    border-radius: $radius;
+    font-size: 0.875rem;
+    color: darken($primary-color, 10%);
+    display: flex;
+    align-items: center;
+    
+    &:before {
+      content: "•";
+      display: inline-block;
+      margin-left: 0.5rem;
+      color: $primary-color;
+      font-size: 1.25rem;
+    }
+  }
+}
+
+// Additional info section
+.additionalInfo {
+  margin-top: 1rem;
+  
+  h4 {
+    font-size: 1rem;
+    font-weight: 600;
+    color: $text-dark;
+    margin-bottom: 0.75rem;
+    padding-bottom: 0.5rem;
+    border-bottom: 1px solid $border-color;
+  }
+}
+
+// Footer of the modal
+.modalFooter {
+  padding: 1rem 1.5rem;
+  border-top: 1px solid $border-color;
+  display: flex;
+  justify-content: flex-start;
+  background-color: #f9fafb;
+}
+
+// Close button in footer
+.closeModalButton {
+  padding: 0.5rem 1.25rem;
+  background-color: white;
+  color: $text-dark;
+  border: 1px solid $border-color;
+  border-radius: $radius-sm;
+  font-size: 0.875rem;
+  font-weight: 500;
+  cursor: pointer;
+  transition: $transition;
+  
+  &:hover {
+    background-color: #f3f4f6;
+    border-color: #d1d5db;
+    transform: translateY(-1px);
+    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.05);
+  }
+  
+  &:active {
+    transform: translateY(0);
+  }
+}
+
+// Animations
+@keyframes fadeIn {
+  from {
+    opacity: 0;
+  }
+  to {
+    opacity: 1;
+  }
+}
+
+@keyframes modalFadeIn {
+  from {
+    opacity: 0;
+    transform: translateY(20px) scale(0.98);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0) scale(1);
+  }
+}

@@ -168,6 +168,18 @@
   direction: rtl;
 }
 
+.approvalNote {
+  margin-top: 1rem;
+  font-size: 0.875rem;
+  color: #6b7280;
+  background-color: #f9fafb;
+  padding: 0.75rem;
+  border-radius: 6px;
+  border-right: 3px solid #10b981;
+  line-height: 1.4;
+  text-align: right;
+}
+
 .submitButton {
   display: flex;
   align-items: center;
