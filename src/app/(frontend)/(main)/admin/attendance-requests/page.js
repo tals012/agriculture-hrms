@@ -33,7 +33,6 @@ export default function AttendanceRequestsPage() {
     setLoading(true);
     try {
       const result = await getAttendanceRequests(filterOptions);
-
       if (result.success) {
         setAttendanceRequests(result.data);
       } else {

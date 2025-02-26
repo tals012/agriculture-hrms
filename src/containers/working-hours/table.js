@@ -8,6 +8,76 @@ import { getPricing } from "@/app/(backend)/actions/clients/getPricing";
 import getWorkerById from "@/app/(backend)/actions/workers/getWorkerById";
 import styles from "@/styles/containers/working-hours/table.module.scss";
 import Select from "react-select";
+import { FaCalendarTimes, FaClock, FaHourglassHalf, FaCheck, FaTimesCircle, FaExclamationTriangle } from "react-icons/fa";
+
+// Status icon component
+const StatusIcon = ({ status, approvalStatus, isWeekend }) => {
+  if (approvalStatus === 'PENDING') {
+    return (
+      <div className={`${styles.statusIcon} ${styles.pending}`} title="ממתין לאישור">
+        <FaHourglassHalf />
+      </div>
+    );
+  }
+  
+  if (approvalStatus === 'REJECTED') {
+    return (
+      <div className={`${styles.statusIcon} ${styles.rejected}`} title="נדחה">
+        <FaTimesCircle />
+      </div>
+    );
+  }
+  
+  if (status && status !== 'WORKING') {
+    return (
+      <div className={`${styles.statusIcon} ${styles.notWorking}`} title="לא עובד">
+        <FaClock />
+      </div>
+    );
+  }
+  
+  if (status === 'WEEKEND' || (status === undefined && isWeekend)) {
+    return (
+      <div className={`${styles.statusIcon} ${styles.weekend}`} title="סוף שבוע">
+        <FaCalendarTimes />
+      </div>
+    );
+  }
+  
+  return null;
+};
+
+// Legend component
+const Legend = () => {
+  return (
+    <div className={styles.legend}>
+      <div className={styles.legendItem}>
+        <div className={`${styles.icon} ${styles.pending}`}>
+          <FaHourglassHalf />
+        </div>
+        <span className={styles.label}>ממתין לאישור</span>
+      </div>
+      <div className={styles.legendItem}>
+        <div className={`${styles.icon} ${styles.rejected}`}>
+          <FaTimesCircle />
+        </div>
+        <span className={styles.label}>נדחה</span>
+      </div>
+      <div className={styles.legendItem}>
+        <div className={`${styles.icon} ${styles.notWorking}`}>
+          <FaClock />
+        </div>
+        <span className={styles.label}>לא עובד</span>
+      </div>
+      <div className={styles.legendItem}>
+        <div className={`${styles.icon} ${styles.weekend}`}>
+          <FaCalendarTimes />
+        </div>
+        <span className={styles.label}>סוף שבוע</span>
+      </div>
+    </div>
+  );
+};
 
 const formatMinutesToTime = (minutes) => {
   if (!minutes && minutes !== 0) return "-";
@@ -226,6 +296,7 @@ const EditableRow = memo(({ day, weekDays, onSave, disabled, clientId }) => {
     if (day.status && day.status !== 'WORKING') {
       classes.push(styles.notWorking);
     }
+    // We'll use icons instead of background color for pending status
     return classes.join(' ');
   }, [day.isWeekend, day.status]);
 
@@ -347,6 +418,13 @@ const EditableRow = memo(({ day, weekDays, onSave, disabled, clientId }) => {
 
   return (
     <tr className={rowClassName}>
+      <td className={styles.statusCell}>
+        <StatusIcon 
+          status={day.status} 
+          approvalStatus={day.approvalStatus || (day.attendance && day.attendance.approvalStatus)}
+          isWeekend={day.isWeekend}
+        />
+      </td>
       <td>{new Date(day.date).getDate()}</td>
       <td>{weekDays[day.dayOfWeek]}</td>
       <td>
@@ -561,10 +639,14 @@ const Table = memo(({ data, workerId, onDataUpdate }) => {
         </div>
       </div>
 
+      {/* Add legend above the table */}
+      <Legend />
+
       <div className={styles.tableWrapper}>
         <table className={styles.table}>
           <thead>
             <tr>
+              <th>סטטוס</th>
               <th>תאריך</th>
               <th>יום</th>
               <th>התחלה</th>

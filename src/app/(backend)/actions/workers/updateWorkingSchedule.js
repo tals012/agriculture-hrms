@@ -423,6 +423,25 @@ const updateWorkingSchedule = async (input) => {
 
     console.log(attendanceData, "attendanceData");
 
+    // Check if there's a REJECTED record with the same date, and delete it if exists
+    const rejectedRecord = await prisma.workerAttendance.findFirst({
+      where: {
+        workerId,
+        attendanceDate: new Date(date),
+        approvalStatus: "REJECTED"
+      }
+    });
+
+    if (rejectedRecord) {
+      // Delete the rejected record
+      await prisma.workerAttendance.delete({
+        where: {
+          id: rejectedRecord.id
+        }
+      });
+      console.log(`Deleted rejected record with ID: ${rejectedRecord.id}`);
+    }
+
     const attendanceRecord = await prisma.workerAttendance.upsert({
       where: {
         id: existingRecord?.id || "new",

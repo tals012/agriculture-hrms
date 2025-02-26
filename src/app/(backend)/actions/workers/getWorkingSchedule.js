@@ -94,6 +94,10 @@ export async function getWorkingSchedule(input) {
           gte: startDate,
           lte: endDate,
         },
+        // Filter out records with REJECTED approval status
+        NOT: {
+          approvalStatus: 'REJECTED'
+        }
       },
       include: {
         combination: {
@@ -253,6 +257,7 @@ export async function getWorkingSchedule(input) {
             price: attendanceRecord.combination.price,
             containerNorm: attendanceRecord.combination.containerNorm,
           } : null,
+          approvalStatus: attendanceRecord.approvalStatus,
 
         });
       } else {
@@ -272,6 +277,7 @@ export async function getWorkingSchedule(input) {
           totalWorkingHoursWindow125: isWeekendDay ? 0 : schedule.numberOfTotalHoursPerDayWindow125,
           totalWorkingHoursWindow150: isWeekendDay ? 0 : schedule.numberOfTotalHoursPerDayWindow150,
           scheduleSource: schedule.source,
+          approvalStatus: null,
         });
       }
 
