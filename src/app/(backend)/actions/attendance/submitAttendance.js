@@ -29,6 +29,7 @@ const submitAttendanceSchema = z.object({
   combinationId: z.string(),
   groupId: z.string(),
   managerId: z.string().optional(),
+  leaderId: z.string().optional(),
   issues: z.array(z.string()).optional(),
   otherIssueText: z.string().optional(),
   workersAttendance: z.array(workerAttendanceSchema),
@@ -55,6 +56,7 @@ export async function submitAttendance(input) {
       combinationId,
       groupId,
       managerId,
+      leaderId,
       issues,
       otherIssueText,
       workersAttendance,
@@ -83,6 +85,13 @@ export async function submitAttendance(input) {
         message: "קבוצה לא נמצאה",
       };
     }
+
+    const groupLeader = await prisma.groupMember.findFirst({
+      where: {
+        groupId,
+        isGroupLeader: true,
+      },
+    });
 
     // Process each worker's attendance
     const attendanceRecords = await Promise.all(
@@ -171,11 +180,12 @@ export async function submitAttendance(input) {
           data: {
             workerId,
             attendanceDate: new Date(date),
-            attendanceDoneBy: managerId ? "MANAGER" : "ADMIN",
+            attendanceDoneBy: managerId ? "MANAGER" : leaderId ? "LEADER" : "ADMIN",
             attendanceAdministratorName: administratorName,
             combinationId,
             groupId,
-            managerId,
+            ...(managerId && { managerId }),
+            ...(groupLeader && { leaderId: groupLeader.id }),
             status,
             issues: finalIssues,
             totalContainersFilled: status === "WORKING" ? containersFilled : null,

@@ -63,6 +63,7 @@ export default function GroupAttendanceDetailsModal({ request, onClose }) {
     attendanceDate,
     createdAt,
     manager,
+    leader,
     group,
     worker,
     combination,
@@ -79,7 +80,7 @@ export default function GroupAttendanceDetailsModal({ request, onClose }) {
   } = request;
 
   const workerName = worker ? `${worker.nameHe || ""} ${worker.surnameHe || ""}`.trim() : "לא צוין";
-  const managerName = manager?.name || "לא צוין";
+  const managerName = manager?.name ? manager.name : leader?.worker?.nameHe ? leader.worker.nameHe : "לא צוין";
   const groupName = group?.name || "לא צוין";
   const harvestType = combination?.harvestType?.name || "לא צוין";
   const species = combination?.species?.name || "לא צוין";

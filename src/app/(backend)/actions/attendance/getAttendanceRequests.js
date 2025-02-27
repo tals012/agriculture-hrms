@@ -68,6 +68,17 @@ export async function getAttendanceRequests(filters = {}) {
         worker: true,
         group: true,
         manager: true,
+        leader: {
+          include: {
+            worker: {
+              select: {
+                id: true,
+                surnameHe: true,
+                nameHe: true,
+              },
+            },
+          },
+        },
         combination: {
           include: {
             harvestType: true,

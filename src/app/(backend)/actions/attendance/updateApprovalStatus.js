@@ -12,7 +12,7 @@ const updateApprovalStatusSchema = z.object({
   approvalStatus: z.enum(["APPROVED", "REJECTED"], {
     required_error: "נדרש סטטוס אישור תקין (APPROVED או REJECTED)",
   }),
-  rejectionReason: z.string().optional(),
+  rejectionReason: z.string().nullish(),
 });
 
 /**
@@ -31,6 +31,7 @@ export async function updateApprovalStatus(formData) {
 
     if (!parsedData.success) {
       const error = parsedData.error.format();
+      console.error("Validation error:", error);
       return {
         success: false,
         message: "שגיאת אימות נתונים",

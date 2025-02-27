@@ -315,7 +315,6 @@ model Group {
   field                    Field                      @relation(fields: [fieldId], references: [id], onDelete: Cascade)
   members                  GroupMember[]
   clientPricingCombination ClientPricingCombination[]
-  // attendance               GroupAttendance[]
   workingSchedule          WorkingSchedule[]
   workerAttendance         WorkerAttendance[]
 

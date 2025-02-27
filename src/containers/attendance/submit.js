@@ -26,7 +26,7 @@ const issuesList = {
   'other': 'אחר'
 };
 
-export default function Submit({ data, onUpdate, managerId }) {
+export default function Submit({ data, onUpdate, managerId, leaderId }) {
   const [isSubmitting, setIsSubmitting] = useState(false);
 
   const getDisplayLabel = (optionId, workerId) => {
@@ -97,6 +97,7 @@ export default function Submit({ data, onUpdate, managerId }) {
         otherIssueText: data.otherIssueText,
         groupId: data.selectedGroup.value,
         managerId: managerId,
+        leaderId: leaderId,
         workersAttendance,
       };
 

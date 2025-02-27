@@ -29,7 +29,7 @@ const selectStyle = {
   menu: (provided) => ({ ...provided, zIndex: 9999 }),
 };
 
-export default function General({ data, onUpdate, onStepChange, managerId }) {
+export default function General({ data, onUpdate, onStepChange, managerId, leaderId }) {
   const [formData, setFormData] = useState({
     fullName: data?.fullName || "",
     reportDate: data?.reportDate || new Date(),
@@ -45,9 +45,9 @@ export default function General({ data, onUpdate, onStepChange, managerId }) {
 
   const fetchGroups = async () => {
     try {
-      if (!managerId) return;
+      if (!managerId && !leaderId) return;
 
-      const response = await getGroups({ managerId });
+      const response = await getGroups({ managerId, leaderId });
       if (response.status === 200) {
         console.log(response.data, "response.data");
         if (response.data.length === 0) {
@@ -67,7 +67,7 @@ export default function General({ data, onUpdate, onStepChange, managerId }) {
 
   useEffect(() => {
     fetchGroups();
-  }, [managerId]);
+  }, [managerId, leaderId]);
 
   // ! ============================
   // ! GROUPS END

@@ -13,6 +13,7 @@ import InitialsCircle from "@/components/initialsCircle";
 import { toast } from "react-toastify";
 import styles from "@/styles/screens/my-group.module.scss";
 import Spinner from "@/components/spinner";
+import useProfile from "@/hooks/useProfile";
 
 export default function MyGroupPage() {
   const [loading, setLoading] = useState(true);
@@ -23,6 +24,9 @@ export default function MyGroupPage() {
   const [selectedWorkers, setSelectedWorkers] = useState([]);
   const [loadingWorkers, setLoadingWorkers] = useState(false);
   const [adding, setAdding] = useState(false);
+
+  const { profile, loading: profileLoading } = useProfile();
+  console.log(profile, "profile");
 
   const fetchGroup = async () => {
     try {
@@ -43,7 +47,7 @@ export default function MyGroupPage() {
 
   const fetchAvailableWorkers = async () => {
     if (!group) return;
-    
+
     try {
       setLoadingWorkers(true);
       const response = await getAvailableWorkers({ groupId: group.id });
@@ -75,7 +79,7 @@ export default function MyGroupPage() {
       setRemoving(true);
       const response = await removeWorkersFromGroup({
         groupId: group.id,
-        workers: [workerId]
+        workers: [workerId],
       });
 
       if (response.status === 200) {
@@ -114,7 +118,7 @@ export default function MyGroupPage() {
       setAdding(true);
       const response = await addWorkersToGroup({
         groupId: group.id,
-        workers: selectedWorkers
+        workers: selectedWorkers,
       });
 
       if (response.status === 200) {
@@ -143,9 +147,9 @@ export default function MyGroupPage() {
   };
 
   const handleToggleWorker = (workerId) => {
-    setSelectedWorkers(prev => 
+    setSelectedWorkers((prev) =>
       prev.includes(workerId)
-        ? prev.filter(id => id !== workerId)
+        ? prev.filter((id) => id !== workerId)
         : [...prev, workerId]
     );
   };
@@ -164,9 +168,13 @@ export default function MyGroupPage() {
   }
 
   // Filter out the group leader and get regular members
-  const regularMembers = group.members.filter(m => !m.isGroupLeader);
-  const activeWorkers = regularMembers.filter(m => m.worker.workerStatus === "ACTIVE");
-  const inactiveWorkers = regularMembers.filter(m => m.worker.workerStatus !== "ACTIVE");
+  const regularMembers = group.members.filter((m) => !m.isGroupLeader);
+  const activeWorkers = regularMembers.filter(
+    (m) => m.worker.workerStatus === "ACTIVE"
+  );
+  const inactiveWorkers = regularMembers.filter(
+    (m) => m.worker.workerStatus !== "ACTIVE"
+  );
 
   return (
     <div className={styles.container}>
@@ -207,7 +215,7 @@ export default function MyGroupPage() {
               </div>
             </div>
           </div>
-          <button 
+          <button
             className={styles.addButton}
             onClick={() => {
               setShowAddModal(true);
@@ -253,9 +261,16 @@ export default function MyGroupPage() {
                       <td>
                         <div className={styles.user}>
                           <InitialsCircle
-                            name={`${member.worker.name || member.worker.nameHe} ${member.worker.surname || member.worker.surnameHe}`} 
+                            name={`${
+                              member.worker.name || member.worker.nameHe
+                            } ${
+                              member.worker.surname || member.worker.surnameHe
+                            }`}
                           />
-                          <p>{member.worker.name || member.worker.nameHe} {member.worker.surname || member.worker.surnameHe}</p>
+                          <p>
+                            {member.worker.name || member.worker.nameHe}{" "}
+                            {member.worker.surname || member.worker.surnameHe}
+                          </p>
                         </div>
                       </td>
                       <td>
@@ -268,13 +283,27 @@ export default function MyGroupPage() {
                         <p>{member.worker.passport || "-"}</p>
                       </td>
                       <td>
-                        <p>{format(new Date(member.startDate), "dd-MM-yyyy")}</p>
+                        <p>
+                          {format(new Date(member.startDate), "dd-MM-yyyy")}
+                        </p>
                       </td>
                       <td>
                         <Chip
-                          text={member.worker.workerStatus === "ACTIVE" ? "פעיל" : "לא פעיל"}
-                          bgColor={member.worker.workerStatus === "ACTIVE" ? "#EAF5F1" : "#FDECEC"}
-                          textColor={member.worker.workerStatus === "ACTIVE" ? "#00563E" : "#D8000C"}
+                          text={
+                            member.worker.workerStatus === "ACTIVE"
+                              ? "פעיל"
+                              : "לא פעיל"
+                          }
+                          bgColor={
+                            member.worker.workerStatus === "ACTIVE"
+                              ? "#EAF5F1"
+                              : "#FDECEC"
+                          }
+                          textColor={
+                            member.worker.workerStatus === "ACTIVE"
+                              ? "#00563E"
+                              : "#D8000C"
+                          }
                         />
                       </td>
                       <td>
@@ -289,7 +318,7 @@ export default function MyGroupPage() {
                               מסיר...
                             </span>
                           ) : (
-                            'הסר מהקבוצה'
+                            "הסר מהקבוצה"
                           )}
                         </button>
                       </td>
@@ -307,7 +336,7 @@ export default function MyGroupPage() {
           <div className={styles.modalContent}>
             <div className={styles.modalHeader}>
               <h3>הוספת עובדים לקבוצה</h3>
-              <button 
+              <button
                 className={styles.closeButton}
                 onClick={() => {
                   setShowAddModal(false);
@@ -317,7 +346,7 @@ export default function MyGroupPage() {
                 ✕
               </button>
             </div>
-            
+
             <div className={styles.modalBody}>
               {loadingWorkers ? (
                 <div className={styles.loading}>
@@ -328,26 +357,33 @@ export default function MyGroupPage() {
                 <div className={styles.noWorkers}>אין עובדים זמינים להוספה</div>
               ) : (
                 <div className={styles.workersList}>
-                  {availableWorkers.map(worker => (
-                    <div 
+                  {availableWorkers.map((worker) => (
+                    <div
                       key={worker.id}
                       className={`${styles.workerItem} ${
-                        selectedWorkers.includes(worker.id) ? styles.selected : ''
+                        selectedWorkers.includes(worker.id)
+                          ? styles.selected
+                          : ""
                       }`}
                       onClick={() => handleToggleWorker(worker.id)}
                     >
                       <div className={styles.workerInfo}>
                         <InitialsCircle
-                          name={`${worker.name || worker.nameHe} ${worker.surname || worker.surnameHe}`}
+                          name={`${worker.name || worker.nameHe} ${
+                            worker.surname || worker.surnameHe
+                          }`}
                         />
                         <div className={styles.workerDetails}>
                           <p className={styles.name}>
-                            {worker.name || worker.nameHe} {worker.surname || worker.surnameHe}
+                            {worker.name || worker.nameHe}{" "}
+                            {worker.surname || worker.surnameHe}
                           </p>
-                          <p className={styles.passport}>{worker.passport || "-"}</p>
+                          <p className={styles.passport}>
+                            {worker.passport || "-"}
+                          </p>
                         </div>
                       </div>
-                      <input 
+                      <input
                         type="checkbox"
                         checked={selectedWorkers.includes(worker.id)}
                         onChange={() => {}}
@@ -379,7 +415,7 @@ export default function MyGroupPage() {
                     מוסיף...
                   </span>
                 ) : (
-                  'הוסף עובדים'
+                  "הוסף עובדים"
                 )}
               </button>
             </div>

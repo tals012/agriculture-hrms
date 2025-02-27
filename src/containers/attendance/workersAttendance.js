@@ -21,6 +21,7 @@ export default function WorkersAttendance({
   onUpdate,
   onStepChange,
   managerId,
+  leaderId,
 }) {
   const [openWorkerId, setOpenWorkerId] = useState(null);
   const [workersAttendance, setWorkersAttendance] = useState(

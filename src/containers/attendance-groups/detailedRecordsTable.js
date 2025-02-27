@@ -72,13 +72,15 @@ const DetailedRecordsTable = ({ records, onSelectRequest }) => {
     return <p className={styles.emptyMessage}>אין רשומות לתצוגה</p>;
   }
 
+  console.log(records, 'RECORDS');
+
   return (
     <>
       <div className={styles.tableContainer}>
         <table className={styles.table}>
           <thead className={styles.tableHeader}>
             <tr>
-              <th className={styles.headerCell}>מנהל שדה</th>
+              <th className={styles.headerCell}>עובד נוכחות</th>
               <th className={styles.headerCell}>קבוצת עובדים</th>
               <th className={styles.headerCell}>עובד</th>
               <th className={styles.headerCell}>מיכלים</th>
@@ -91,7 +93,7 @@ const DetailedRecordsTable = ({ records, onSelectRequest }) => {
             {records.map((record) => (
               <tr key={record.id} className={styles.tableRow}>
                 <td className={styles.tableCell}>
-                  {record.manager?.name || "—"}
+                  {record.manager?.name ? record.manager?.name : record.leader?.worker?.nameHe ? record.leader?.worker?.nameHe : "—"}
                 </td>
                 <td className={styles.tableCell}>
                   {record.group?.name || "—"}

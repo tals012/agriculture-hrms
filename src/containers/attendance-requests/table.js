@@ -11,10 +11,10 @@ const formatDate = (dateString) => {
   if (!dateString) return "לא צוין";
   try {
     const date = new Date(dateString);
-    return date.toLocaleDateString('he-IL', {
-      year: 'numeric',
-      month: '2-digit',
-      day: '2-digit'
+    return date.toLocaleDateString("he-IL", {
+      year: "numeric",
+      month: "2-digit",
+      day: "2-digit",
     });
   } catch (error) {
     return dateString;
@@ -26,28 +26,31 @@ const RequestStatus = ({ status }) => {
   const statusMap = {
     PENDING: { text: "ממתין לאישור", className: styles.pending },
     APPROVED: { text: "מאושר", className: styles.approved },
-    REJECTED: { text: "נדחה", className: styles.rejected }
+    REJECTED: { text: "נדחה", className: styles.rejected },
   };
-  
-  const { text, className } = statusMap[status] || { text: status, className: "" };
-  
-  return (
-    <span className={`${styles.status} ${className}`}>
-      {text}
-    </span>
-  );
+
+  const { text, className } = statusMap[status] || {
+    text: status,
+    className: "",
+  };
+
+  return <span className={`${styles.status} ${className}`}>{text}</span>;
 };
 
-export default function AttendanceRequestsTable({ requests, onStatusChange, loading }) {
+export default function AttendanceRequestsTable({
+  requests,
+  onStatusChange,
+  loading,
+}) {
   const [processingIds, setProcessingIds] = useState([]);
   const [selectedRequest, setSelectedRequest] = useState(null);
   const [rejectionRequest, setRejectionRequest] = useState(null);
-  
+
   // Handle approve action
   const handleApprove = async (requestId) => {
     if (processingIds.includes(requestId)) return;
-    
-    setProcessingIds(prev => [...prev, requestId]);
+
+    setProcessingIds((prev) => [...prev, requestId]);
     try {
       // Call the parent's onStatusChange function
       await onStatusChange(requestId, "APPROVED");
@@ -55,57 +58,57 @@ export default function AttendanceRequestsTable({ requests, onStatusChange, load
       toast.error("אירעה שגיאה בעת עדכון הסטטוס", {
         position: "bottom-center",
         autoClose: 5000,
-        rtl: true
+        rtl: true,
       });
     } finally {
-      setProcessingIds(prev => prev.filter(id => id !== requestId));
+      setProcessingIds((prev) => prev.filter((id) => id !== requestId));
     }
   };
-  
+
   // Open rejection form
   const handleReject = (requestId) => {
     setRejectionRequest(requestId);
   };
-  
+
   // Submit rejection with reason
   const handleSubmitRejection = async (requestId, reason) => {
     if (processingIds.includes(requestId)) return;
-    
-    setProcessingIds(prev => [...prev, requestId]);
+
+    setProcessingIds((prev) => [...prev, requestId]);
     try {
       // Create a FormData object to include the rejection reason
       const formData = new FormData();
       formData.append("attendanceId", requestId);
       formData.append("approvalStatus", "REJECTED");
       formData.append("rejectionReason", reason);
-      
+
       // Call the parent's onStatusChange function with the form data
       await onStatusChange(requestId, "REJECTED", formData);
-      
+
       // Close the rejection form
       setRejectionRequest(null);
     } catch (error) {
       throw error; // Let the form component handle the error
     } finally {
-      setProcessingIds(prev => prev.filter(id => id !== requestId));
+      setProcessingIds((prev) => prev.filter((id) => id !== requestId));
     }
   };
-  
+
   // Cancel rejection
   const handleCancelRejection = () => {
     setRejectionRequest(null);
   };
-  
+
   // Open details modal
   const handleViewDetails = (request) => {
     setSelectedRequest(request);
   };
-  
+
   // Close details modal
   const handleCloseModal = () => {
     setSelectedRequest(null);
   };
-  
+
   if (loading) {
     return (
       <div className={styles.loader}>
@@ -116,7 +119,7 @@ export default function AttendanceRequestsTable({ requests, onStatusChange, load
       </div>
     );
   }
-  
+
   if (!requests || requests.length === 0) {
     return (
       <div className={styles.noData}>
@@ -124,7 +127,7 @@ export default function AttendanceRequestsTable({ requests, onStatusChange, load
       </div>
     );
   }
-  
+
   return (
     <>
       <div className={styles.tableContainer}>
@@ -132,7 +135,7 @@ export default function AttendanceRequestsTable({ requests, onStatusChange, load
           <thead>
             <tr>
               <th>תאריך דיווח</th>
-              <th>מנהל שדה</th>
+              <th>עובד נוכחות</th>
               <th>קבוצת עובדים</th>
               <th>עובד</th>
               <th>תאריך נוכחות</th>
@@ -144,9 +147,19 @@ export default function AttendanceRequestsTable({ requests, onStatusChange, load
             {requests.map((request) => (
               <tr key={request.id}>
                 <td>{formatDate(request.createdAt)}</td>
-                <td>{request.manager?.name || "לא צוין"}</td>
+                <td>
+                  {request.manager?.name
+                    ? request.manager?.name
+                    : request.leader?.worker?.nameHe
+                    ? request.leader?.worker?.nameHe
+                    : "לא צוין"}
+                </td>
                 <td>{request.group?.name || "לא צוין"}</td>
-                <td>{`${request.worker?.nameHe || ""} ${request.worker?.surnameHe || ""}`.trim() || "לא צוין"}</td>
+                <td>
+                  {`${request.worker?.nameHe || ""} ${
+                    request.worker?.surnameHe || ""
+                  }`.trim() || "לא צוין"}
+                </td>
                 <td>{formatDate(request.attendanceDate)}</td>
                 <td>
                   <RequestStatus status={request.approvalStatus} />
@@ -161,7 +174,7 @@ export default function AttendanceRequestsTable({ requests, onStatusChange, load
                       <FaEye />
                       <span>פרטים</span>
                     </button>
-                    
+
                     {request.approvalStatus === "PENDING" && (
                       <>
                         <button
@@ -189,14 +202,14 @@ export default function AttendanceRequestsTable({ requests, onStatusChange, load
           </tbody>
         </table>
       </div>
-      
+
       {selectedRequest && (
-        <AttendanceDetailsModal 
+        <AttendanceDetailsModal
           request={selectedRequest}
           onClose={handleCloseModal}
         />
       )}
-      
+
       {rejectionRequest && (
         <RejectionReasonForm
           requestId={rejectionRequest}
@@ -206,4 +219,4 @@ export default function AttendanceRequestsTable({ requests, onStatusChange, load
       )}
     </>
   );
-} 
+}
