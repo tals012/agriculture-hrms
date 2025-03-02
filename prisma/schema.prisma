@@ -809,8 +809,8 @@ model WorkerDocument {
   documentAsset   Asset  @relation(fields: [documentAssetId], references: [id])
   documentAssetId String @unique
 
-  documentCategory   DocumentCategoryWorker? @relation(fields: [documentCategoryId], references: [id])
-  documentCategoryId String?
+  templateCategory   WorkerTemplateCategory? @relation(fields: [templateCategoryId], references: [id])
+  templateCategoryId String?
 
   simpleCategory   WorkerSimpleCategory? @relation(fields: [simpleCategoryId], references: [id])
   simpleCategoryId String?
@@ -854,7 +854,7 @@ model WorkerSimpleCategory {
   updatedAt       DateTime         @updatedAt
 }
 
-model DocumentCategoryWorker {
+model WorkerTemplateCategory {
   id                         String                      @id @default(cuid())
   name                       String
   createdAt                  DateTime                    @default(now())
@@ -868,8 +868,8 @@ model WorkerDigitalFormTemplate {
   name               String
   description        String?
   isDeleted          Boolean                 @default(false)
-  documentCategory   DocumentCategoryWorker? @relation(fields: [documentCategoryId], references: [id])
-  documentCategoryId String?
+  templateCategory   WorkerTemplateCategory? @relation(fields: [templateCategoryId], references: [id])
+  templateCategoryId String?
   templateAsset      Asset                   @relation(fields: [templateAssetId], references: [id])
   templateAssetId    String                  @unique
   createdAt          DateTime                @default(now())
