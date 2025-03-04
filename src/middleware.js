@@ -17,6 +17,8 @@ export async function middleware(request) {
       redirectUrl = "/group-leader/my-group";
     } else if (role === "FIELD_MANAGER") {
       redirectUrl = "/manager/my-fields";
+    } else if (role === "WORKER") {
+      redirectUrl = "/worker/attendance";
     }
 
     return NextResponse.redirect(new URL(redirectUrl, request.url));

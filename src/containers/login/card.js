@@ -38,11 +38,11 @@ export default function Card() {
         // Redirect based on role
         if (res.role === "GROUP_LEADER") {
           router.push("/group-leader/my-group");
-        } 
-        else if (res.role === "FIELD_MANAGER") {
+        } else if (res.role === "FIELD_MANAGER") {
           router.push("/manager/my-fields");
-        }
-        else {
+        } else if (res.role === "WORKER") {
+          router.push("/worker/attendance");
+        } else {
           router.push("/admin/clients");
         }
       }
@@ -79,8 +79,7 @@ export default function Card() {
           <a
             className="cursor-pointer"
             onClick={() => router.push("/forgot-password")}
-          >
-          </a>
+          ></a>
         </div>
 
         <button type="submit">

@@ -1,13 +1,15 @@
+"use server";
+	
 import prisma from "@/lib/prisma";
-import { sendSMS } from "../sms/sendSMS";
-import bcrypt from "bcrypt";
+import sendSMS from "../sms/sendSMS";
+import bcrypt from "bcryptjs";
 
 // Generates a random 5-digit password
 function generateRandomPassword() {
   return Math.floor(10000 + Math.random() * 90000).toString();
 }
 
-export async function sendRequestForAttendance(workerId, groupId) {
+const sendRequestForAttendance = async (workerId, groupId) => {
   try {
     const worker = await prisma.worker.findUnique({
       where: { id: workerId },
@@ -65,7 +67,7 @@ export async function sendRequestForAttendance(workerId, groupId) {
       });
     }
 
-    const attendanceLink = `${process.env.NEXT_PUBLIC_APP_URL}/attendance?groupId=${groupId}`;
+    const attendanceLink = `${process.env.NEXT_PUBLIC_APP_URL}/worker/attendance?groupId=${groupId}`;
 
     const message = `Your login credentials for attendance: Username: ${username}, Password: ${password}. Please complete your attendance at: ${attendanceLink}`;
 
@@ -94,3 +96,5 @@ export async function sendRequestForAttendance(workerId, groupId) {
     return { success: false, message: error.message };
   }
 }
+
+export default sendRequestForAttendance;

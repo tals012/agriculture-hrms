@@ -68,6 +68,7 @@ enum Role {
   ADMIN
   FIELD_MANAGER
   GROUP_LEADER
+  WORKER
 }
 
 model Client {
