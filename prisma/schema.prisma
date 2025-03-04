@@ -34,6 +34,8 @@ model Organization {
 
   workingSchedule WorkingSchedule[]
 
+  sms SMS[]
+
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
 }
@@ -101,6 +103,8 @@ model Client {
   clientPricingCombination ClientPricingCombination[]
 
   workingSchedule WorkingSchedule[]
+
+  sms SMS[]
 
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
@@ -186,6 +190,7 @@ model Worker {
   dailyCalculations  WorkerDailySalaryCalculation[]
 
   documents WorkerDocument[]
+  sms       SMS[]
 
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
@@ -874,4 +879,46 @@ model WorkerDigitalFormTemplate {
   templateAssetId    String                  @unique
   createdAt          DateTime                @default(now())
   updatedAt          DateTime                @updatedAt
+}
+
+model SMS {
+  id            String    @id @default(cuid())
+  sentAt        DateTime  @default(now())
+  readAt        DateTime?
+  message       String
+  status        SMSStatus @default(PENDING)
+  failureReason String?
+
+  sentBy SMSSentBy?
+  sentTo SMSSentTo?
+
+  organization   Organization @relation(fields: [organizationId], references: [id])
+  organizationId String
+
+  client   Client @relation(fields: [clientId], references: [id])
+  clientId String
+
+  worker   Worker @relation(fields: [workerId], references: [id])
+  workerId String
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+}
+
+enum SMSStatus {
+  PENDING
+  SENT
+  FAILED
+}
+
+enum SMSSentBy {
+  WORKER
+  CLIENT
+  ORGANIZATION
+}
+
+enum SMSSentTo {
+  WORKER
+  CLIENT
+  ORGANIZATION
 }
