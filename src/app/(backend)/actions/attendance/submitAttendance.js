@@ -33,6 +33,7 @@ const submitAttendanceSchema = z.object({
   issues: z.array(z.string()).optional(),
   otherIssueText: z.string().optional(),
   workersAttendance: z.array(workerAttendanceSchema),
+  doneByWorker: z.boolean().optional(),
 });
 
 export async function submitAttendance(input) {
@@ -60,6 +61,7 @@ export async function submitAttendance(input) {
       issues,
       otherIssueText,
       workersAttendance,
+      doneByWorker,
     } = parsedData.data;
 
     // Verify the pricing combination exists
@@ -180,7 +182,7 @@ export async function submitAttendance(input) {
           data: {
             workerId,
             attendanceDate: new Date(date),
-            attendanceDoneBy: managerId ? "MANAGER" : leaderId ? "LEADER" : "ADMIN",
+            attendanceDoneBy: doneByWorker ? "WORKER" : managerId ? "MANAGER" : leaderId ? "LEADER" : "ADMIN",
             attendanceAdministratorName: administratorName,
             combinationId,
             groupId,

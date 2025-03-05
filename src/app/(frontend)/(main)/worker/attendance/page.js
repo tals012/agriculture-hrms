@@ -2,12 +2,14 @@
 import { useState, useEffect } from "react";
 import { format } from "date-fns";
 import { ToastContainer, toast } from "react-toastify";
+import "react-toastify/dist/ReactToastify.css";
 import DatePicker from "react-datepicker";
 import "react-datepicker/dist/react-datepicker.css";
 import useProfile from "@/hooks/useProfile";
-import getGroupMembers from "@/app/(backend)/actions/groups/getGroupMembers";
-import styles from "@/styles/screens/workerAttendance.module.scss";
 import getGroupById from "@/app/(backend)/actions/groups/getGroupById";
+import getPricing from "@/app/(backend)/actions/groups/getPricing";
+import submitAttendance from "@/app/(backend)/actions/attendance/submitAttendance";
+import styles from "@/styles/screens/workerAttendance.module.scss";
 
 // Translation data
 const translations = {
@@ -45,6 +47,15 @@ const translations = {
     enterCustomPlaceholder: "Enter custom amount",
     custom: "Custom",
     loading: "Loading...",
+    pricingOptionsLabel: "Select Harvest Type",
+    selectPricingOption: "Select pricing option",
+    noPricingOptions: "No pricing options available",
+    loadingPricing: "Loading pricing options...",
+    errorContainerRequired:
+      "Please select or enter the number of containers filled",
+    errorPricingRequired: "Please select a harvest type",
+    errorProfileNotLoaded: "Worker profile not loaded. Please try again.",
+    errorSubmitFailed: "Failed to submit attendance data",
   },
   Arabic: {
     language: "اللغة",
@@ -80,6 +91,14 @@ const translations = {
     enterCustomPlaceholder: "أدخل كمية مخصصة",
     custom: "مخصص",
     loading: "جاري التحميل...",
+    pricingOptionsLabel: "اختر نوع الحصاد",
+    selectPricingOption: "حدد خيار التسعير",
+    noPricingOptions: "لا توجد خيارات تسعير متاحة",
+    loadingPricing: "جاري تحميل خيارات التسعير...",
+    errorContainerRequired: "الرجاء تحديد أو إدخال عدد الحاويات المملوءة",
+    errorPricingRequired: "الرجاء اختيار نوع الحصاد",
+    errorProfileNotLoaded: "لم يتم تحميل ملف تعريف العامل. حاول مرة أخرى.",
+    errorSubmitFailed: "فشل في إرسال بيانات الحضور",
   },
   Chinese: {
     language: "语言",
@@ -115,6 +134,10 @@ const translations = {
     enterCustomPlaceholder: "输入自定义数量",
     custom: "自定义",
     loading: "加载中...",
+    pricingOptionsLabel: "选择收获类型",
+    selectPricingOption: "选择定价选项",
+    noPricingOptions: "没有可用的定价选项",
+    loadingPricing: "正在加载定价选项...",
   },
   Thai: {
     language: "ภาษา",
@@ -150,6 +173,10 @@ const translations = {
     enterCustomPlaceholder: "ป้อนจำนวนที่กำหนดเอง",
     custom: "กำหนดเอง",
     loading: "กำลังโหลด...",
+    pricingOptionsLabel: "เลือกประเภทการเก็บเกี่ยว",
+    selectPricingOption: "เลือกตัวเลือกราคา",
+    noPricingOptions: "ไม่มีตัวเลือกราคาที่มีอยู่",
+    loadingPricing: "กำลังโหลดตัวเลือกราคา...",
   },
   Srilankan: {
     language: "භාෂාව",
@@ -185,6 +212,10 @@ const translations = {
     enterCustomPlaceholder: "අභිරුචි ප්‍රමාණය ඇතුළත් කරන්න",
     custom: "අභිරුචි",
     loading: "පූරණය වෙමින්...",
+    pricingOptionsLabel: "අස්වැන්න වර්ගය තෝරන්න",
+    selectPricingOption: "මිල ගණන් තෝරන්න",
+    noPricingOptions: "මිල ගණන් විකල්ප නොමැත",
+    loadingPricing: "මිල ගණන් විකල්ප පූරණය වෙමින්...",
   },
   Hindi: {
     language: "भाषा",
@@ -220,6 +251,10 @@ const translations = {
     enterCustomPlaceholder: "कस्टम मात्रा दर्ज करें",
     custom: "कस्टम",
     loading: "लोड हो रहा है...",
+    pricingOptionsLabel: "कटाई प्रकार चुनें",
+    selectPricingOption: "मूल्य निर्धारण विकल्प चुनें",
+    noPricingOptions: "कोई मूल्य निर्धारण विकल्प उपलब्ध नहीं है",
+    loadingPricing: "मूल्य निर्धारण विकल्प लोड हो रहे हैं...",
   },
   Hebrew: {
     language: "עברית",
@@ -249,6 +284,14 @@ const translations = {
     selectOption: "בחר אפשרות",
     custom: "מותאם אישית",
     loading: "טוען...",
+    pricingOptionsLabel: "בחר סוג קטיף",
+    selectPricingOption: "בחר אפשרות תמחור",
+    noPricingOptions: "אין אפשרויות תמחור זמינות",
+    loadingPricing: "טוען אפשרויות תמחור...",
+    errorContainerRequired: "אנא בחר או הזן את מספר המכולות שמולאו",
+    errorPricingRequired: "אנא בחר סוג קטיף",
+    errorProfileNotLoaded: "פרופיל העובד לא נטען. אנא נסה שוב.",
+    errorSubmitFailed: "שליחת נתוני הנוכחות נכשלה",
   },
 };
 
@@ -284,6 +327,7 @@ export default function AttendancePage() {
     selectedPricing: null,
     defaultSchedule: null,
     containersFilled: "",
+    selectedPricingId: "",
   });
 
   const [isAccordionOpen, setIsAccordionOpen] = useState(false);
@@ -304,6 +348,7 @@ export default function AttendancePage() {
   ];
 
   const { profile, loading } = useProfile();
+  console.log(profile, "profile");
 
   useEffect(() => {
     if (profile && profile.name) {
@@ -336,6 +381,37 @@ export default function AttendancePage() {
     };
 
     fetchGroupInfo();
+  }, [groupId]);
+
+  // ! FETCH PRICING COMBINATIONS
+  const [pricing, setPricing] = useState([]);
+  const [pricingLoading, setPricingLoading] = useState(true);
+
+  const fetchPricing = async () => {
+    try {
+      if (!groupId) return;
+
+      const response = await getPricing({
+        groupId,
+      });
+      if (response.status === 200) {
+        console.log(response.data, "pricing data");
+        if (response.data.length === 0) {
+          setPricing([]);
+        } else {
+          setPricing(response.data);
+        }
+        setPricingLoading(false);
+      }
+    } catch (error) {
+      console.error("Error fetching pricing:", error);
+      setPricing([]);
+      setPricingLoading(false);
+    }
+  };
+
+  useEffect(() => {
+    fetchPricing();
   }, [groupId]);
 
   const handleInputChange = (e) => {
@@ -406,36 +482,108 @@ export default function AttendancePage() {
     e.preventDefault();
 
     if (!formData.containersFilled) {
-      toast.error("Please select or enter the number of containers filled");
+      toast.error(translations[selectedLanguage].errorContainerRequired);
+      return;
+    }
+
+    if (!formData.selectedPricingId) {
+      toast.error(translations[selectedLanguage].errorPricingRequired);
+      return;
+    }
+
+    if (!profile) {
+      toast.error(translations[selectedLanguage].errorProfileNotLoaded);
       return;
     }
 
     try {
       setIsLoading(true);
+
+      // Prepare the data for submission
+      let workerFirstName = profile.worker.nameHe || profile.worker.name;
+      let workerLastName = profile.worker.surnameHe || profile.worker.surname;
+      const submissionData = {
+        administratorName: workerFirstName + " " + workerLastName,
+        date: format(formData.reportDate, "yyyy-MM-dd"), // Report date formatted as required
+        combinationId: formData.selectedPricingId, // Selected pricing ID
+        groupId: groupId, // Group ID
+        doneByWorker: true, // As requested
+        workersAttendance: [
+          {
+            workerId: profile.worker.id, // Current worker's ID
+            status: "WORKING",
+            containersFilled: parseFloat(formData.containersFilled) || 0,
+          },
+        ],
+      };
+
+      console.log("Submitting attendance data:", submissionData);
+
       // Submit attendance data to backend
-      // TODO: Implement API call to save data
+      const response = await submitAttendance(submissionData);
 
-      toast.success(translations[selectedLanguage].attendanceSuccess);
-
-      // Reset form after successful submission
-      setFormData((prev) => ({
-        ...prev,
-        containersFilled: "",
-      }));
+      if (response.status === 201) {
+        toast.success(translations[selectedLanguage].attendanceSuccess, {
+          position: "top-center",
+          autoClose: 3000,
+          hideProgressBar: false,
+          closeOnClick: true,
+          pauseOnHover: true,
+          draggable: true,
+          rtl: isRtl,
+          onClose: () => {
+            // Only reset the form after the toast is closed
+            setFormData((prev) => ({
+              ...prev,
+              containersFilled: "",
+              selectedPricingId: "",
+            }));
+          }
+        });
+        
+        // Don't reset form immediately - let the toast show first
+        setSelectedContainerOption("");
+      } else {
+        throw new Error(response.message || "Failed to submit attendance");
+      }
     } catch (error) {
       console.error("Error submitting attendance data:", error);
-      toast.error("Failed to submit attendance data");
+      toast.error(
+        error.message || translations[selectedLanguage].errorSubmitFailed
+      );
     } finally {
       setIsLoading(false);
     }
   };
 
-  // Format current date for display
-  const formattedCurrentDate = format(new Date(), "dd MMMM yyyy");
-
   const rtlLanguages = ["Arabic", "Hebrew"];
   const isRtl = rtlLanguages.includes(selectedLanguage);
-  console.log(isRtl, "isRtl");
+
+  // Add styles for the select dropdown if they don't exist
+  const selectStyles = {
+    selectInput: {
+      width: "100%",
+      height: "44px",
+      padding: "0 15px",
+      border: "1px solid #E6E6E6",
+      borderRadius: "6px",
+      fontSize: "14px",
+      color: "#374151",
+      backgroundColor: "transparent",
+      appearance: "none",
+    },
+    noDataMessage: {
+      color: "#888",
+      fontSize: "14px",
+      marginTop: "5px",
+    },
+    loadingMessage: {
+      color: "#888",
+      fontSize: "14px",
+      marginTop: "5px",
+      fontStyle: "italic",
+    },
+  };
 
   if (loading || isLoading) {
     return (
@@ -486,7 +634,8 @@ export default function AttendancePage() {
               <span className={styles.nameLabel}>
                 {translations[selectedLanguage].workerNameLabel}
               </span>
-              {profile?.name ? profile.name : profile?.nameHe || "Worker Name"}
+              {profile?.worker?.name ? profile.worker.name : profile?.worker?.nameHe}{" "}
+              {profile?.worker?.surname ? profile.worker.surname : profile?.worker?.surnameHe}
             </h1>
           </div>
         </div>
@@ -523,14 +672,6 @@ export default function AttendancePage() {
           >
             {profile && (
               <>
-                <div className={styles.infoRow}>
-                  <div className={styles.infoValue}>
-                    {profile?.worker?.id || "2771"}
-                  </div>
-                  <div className={styles.infoLabel}>
-                    {translations[selectedLanguage].workerIdLabel}
-                  </div>
-                </div>
                 <div className={styles.infoRow}>
                   <div className={styles.infoValue}>
                     {profile?.worker?.passport || "U09614337"}
@@ -710,6 +851,39 @@ export default function AttendancePage() {
 
                 <div className={styles.formField}>
                   <div className={styles.fieldLabel}>
+                    {translations[selectedLanguage].pricingOptionsLabel}
+                  </div>
+                  <select
+                    className={styles.selectInput}
+                    name="selectedPricingId"
+                    value={formData.selectedPricingId || ""}
+                    onChange={handleInputChange}
+                    style={selectStyles.selectInput}
+                  >
+                    <option value="">
+                      {translations[selectedLanguage].selectPricingOption}
+                    </option>
+                    {pricing.map((price) => (
+                      <option key={price.id} value={price.id}>
+                        {price.name} - {price.harvestType.name} -{" "}
+                        {price.species.name} - ${price.price}
+                      </option>
+                    ))}
+                  </select>
+                  {pricing.length === 0 && !pricingLoading && (
+                    <div style={selectStyles.noDataMessage}>
+                      {translations[selectedLanguage].noPricingOptions}
+                    </div>
+                  )}
+                  {pricingLoading && (
+                    <div style={selectStyles.loadingMessage}>
+                      {translations[selectedLanguage].loadingPricing}
+                    </div>
+                  )}
+                </div>
+
+                <div className={styles.formField}>
+                  <div className={styles.fieldLabel}>
                     {translations[selectedLanguage].reportDateLabel}
                   </div>
                   <div className={styles.datePickerWrapper}>
@@ -748,7 +922,17 @@ export default function AttendancePage() {
         </div>
       </div>
 
-      <ToastContainer position="top-right" autoClose={5000} />
+      <ToastContainer 
+        position="top-center"
+        autoClose={3000}
+        hideProgressBar={false}
+        newestOnTop={false}
+        closeOnClick
+        rtl={isRtl}
+        pauseOnFocusLoss
+        draggable
+        pauseOnHover
+      />
     </div>
   );
 }
