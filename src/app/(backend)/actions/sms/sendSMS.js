@@ -32,7 +32,7 @@ const sendSMS = async (
     console.log("Response from SMS gateway:", body);
     console.log("Sending SMS to worker ID:", workerId);
 
-    const smsRecord = await prisma.sms.create({
+    const smsRecord = await prisma.sMS.create({
       data: {
         message: message,
         status: response.status === 200 && body === "1" ? "SENT" : "FAILED",
