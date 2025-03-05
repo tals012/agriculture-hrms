@@ -295,30 +295,32 @@ const translations = {
   },
 };
 
-// Hebrew translations (default for RTL elements in the design)
-const hebrewTexts = {
-  workerNameLabel: "שם עובד/ת",
-  passportLabel: "דרכון:",
-  generalDetails: "פרטים כלליים",
-  workerIdLabel: "מספר עובד",
-  passportNumberLabel: "מספר דרכון",
-  statusLabel: "סטטוס",
-  phoneLabel: "פלאפון",
-  countryOfBirthLabel: "ארץ לידה",
-  birthDateLabel: "תאריך לידה",
-  clientNameLabel: "שם לקוח",
-  siteNameLabel: "שם אתר",
-};
-
 export default function AttendancePage() {
   // get groupId from query
   const [searchParams] = useState(new URLSearchParams(window.location.search));
-  const groupId = searchParams.get("groupId");
+  const [groupId, setGroupId] = useState(searchParams.get("groupId"));
   const [groupInfo, setGroupInfo] = useState({
     name: "",
     fieldName: "",
   });
   const [isLoading, setIsLoading] = useState(false);
+
+  // Store groupId in localStorage if it exists in URL
+  useEffect(() => {
+    if (groupId) {
+      localStorage.setItem('lastAttendanceGroupId', groupId);
+    } else {
+      // Try to fetch groupId from localStorage if not in URL
+      const storedGroupId = localStorage.getItem('lastAttendanceGroupId');
+      if (storedGroupId) {
+        setGroupId(storedGroupId);
+        // Update URL with the stored groupId for consistency
+        const newUrl = new URL(window.location);
+        newUrl.searchParams.set('groupId', storedGroupId);
+        window.history.pushState({}, '', newUrl);
+      }
+    }
+  }, [groupId]);
 
   const [formData, setFormData] = useState({
     administratorName: "",

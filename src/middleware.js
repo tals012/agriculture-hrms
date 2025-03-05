@@ -26,7 +26,9 @@ export async function middleware(request) {
 
   // If user is not on login page and has no token, redirect to login
   if (!isLoginPage && !token) {
+    const originalPath = request.nextUrl.pathname + request.nextUrl.search;
     const loginUrl = new URL("/login", request.url);
+    loginUrl.searchParams.set("redirectTo", originalPath);
     return NextResponse.redirect(loginUrl);
   }
 
