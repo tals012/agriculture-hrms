@@ -147,13 +147,19 @@ export default function AttendanceRequestsTable({
             {requests.map((request) => (
               <tr key={request.id}>
                 <td>{formatDate(request.createdAt)}</td>
-                <td>
-                  {request.manager?.name
-                    ? request.manager?.name
-                    : request.leader?.worker?.nameHe
-                    ? request.leader?.worker?.nameHe
-                    : "לא צוין"}
-                </td>
+                {request.attendanceDoneBy === "WORKER" ? (
+                  <td>
+                    {request.worker?.nameHe + " " + request.worker?.surnameHe}
+                  </td>
+                ) : (
+                  <td>
+                    {request.manager?.name
+                      ? request.manager?.name
+                      : request.leader?.worker?.nameHe
+                      ? request.leader?.worker?.nameHe
+                      : "לא צוין"}
+                  </td>
+                )}
                 <td>{request.group?.name || "לא צוין"}</td>
                 <td>
                   {`${request.worker?.nameHe || ""} ${

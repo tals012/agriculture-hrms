@@ -1,9 +1,9 @@
 "use client";
 
-import { useState } from 'react';
-import { format } from 'date-fns';
-import { FaEye } from 'react-icons/fa';
-import styles from '@/styles/containers/attendance-groups/detailed-records-table.module.scss';
+import { useState } from "react";
+import { format } from "date-fns";
+import { FaEye } from "react-icons/fa";
+import styles from "@/styles/containers/attendance-groups/detailed-records-table.module.scss";
 import GroupAttendanceDetailsModal from "./detailsModal";
 
 // Helper function to format date
@@ -27,9 +27,9 @@ const formatDate = (dateString) => {
 const RequestStatus = ({ status }) => {
   const getStatusClassName = () => {
     switch (status) {
-      case 'APPROVED':
+      case "APPROVED":
         return styles.approved;
-      case 'REJECTED':
+      case "REJECTED":
         return styles.rejected;
       default:
         return styles.pending;
@@ -38,12 +38,12 @@ const RequestStatus = ({ status }) => {
 
   const getStatusText = () => {
     switch (status) {
-      case 'APPROVED':
-        return 'אושר';
-      case 'REJECTED':
-        return 'נדחה';
+      case "APPROVED":
+        return "אושר";
+      case "REJECTED":
+        return "נדחה";
       default:
-        return 'ממתין';
+        return "ממתין";
     }
   };
 
@@ -72,7 +72,7 @@ const DetailedRecordsTable = ({ records, onSelectRequest }) => {
     return <p className={styles.emptyMessage}>אין רשומות לתצוגה</p>;
   }
 
-  console.log(records, 'RECORDS');
+  console.log(records, "RECORDS");
 
   return (
     <>
@@ -92,15 +92,27 @@ const DetailedRecordsTable = ({ records, onSelectRequest }) => {
           <tbody className={styles.tableBody}>
             {records.map((record) => (
               <tr key={record.id} className={styles.tableRow}>
-                <td className={styles.tableCell}>
-                  {record.manager?.name ? record.manager?.name : record.leader?.worker?.nameHe ? record.leader?.worker?.nameHe : "—"}
-                </td>
+                {record.attendanceDoneBy === "WORKER" ? (
+                  <td className={styles.tableCell}>
+                    {record.worker?.nameHe + " " + record.worker?.surnameHe}
+                  </td>
+                ) : (
+                  <td className={styles.tableCell}>
+                    {record.manager?.name
+                      ? record.manager?.name
+                      : record.leader?.worker?.nameHe
+                      ? record.leader?.worker?.nameHe
+                      : "לא צוין"}
+                  </td>
+                )}
                 <td className={styles.tableCell}>
                   {record.group?.name || "—"}
                 </td>
                 <td className={styles.tableCell}>
-                  {record.worker ? 
-                    `${record.worker.nameHe || ''} ${record.worker.surnameHe || ''}`.trim() 
+                  {record.worker
+                    ? `${record.worker.nameHe || ""} ${
+                        record.worker.surnameHe || ""
+                      }`.trim()
                     : "—"}
                 </td>
                 <td className={styles.tableCell}>
@@ -137,4 +149,4 @@ const DetailedRecordsTable = ({ records, onSelectRequest }) => {
   );
 };
 
-export default DetailedRecordsTable; 
+export default DetailedRecordsTable;

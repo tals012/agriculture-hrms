@@ -34,6 +34,7 @@ export default function AttendanceRequestsPage() {
     try {
       const result = await getAttendanceRequests(filterOptions);
       if (result.success) {
+        console.log(result.data, "result.data");
         setAttendanceRequests(result.data);
       } else {
         toast.error("אירעה שגיאה בטעינת הנתונים: " + result.message, {

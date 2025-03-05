@@ -185,7 +185,7 @@ const Worker = ({ isOpen, onClose }) => {
               workerId={isOpen}
             />
           ) : activeTab === 1 ? (
-            <Credentials workerId={isOpen} />
+            <Credentials workerId={isOpen} workerData={data} />
           ) : null}
 
           <Image
