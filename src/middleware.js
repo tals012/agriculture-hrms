@@ -43,7 +43,9 @@ export async function middleware(request) {
       return NextResponse.next();
     } catch (error) {
       // If token is invalid, redirect to login
+      const originalPath = request.nextUrl.pathname + request.nextUrl.search;
       const loginUrl = new URL("/login", request.url);
+      loginUrl.searchParams.set("redirectTo", originalPath);
       return NextResponse.redirect(loginUrl);
     }
   }
