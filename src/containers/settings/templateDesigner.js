@@ -116,7 +116,7 @@ function TemplateDesigner() {
       }
 
       toast.success("התבנית נשמרה בהצלחה!");
-      // router.push("/admin/settings?tab=document-management");
+      router.push("/admin/settings?tab=document-management");
     } catch (error) {
       console.error("Error saving template:", error);
       toast.error("שגיאה בשמירת התבנית: " + error.message);
