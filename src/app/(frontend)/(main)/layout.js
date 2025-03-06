@@ -1,9 +1,10 @@
 import { cookies } from "next/headers";
 import { IBM_Plex_Sans_Hebrew } from "next/font/google";
+import { redirect } from "next/navigation";
 import AdminHeader from "./header";
 import GroupLeaderHeader from "./groupLeaderHeader";
 import ManagerHeader from "./managerHeader";
-import { redirect } from "next/navigation";
+import WorkerHeader from "./workerHeader";
 
 export const metadata = {
   title: "Agriculture Management System",
@@ -28,11 +29,13 @@ export default function AppLayout({ children }) {
 
   // Determine which header to show based on role
   const getHeader = () => {
-    switch(role) {
+    switch (role) {
       case "GROUP_LEADER":
         return <GroupLeaderHeader />;
       case "FIELD_MANAGER":
         return <ManagerHeader />;
+      case "WORKER":
+        return null;
       default:
         return <AdminHeader />;
     }

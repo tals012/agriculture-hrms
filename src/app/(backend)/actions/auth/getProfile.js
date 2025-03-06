@@ -65,6 +65,11 @@ const getProfile = async ({ token }) => {
           select: {
             id: true,
             name: true,
+            surname: true,
+            nameHe: true,
+            surnameHe: true,
+            passport: true,
+            primaryPhone: true,
           },
         },
       },

@@ -1,7 +1,7 @@
 "use client";
 
 import { useEffect, useState } from "react";
-import { useRouter } from "next/navigation";
+import { useRouter, useSearchParams } from "next/navigation";
 import Spinner from "@/components/spinner";
 import { login } from "@/app/(backend)/actions/auth/login";
 import { toast } from "react-toastify";
@@ -10,6 +10,8 @@ import styles from "@/styles/containers/login/card.module.scss";
 
 export default function Card() {
   const router = useRouter();
+  const searchParams = useSearchParams();
+  const redirectTo = searchParams.get("redirectTo");
   const [loading, setLoading] = useState(false);
   const [username, setUsername] = useState("");
   const [password, setPassword] = useState("");
@@ -35,15 +37,20 @@ export default function Card() {
           autoClose: 3000,
         });
 
-        // Redirect based on role
-        if (res.role === "GROUP_LEADER") {
-          router.push("/group-leader/my-group");
-        } 
-        else if (res.role === "FIELD_MANAGER") {
-          router.push("/manager/my-fields");
-        }
-        else {
-          router.push("/admin/clients");
+        // Check if there's a redirectTo parameter and use it
+        if (redirectTo) {
+          router.push(redirectTo);
+        } else {
+          // Default redirects based on role
+          if (res.role === "GROUP_LEADER") {
+            router.push("/group-leader/my-group");
+          } else if (res.role === "FIELD_MANAGER") {
+            router.push("/manager/my-fields");
+          } else if (res.role === "WORKER") {
+            router.push("/worker/attendance");
+          } else {
+            router.push("/admin/clients");
+          }
         }
       }
     } catch (error) {
@@ -79,8 +86,7 @@ export default function Card() {
           <a
             className="cursor-pointer"
             onClick={() => router.push("/forgot-password")}
-          >
-          </a>
+          ></a>
         </div>
 
         <button type="submit">

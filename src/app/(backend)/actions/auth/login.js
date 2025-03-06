@@ -3,7 +3,7 @@
   import { redirect } from "next/navigation";
   import { cookies } from "next/headers";
   import prisma from "@/lib/prisma";
-  import bcrypt from "bcrypt";
+  import bcrypt from "bcryptjs";
   import * as jose from "jose";
 
   export const login = async ({ username, password }) => {

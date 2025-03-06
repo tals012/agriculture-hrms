@@ -34,6 +34,8 @@ model Organization {
 
   workingSchedule WorkingSchedule[]
 
+  sms SMS[]
+
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
 }
@@ -56,6 +58,7 @@ model User {
   worker  Worker?
 
   workerAttendance WorkerAttendance[]
+  workerDocuments  WorkerDocument[]
 
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
@@ -65,6 +68,7 @@ enum Role {
   ADMIN
   FIELD_MANAGER
   GROUP_LEADER
+  WORKER
 }
 
 model Client {
@@ -100,6 +104,8 @@ model Client {
   clientPricingCombination ClientPricingCombination[]
 
   workingSchedule WorkingSchedule[]
+
+  sms SMS[]
 
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
@@ -183,6 +189,9 @@ model Worker {
   workingSchedule    WorkingSchedule[]
   monthlySubmissions WorkerMonthlyWorkingHoursSubmission[]
   dailyCalculations  WorkerDailySalaryCalculation[]
+
+  documents WorkerDocument[]
+  sms       SMS[]
 
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
@@ -550,6 +559,7 @@ enum AttendanceDoneBy {
   ADMIN
   MANAGER
   LEADER
+  WORKER
 }
 
 model WorkerDailySalaryCalculation {
@@ -743,4 +753,174 @@ model Branch {
   bankId         String?
   bank           Bank?    @relation(fields: [bankId], references: [id])
   workers        Worker[]
+}
+
+model Asset {
+  id                           String                     @id @default(cuid())
+  filePath                     String
+  thumbnailFilePath            String?
+  type                         AssetType
+  status                       AssetStatus                @default(NOT_READY)
+  isDeleted                    Boolean                    @default(false)
+  documentForWorker            WorkerDocument?
+  digitalFormTemplateForWorker WorkerDigitalFormTemplate?
+  createdAt                    DateTime                   @default(now())
+  updatedAt                    DateTime                   @updatedAt
+  // profilePictureForForeignWorker ForeignWorker?
+  // logoForOrganizationSystem      OrganizationSystem?
+  // profilePictureForUser          User?
+  // documentForWorkerFees          WorkerFees?
+  // WorkerMonthlySalaryDocument    WorkerMonthlySalaryDocument[]
+  // WorkersReportInterimDownload   WorkersReportInterimDownload[]
+}
+
+enum AssetType {
+  PDF
+  IMAGE
+  DIGITAL_FORM_PDF_TEMPLATE_JSON
+  UNKNOWN
+}
+
+enum AssetStatus {
+  NOT_READY
+  READY
+  ERROR
+}
+
+model WorkerDocument {
+  id                           String                    @id @default(cuid())
+  name                         String
+  category                     String?
+  note                         String?
+  type                         ForeignWorkerDocumentType
+  slug                         String?
+  authMode                     AuthMode?                 @default(NONE)
+  isRemoteDocRead              Boolean?                  @default(false)
+  isRemoteDocSubmitted         Boolean?                  @default(false)
+  remoteDocInitiatedAt         DateTime?
+  remoteDocReadAt              DateTime?
+  remoteDocSmsStatus           GeneralStatus?            @default(PENDING)
+  remoteDocSmsStatusAt         DateTime?
+  remoteDocSubmittedAt         DateTime?
+  isRemoteDocPasswordProtected Boolean?                  @default(false)
+  remoteDocPassword            String?
+
+  // bulkSigningSession             WorkerBulkSigningSession? @relation(fields: [bulkSigningSessionId], references: [id])
+  // bulkSigningSessionId           String?
+  // parentRemoteDocumentsRequest   RemoteDocumentsRequest?   @relation(fields: [parentRemoteDocumentsRequestId], references: [id])
+  // parentRemoteDocumentsRequestId String?
+
+  worker   Worker @relation(fields: [workerId], references: [id], onDelete: Cascade)
+  workerId String
+
+  documentAsset   Asset  @relation(fields: [documentAssetId], references: [id])
+  documentAssetId String @unique
+
+  templateCategory   WorkerTemplateCategory? @relation(fields: [templateCategoryId], references: [id])
+  templateCategoryId String?
+
+  simpleCategory   WorkerSimpleCategory? @relation(fields: [simpleCategoryId], references: [id])
+  simpleCategoryId String?
+
+  uploadedByUser   User?   @relation(fields: [uploadedByUserId], references: [id])
+  uploadedByUserId String?
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+  // @@index([bulkSigningSessionId])
+
+  @@index([workerId])
+}
+
+enum ForeignWorkerDocumentType {
+  UPLOADED
+  SIGNED
+  REMOTE_DOCUMENT
+}
+
+enum AuthMode {
+  PHONE_OTP
+  NONE
+  EMAIL_OTP
+  PASSWORD
+}
+
+enum GeneralStatus {
+  PENDING
+  COMPLETED
+  INITIALIZED
+  FAILED
+  NOT_INITIALIZED
+}
+
+model WorkerSimpleCategory {
+  id              String           @id @default(cuid())
+  name            String
+  workerDocuments WorkerDocument[]
+  createdAt       DateTime         @default(now())
+  updatedAt       DateTime         @updatedAt
+}
+
+model WorkerTemplateCategory {
+  id                         String                      @id @default(cuid())
+  name                       String
+  createdAt                  DateTime                    @default(now())
+  updatedAt                  DateTime                    @updatedAt
+  workerDigitalFormTemplates WorkerDigitalFormTemplate[]
+  workerDocuments            WorkerDocument[]
+}
+
+model WorkerDigitalFormTemplate {
+  id                 String                  @id @default(cuid())
+  name               String
+  description        String?
+  isDeleted          Boolean                 @default(false)
+  templateCategory   WorkerTemplateCategory? @relation(fields: [templateCategoryId], references: [id])
+  templateCategoryId String?
+  templateAsset      Asset                   @relation(fields: [templateAssetId], references: [id])
+  templateAssetId    String                  @unique
+  createdAt          DateTime                @default(now())
+  updatedAt          DateTime                @updatedAt
+}
+
+model SMS {
+  id            String    @id @default(cuid())
+  sentAt        DateTime  @default(now())
+  readAt        DateTime?
+  message       String
+  status        SMSStatus @default(PENDING)
+  failureReason String?
+
+  sentBy SMSSentBy?
+  sentTo SMSSentTo?
+
+  organization   Organization @relation(fields: [organizationId], references: [id])
+  organizationId String
+
+  client   Client @relation(fields: [clientId], references: [id])
+  clientId String
+
+  worker   Worker @relation(fields: [workerId], references: [id])
+  workerId String
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+}
+
+enum SMSStatus {
+  PENDING
+  SENT
+  FAILED
+}
+
+enum SMSSentBy {
+  WORKER
+  CLIENT
+  ORGANIZATION
+}
+
+enum SMSSentTo {
+  WORKER
+  CLIENT
+  ORGANIZATION
 }

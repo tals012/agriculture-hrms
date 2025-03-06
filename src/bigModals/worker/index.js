@@ -4,6 +4,7 @@ import { useEffect, useState } from "react";
 import Top from "./top";
 import SideMenu from "./sideMenu";
 import General from "./tabs/general";
+import Credentials from "./tabs/credentials";
 import SideDetails from "./sideDetails";
 import getWorkerById from "@/app/(backend)/actions/workers/getWorkerById";
 import Spinner from "@/components/spinner";
@@ -166,6 +167,12 @@ const Worker = ({ isOpen, onClose }) => {
                 width: 24.83,
                 height: 32.5,
               },
+              {
+                icon: "/assets/icons/user-1.svg",
+                title: "הרשאות",
+                width: 24,
+                height: 24,
+              },
             ]}
             activeTab={activeTab}
             setActiveTab={setActiveTab}
@@ -178,8 +185,7 @@ const Worker = ({ isOpen, onClose }) => {
               workerId={isOpen}
             />
           ) : activeTab === 1 ? (
-            // <HarvestEntries workerId={isOpen} />
-            null
+            <Credentials workerId={isOpen} workerData={data} />
           ) : null}
 
           <Image

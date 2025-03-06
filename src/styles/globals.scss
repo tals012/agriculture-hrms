@@ -14,10 +14,10 @@ body {
   background: var(--background);
   -webkit-font-smoothing: antialiased;
   -moz-osx-font-smoothing: grayscale;
+  direction: rtl;
 }
 
 * {
-  direction: rtl;
   box-sizing: border-box;
   padding: 0;
   margin: 0;

@@ -5,6 +5,7 @@ import SideBox from "@/containers/settings/sideBox";
 import Species from "@/containers/settings/species";
 import HarvestTypes from "@/containers/settings/harvestTypes";
 import OrganizationSettings from "@/containers/settings/organization";
+import DocumentCategories from "@/containers/settings/documentCategories";
 import styles from "@/styles/screens/settings.module.scss";
 import { useSearchParams } from "next/navigation";
 import { ToastContainer } from "react-toastify";
@@ -22,6 +23,8 @@ export default function Settings() {
         return <Species />;
       case "harvest-types":
         return <HarvestTypes />;
+      case "document-categories":
+        return <DocumentCategories />;
       default:
         return <OrganizationSettings />;
     }

@@ -2,7 +2,7 @@
 
 import prisma from "@/lib/prisma";
 import { z } from "zod";
-import bcrypt from "bcrypt";
+import bcrypt from "bcryptjs";
 
 const SALT_ROUNDS = 10;
 

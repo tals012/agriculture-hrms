@@ -2,6 +2,7 @@
 
 import { useState } from "react";
 import makeGroupLeader from "@/app/(backend)/actions/groups/makeGroupLeader";
+import sendRequestForAttendance from "@/app/(backend)/actions/workers/sendRequestForAttendance";
 import Spinner from "@/components/spinner";
 import { toast } from "react-toastify";
 import Image from "next/image";
@@ -79,6 +80,23 @@ const Members = ({ groupId, members, onUpdate }) => {
     } catch (error) {
       console.error("Error removing worker from group:", error);
       toast.error("הסרת העובד מהקבוצה נכשלה");
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  const handleSendAttendanceRequest = async (workerId) => {
+    try {
+      setLoading(workerId);
+      const res = await sendRequestForAttendance(workerId, groupId);
+      if (res.success) {
+        toast.success(res.message);
+      } else {
+        toast.error(res.message);
+      }
+    } catch (error) {
+      console.error("Error sending attendance request:", error);
+      toast.error("שליחת בקשת נוכחות נכשלה");
     } finally {
       setLoading(false);
     }
@@ -182,6 +200,13 @@ const Members = ({ groupId, members, onUpdate }) => {
                             disabled={loading}
                           >
                             הסרת משתתפ
+                          </button>
+                          <button
+                            className={styles.actionButton}
+                            onClick={() => handleSendAttendanceRequest(record.worker.id)}
+                            disabled={loading}
+                          >
+                            שלח בקשת נוכחות
                           </button>
                         </div>
                       )}

@@ -56,6 +56,12 @@ const getWorkerById = async ({ payload }) => {
             },
           },
         },
+        user: {
+          select: {
+            id: true,
+            username: true,
+          },
+        },
         harvestEntries: {
           select: {
             id: true,
@@ -80,7 +86,7 @@ const getWorkerById = async ({ payload }) => {
             },
           },
           orderBy: {
-            entryTime: 'desc',
+            entryTime: "desc",
           },
           take: 10,
         },
@@ -110,4 +116,4 @@ const getWorkerById = async ({ payload }) => {
   }
 };
 
-export default getWorkerById; 
+export default getWorkerById;

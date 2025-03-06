@@ -17,6 +17,8 @@ export async function middleware(request) {
       redirectUrl = "/group-leader/my-group";
     } else if (role === "FIELD_MANAGER") {
       redirectUrl = "/manager/my-fields";
+    } else if (role === "WORKER") {
+      redirectUrl = "/worker/attendance";
     }
 
     return NextResponse.redirect(new URL(redirectUrl, request.url));
@@ -24,7 +26,9 @@ export async function middleware(request) {
 
   // If user is not on login page and has no token, redirect to login
   if (!isLoginPage && !token) {
+    const originalPath = request.nextUrl.pathname + request.nextUrl.search;
     const loginUrl = new URL("/login", request.url);
+    loginUrl.searchParams.set("redirectTo", originalPath);
     return NextResponse.redirect(loginUrl);
   }
 
@@ -39,7 +43,9 @@ export async function middleware(request) {
       return NextResponse.next();
     } catch (error) {
       // If token is invalid, redirect to login
+      const originalPath = request.nextUrl.pathname + request.nextUrl.search;
       const loginUrl = new URL("/login", request.url);
+      loginUrl.searchParams.set("redirectTo", originalPath);
       return NextResponse.redirect(loginUrl);
     }
   }
