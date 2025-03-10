@@ -12,6 +12,7 @@
   "dependencies": {
     "@pdfme/common": "^1.0.8",
     "@pdfme/generator": "^1.0.8",
+    "@pdfme/schemas": "^5.3.13",
     "@pdfme/ui": "^1.0.8",
     "@prisma/client": "^6.2.1",
     "@vercel/functions": "^2.0.0",
