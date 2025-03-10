@@ -1,6 +1,6 @@
 "use client";
 
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import makeGroupLeader from "@/app/(backend)/actions/groups/makeGroupLeader";
 import sendRequestForAttendance from "@/app/(backend)/actions/workers/sendRequestForAttendance";
 import Spinner from "@/components/spinner";
@@ -10,6 +10,8 @@ import { Plus } from "@/svgs/plus";
 import AddWorkersToGroup from "@/smallModals/groups/addWorkersToGroup";
 import removeWorkersFromGroup from "@/app/(backend)/actions/groups/removeWorkersFromGroup";
 import styles from "@/styles/bigModals/group/tabs/members.module.scss";
+import getGroupById from "@/app/(backend)/actions/groups/getGroupById";
+import { IoMdClose } from "react-icons/io";
 
 const Members = ({ groupId, members, onUpdate }) => {
   const [search, setSearch] = useState("");
@@ -102,9 +104,21 @@ const Members = ({ groupId, members, onUpdate }) => {
     }
   };
 
+  const [groupName, setGroupName] = useState(null);
+
+  useEffect(() => {
+    const fetchData = async () => {
+      const res = await getGroupById({ groupId });
+      if (res?.status === 200) {
+        setGroupName(res.data.name);
+      }
+    };
+    fetchData();
+  }, []);
+
   return (
     <div className={styles.container}>
-      <h1>משתתפים</h1>
+      <h1>{groupName}</h1>
 
       <div className={styles.tabs}>
         <div className={`${styles.tab} ${styles.active}`}>
@@ -196,17 +210,19 @@ const Members = ({ groupId, members, onUpdate }) => {
                           </button>
                           <button
                             className={styles.actionButton}
-                            onClick={() => handleRemoveWorker(record.worker.id)}
-                            disabled={loading}
-                          >
-                            הסרת משתתפ
-                          </button>
-                          <button
-                            className={styles.actionButton}
-                            onClick={() => handleSendAttendanceRequest(record.worker.id)}
+                            onClick={() =>
+                              handleSendAttendanceRequest(record.worker.id)
+                            }
                             disabled={loading}
                           >
                             שלח בקשת נוכחות
+                          </button>
+                          <button
+                            className={styles.closeButton}
+                            onClick={() => handleRemoveWorker(record.worker.id)}
+                            disabled={loading}
+                          >
+                            <IoMdClose color="#ffffff" fontSize={20} />
                           </button>
                         </div>
                       )}

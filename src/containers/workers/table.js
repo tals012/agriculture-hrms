@@ -40,14 +40,20 @@ const Table = ({ data = [], setWorkerId }) => {
                 <th>דרכון</th>
                 <th>טלפון</th>
                 <th>סטטוס</th>
+                <th>מדינה</th>
+                <th>קבוצה</th>
                 <th>פעולות</th>
               </tr>
             </thead>
 
             <tbody>
               {data.map((item, index) => {
-                const status = item.status || 'DEFAULT';
+                const status = item.workerStatus || 'DEFAULT';
                 const colors = statusColorMap[status] || statusColorMap.DEFAULT;
+                const fullName = `${item.nameHe || ''} ${item.surnameHe || ''}`.trim();
+                const groupNames = item.groups && item.groups.length > 0 
+                  ? item.groups.map(g => g.group.name).join(', ')
+                  : '-';
                 
                 return (
                   <tr key={index}>
@@ -55,16 +61,24 @@ const Table = ({ data = [], setWorkerId }) => {
                       <input type="checkbox" />
                     </td>
                     <td onClick={() => setWorkerId(item.id)}>
-                      <div className={styles.name}>
-                        <InitialsCircle name={item.nameHe || item.name} />
-                        <p>{item.nameHe || item.name}</p>
+                      <div className={styles.user}>
+                        <InitialsCircle name={fullName} />
+                        <div className={styles.name}>
+                          <p>{fullName}</p>
+                        </div>
                       </div>
                     </td>
                     <td>
                       <p>{item.passport || "-"}</p>
                     </td>
                     <td>
-                      <p>{item.primaryPhone || "-"}</p>
+                      {item.primaryPhone ? (
+                        <div className={styles.phones}>
+                          <p>{item.primaryPhone}</p>
+                        </div>
+                      ) : (
+                        <p>-</p>
+                      )}
                     </td>
                     <td>
                       <Chip
@@ -72,6 +86,12 @@ const Table = ({ data = [], setWorkerId }) => {
                         textColor={colors.text}
                         bgColor={colors.bg}
                       />
+                    </td>
+                    <td>
+                      <p>{item.country?.nameInHebrew || "-"}</p>
+                    </td>
+                    <td>
+                      <p>{groupNames}</p>
                     </td>
                     <td onClick={() => setWorkerId(item.id)}>
                       <Image

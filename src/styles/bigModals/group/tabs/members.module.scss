@@ -184,21 +184,21 @@
                 cursor: pointer;
                 transition: all 300ms ease-in-out;
 
-                &:nth-child(1) {
-                  background: #2b85ff;
+                // &:nth-child(1) {
+                //   background: #2b85ff;
 
-                  &:hover {
-                    background: #1a76ff;
-                  }
-                }
+                //   &:hover {
+                //     background: #1a76ff;
+                //   }
+                // }
 
-                &:nth-child(2) {
-                  background: #ff2b2b;
+                // &:nth-child(2) {
+                //   background: #ff2b2b;
 
-                  &:hover {
-                    background: #e62b2b;
-                  }
-                }
+                //   &:hover {
+                //     background: #e62b2b;
+                //   }
+                // }
               }
             }
           }
@@ -274,6 +274,16 @@
     background: #e6e6e6;
     cursor: not-allowed;
   }
+}
+
+.closeButton {
+  background: none;
+  border: none;
+  outline: none;
+  cursor: pointer;
+  background: #ff2b2b;
+  padding: 0px 10px !important;
+  width: fit-content !important;
 }
 
 .spinnerContainer {

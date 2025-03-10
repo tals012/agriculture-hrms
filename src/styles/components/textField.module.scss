@@ -24,6 +24,22 @@
       -webkit-box-shadow: 0 0 0 30px white inset !important;
       transition: background-color 5000s ease-in-out 0s;
     }
+    
+    /* RTL support for time inputs */
+    &[type="time"] {
+      direction: rtl;
+      text-align: right;
+      
+      &::-webkit-calendar-picker-indicator {
+        margin-right: auto;
+        margin-left: 4px;
+      }
+      
+      &::-webkit-datetime-edit {
+        direction: rtl;
+        text-align: right;
+      }
+    }
   }
   textarea {
     font-size: 14px;

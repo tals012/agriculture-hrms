@@ -12,11 +12,127 @@ import getWorkersStats from "@/app/(backend)/actions/workers/getWorkersStats";
 import { debounce } from "@/lib/debounce";
 import { useRouter } from "next/navigation";
 import { getCookie } from "@/lib/getCookie";
-import styles from "@/styles/screens/workers.module.scss";
 import Worker from "@/bigModals/worker";
 import ReactSelect from "react-select";
+import getCountries from "@/app/(backend)/actions/misc/getCountries";
+import getGroups from "@/app/(backend)/actions/groups/getGroups";
+import styles from "@/styles/screens/workers.module.scss";
 
 const FilterBox = ({ setIsOpen, filters, setFilters, handleSearch }) => {
+  const [countries, setCountries] = useState([]);
+  const [groups, setGroups] = useState([]);
+  const [loadingCountries, setLoadingCountries] = useState(false);
+  const [loadingGroups, setLoadingGroups] = useState(false);
+
+  // Create select styles with appropriate z-index values
+  const createSelectStyle = (zIndex) => ({
+    control: (baseStyles) => ({
+      ...baseStyles,
+      width: "100%",
+      border: "1px solid #E6E6E6",
+      height: "44px",
+      fontSize: "14px",
+      color: "#999FA5",
+      borderRadius: "6px",
+      background: "white",
+      minHeight: "44px",
+      boxShadow: "none",
+      "&:hover": {
+        border: "1px solid #E6E6E6",
+      }
+    }),
+    valueContainer: (provided) => ({
+      ...provided,
+      padding: "0 8px",
+      height: "42px",
+      display: "flex",
+      alignItems: "center"
+    }),
+    placeholder: (provided) => ({
+      ...provided,
+      position: "absolute",
+      color: "#999FA5",
+      fontSize: "14px",
+      marginLeft: "0",
+      marginRight: "0",
+      top: "50%",
+      transform: "translateY(-50%)"
+    }),
+    input: (provided) => ({
+      ...provided,
+      margin: "0",
+      padding: "0"
+    }),
+    singleValue: (provided) => ({
+      ...provided,
+      margin: "0"
+    }),
+    indicatorsContainer: (provided) => ({
+      ...provided,
+      height: "42px"
+    }),
+    menu: (provided) => ({
+      ...provided,
+      zIndex: 9999 + zIndex,
+    }),
+    menuPortal: (provided) => ({
+      ...provided,
+      zIndex: 9999 + zIndex,
+    }),
+  });
+
+  const statusSelectStyle = createSelectStyle(30);
+  const countrySelectStyle = createSelectStyle(20);
+  const groupSelectStyle = createSelectStyle(10);
+
+  // Fetch countries
+  useEffect(() => {
+    const fetchCountries = async () => {
+      setLoadingCountries(true);
+      try {
+        const response = await getCountries();
+        if (response.status === 200) {
+          setCountries(
+            response.data.map((country) => ({
+              value: country.id,
+              label: country.nameInHebrew,
+            }))
+          );
+        }
+      } catch (error) {
+        console.error("Error fetching countries:", error);
+      } finally {
+        setLoadingCountries(false);
+      }
+    };
+
+    fetchCountries();
+  }, []);
+
+  // Fetch groups
+  useEffect(() => {
+    const fetchGroups = async () => {
+      setLoadingGroups(true);
+      try {
+        const response = await getGroups({});
+        if (response.status === 200) {
+          setGroups(
+            response.data.map((group) => ({
+              value: group.id,
+              label: group.name,
+            }))
+          );
+        }
+      } catch (error) {
+        console.error("Error fetching groups:", error);
+      } finally {
+        setLoadingGroups(false);
+      }
+    };
+
+    fetchGroups();
+  }, []);
+
   return (
     <div className={styles.filterBox}>
       <div className={styles.fields}>
@@ -68,6 +184,45 @@ const FilterBox = ({ setIsOpen, filters, setFilters, handleSearch }) => {
           }
           placeholder="סטטוס"
           isClearable
+          styles={statusSelectStyle}
+          menuPortalTarget={document.body}
+          menuPosition="fixed"
+        />
+        {/* Country filter */}
+        <ReactSelect
+          options={countries}
+          isLoading={loadingCountries}
+          value={
+            filters.countryId && countries.length
+              ? countries.find((c) => c.value === filters.countryId)
+              : null
+          }
+          onChange={(option) =>
+            setFilters({ ...filters, countryId: option ? option.value : "" })
+          }
+          placeholder="מדינה"
+          isClearable
+          styles={countrySelectStyle}
+          menuPortalTarget={document.body}
+          menuPosition="fixed"
+        />
+        {/* Group filter */}
+        <ReactSelect
+          options={groups}
+          isLoading={loadingGroups}
+          value={
+            filters.groupId && groups.length
+              ? groups.find((g) => g.value === filters.groupId)
+              : null
+          }
+          onChange={(option) =>
+            setFilters({ ...filters, groupId: option ? option.value : "" })
+          }
+          placeholder="קבוצה"
+          isClearable
+          styles={groupSelectStyle}
+          menuPortalTarget={document.body}
+          menuPosition="fixed"
         />
       </div>
       <div className={styles.btns}>
@@ -109,6 +264,8 @@ export default function Workers() {
     status: "",
     phone: "",
     passport: "",
+    countryId: "",
+    groupId: "",
   });
 
   const fetchData = async (searchQuery = "", currentFilters = {}) => {
@@ -121,6 +278,8 @@ export default function Workers() {
         ...(currentFilters.status ? { status: currentFilters.status } : {}),
         ...(currentFilters.phone ? { phone: currentFilters.phone } : {}),
         ...(currentFilters.passport ? { passport: currentFilters.passport } : {}),
+        ...(currentFilters.countryId ? { countryId: currentFilters.countryId } : {}),
+        ...(currentFilters.groupId ? { groupId: currentFilters.groupId } : {}),
       };
 
       const res = await getWorkers(payload);

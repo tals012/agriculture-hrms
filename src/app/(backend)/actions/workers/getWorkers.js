@@ -50,6 +50,11 @@ const getWorkers = async (filters = {}) => {
       });
     }
 
+    // Add country filter
+    if (filters.countryId) {
+      where.AND.push({ countryId: filters.countryId });
+    }
+
     if (filters.name?.trim()) {
       where.AND.push({
         OR: [
@@ -82,11 +87,24 @@ const getWorkers = async (filters = {}) => {
         nameHe: true,
         surnameHe: true,
         passport: true,
+        workerStatus: true,
+        primaryPhone: true,
+        country: {
+          select: {
+            nameInHebrew: true,
+          },
+        },
+        groups: {
+          select: {
+            group: {
+              select: {
+                name: true,
+              },
+            },
+          },
+        },
       },
-      orderBy: [
-        { nameHe: "asc" },
-        { surnameHe: "asc" },
-      ],
+      orderBy: [{ nameHe: "asc" }, { surnameHe: "asc" }],
     });
 
     console.log("Workers found:", workers);

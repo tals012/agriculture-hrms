@@ -11,6 +11,7 @@ const TextField = ({
   className,
   iconRight,
   disabled,
+  style,
   ...props
 }) => {
   const [focused, setFocused] = useState(false);
@@ -50,6 +51,7 @@ const TextField = ({
         disabled={disabled}
         style={{
           backgroundColor: disabled ? "#FFFBE6" : "inherit",
+          ...(style || {}),
         }}
         {...props}
       />

@@ -12,6 +12,20 @@ import getGroups from "@/app/(backend)/actions/groups/getGroups";
 import generateSchedule from "@/app/(backend)/actions/schedule/generateSchedule";
 import Spinner from "@/components/spinner";
 
+// Convert minutes to HH:MM format
+const minutesToTimeFormat = (minutes) => {
+  const hours = Math.floor(minutes / 60);
+  const mins = minutes % 60;
+  return `${hours.toString().padStart(2, '0')}:${mins.toString().padStart(2, '0')}`;
+};
+
+// Convert HH:MM format to minutes
+const timeFormatToMinutes = (timeString) => {
+  if (!timeString || !timeString.includes(':')) return 0;
+  const [hours, minutes] = timeString.split(':').map(Number);
+  return hours * 60 + minutes;
+};
+
 const createSelectStyle = (zIndex) => ({
   control: (baseStyles, state) => ({
     ...baseStyles,
@@ -26,17 +40,17 @@ const createSelectStyle = (zIndex) => ({
   }),
   menuPortal: (provided) => ({
     ...provided,
-    zIndex: zIndex + 1,
+    zIndex: 9999 + zIndex,
   }),
   menu: (provided) => ({
     ...provided,
-    zIndex: zIndex + 1,
+    zIndex: 9999 + zIndex,
   }),
 });
 
-const clientSelectStyle = createSelectStyle(3);
-const groupSelectStyle = createSelectStyle(2);
-const workerSelectStyle = createSelectStyle(1);
+const clientSelectStyle = createSelectStyle(30);
+const groupSelectStyle = createSelectStyle(20);
+const workerSelectStyle = createSelectStyle(10);
 
 const SideBox = () => {
   const router = useRouter();
@@ -53,6 +67,16 @@ const SideBox = () => {
     selectedGroup: null,
     selectedWorker: null,
   });
+
+  // Store formatted time for display purposes
+  const [displayStartTime, setDisplayStartTime] = useState(
+    minutesToTimeFormat(parseInt(formData.startTimeInMinutes) || 0)
+  );
+
+  // Update display time when startTimeInMinutes changes
+  useEffect(() => {
+    setDisplayStartTime(minutesToTimeFormat(parseInt(formData.startTimeInMinutes) || 0));
+  }, [formData.startTimeInMinutes]);
 
   const [clients, setClients] = useState([]);
   const [groups, setGroups] = useState([]);
@@ -157,6 +181,19 @@ const SideBox = () => {
     setFormData({ ...formData, [field]: e.target.value });
   };
 
+  // Handle time input change
+  const handleTimeChange = (e) => {
+    const timeValue = e.target.value;
+    // Update the display time
+    setDisplayStartTime(timeValue);
+    
+    // Convert the time format to minutes and update the original state
+    if (timeValue.includes(':')) {
+      const minutesValue = timeFormatToMinutes(timeValue);
+      setFormData({ ...formData, startTimeInMinutes: minutesValue.toString() });
+    }
+  };
+
   const handleBreakTimeCheckboxChange = (e) => {
     if (e.target.checked) {
       setFormData({ ...formData, isBreakTimePaid: true });
@@ -254,12 +291,12 @@ const SideBox = () => {
 
         <div className={styles.formGroup}>
           <TextField
-            label=""
+            label="שעת התחלה"
             width="100%"
-            value={formData.startTimeInMinutes}
-            onChange={(e) => handleChange(e, "startTimeInMinutes")}
-            type="number"
-            placeholder="שעת התחלה (בדקות) - לדוגמה: 480 (8:00)"
+            value={displayStartTime}
+            onChange={handleTimeChange}
+            type="time"
+            className={styles.rtlTimeInput}
           />
         </div>
 
@@ -291,7 +328,7 @@ const SideBox = () => {
               checked={formData.isBonusPaid}
               onChange={handleBonusCheckboxChange}
             />
-            <span>הזינוק בתשלום</span>
+            <span>האם בונוס משולם?</span>
           </label>
         </div>
 

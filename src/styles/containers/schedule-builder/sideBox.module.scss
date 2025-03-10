@@ -29,6 +29,16 @@
     }
   }
   
+  .rtlTimeInput {
+    direction: rtl !important;
+    text-align: right !important;
+    
+    &::-webkit-calendar-picker-indicator {
+      margin-right: auto !important;
+      margin-left: 4px !important;
+    }
+  }
+  
   .checkboxGroup {
     padding: 5px 0;
     

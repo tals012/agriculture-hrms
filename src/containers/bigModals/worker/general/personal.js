@@ -13,6 +13,20 @@ import Spinner from "@/components/spinner";
 import styles from "@/styles/containers/bigModals/worker/general/personal.module.scss";
 import { getBranches } from "@/app/(backend)/actions/branch/getBranches";
 import { getBanks } from "@/app/(backend)/actions/bank/getBanks";
+import { format, parseISO } from "date-fns";
+
+// Helper function to format date in dd/mm/yyyy
+const formatDate = (date) => {
+  if (!date) return null;
+  try {
+    // If the date is a string (ISO format), parse it first
+    const dateObj = typeof date === 'string' ? parseISO(date) : date;
+    return format(dateObj, 'dd/MM/yyyy');
+  } catch (error) {
+    console.error("Date formatting error:", error);
+    return date;
+  }
+};
 
 const selectStyle = {
   control: (baseStyles, state) => ({
@@ -31,6 +45,17 @@ const selectStyle = {
 };
 
 const Personal = ({ personalData, setPersonalData }) => {
+  // Format dates in personalData for display when component mounts
+  useEffect(() => {
+    if (personalData) {
+      // Only update the display formatting, not the actual data that will be sent
+      const formattedDates = {
+        ...personalData,
+      };
+      setPersonalData(formattedDates);
+    }
+  }, []);
+
   const handleChange = (e, key) => {
     if (
       key === "birthday" ||

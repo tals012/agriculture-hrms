@@ -116,26 +116,26 @@ const SideDetails = ({
           />
         </div>
 
-        <div className={styles.block}>
+        {/* <div className={styles.block}>
           <label>מייל</label>
           <p>{data.email || "-"}</p>
-        </div>
+        </div> */}
 
         <div className={styles.block}>
           <label>טלפון ראשי</label>
           <p>{data.primaryPhone || "-"}</p>
         </div>
 
-        <div className={styles.block}>
+        {/* <div className={styles.block}>
           <label>טלפון משני</label>
           <p>{data.secondaryPhone || "-"}</p>
-        </div>
+        </div> */}
 
         <div className={styles.block}>
           <label>דרכון</label>
           <p>{data.passport || "-"}</p>
         </div>
-
+{/* 
         <div className={styles.block}>
           <label>תוקף דרכון</label>
           <p>
@@ -148,23 +148,23 @@ const SideDetails = ({
         <div className={styles.block}>
           <label>ויזה</label>
           <p>{data.visa || "-"}</p>
-        </div>
+        </div> */}
 
-        <div className={styles.block}>
+        {/* <div className={styles.block}>
           <label>תוקף ויזה</label>
           <p>
             {data.visaValidity
               ? format(new Date(data.visaValidity), "dd-MM-yyyy")
               : "-"}
           </p>
-        </div>
+        </div> */}
 
         <div className={styles.block}>
           <label>מדינה</label>
           <p>{data.country?.nameInHebrew || "-"}</p>
         </div>
 
-        <div className={styles.block}>
+        {/* <div className={styles.block}>
           <label>עיר</label>
           <p>{data.city?.nameInHebrew || "-"}</p>
         </div>
@@ -176,16 +176,16 @@ const SideDetails = ({
               ? format(new Date(data.inscriptionDate), "dd-MM-yyyy")
               : "-"}
           </p>
-        </div>
+        </div> */}
 
-        <div className={styles.block}>
+        {/* <div className={styles.block}>
           <label>תאריך כניסה</label>
           <p>
             {data.entryDate
               ? format(new Date(data.entryDate), "dd-MM-yyyy")
               : "-"}
           </p>
-        </div>
+        </div> */}
       </div>
 
       <div className={styles.note}>

@@ -15,12 +15,16 @@
         justify-content: center;
         right: 60px;
         width: 353px;
-        height: 380px;
+        height: auto;
+        min-height: 400px;
+        max-height: 80vh;
+        overflow-y: auto;
         padding-top: 25px;
         padding-bottom: 25px;
         border-radius: 6px;
         background: #ffffff;
         box-shadow: -10px 0px 106.9px 0px #00000033;
+        z-index: 9000;
 
         .fields {
           padding: 0px 30px;
@@ -41,6 +45,10 @@
             &::placeholder {
               color: #999FA5;
             }
+          }
+
+          :global(.css-b62m3t-container) {
+            margin-bottom: 8px;
           }
         }
 
