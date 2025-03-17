@@ -187,20 +187,21 @@ export default function CreateGroup({ setModalOpen, setCreateStatus }) {
         return;
       }
 
-      if (!leaderWorkerId) {
-        toast.error("יש לבחור מנהל קבוצה", {
-          position: "top-center",
-          autoClose: 3000,
-        });
-        return;
-      }
+      // if (!leaderWorkerId) {
+      //   toast.error("יש לבחור מנהל קבוצה", {
+      //     position: "top-center",
+      //     autoClose: 3000,
+      //   });
+      //   return;
+      // }
 
       setLoading(true);
       const res = await createGroup({
         name,
         description,
         fieldId,
-        leaderWorkerId,
+        // leaderWorkerId,
+        ...(leaderWorkerId && { leaderWorkerId }),
         workerIds: selectedWorkers.map(w => w.value),
         clientPricingCombinationIds: selectedPricingCombinations.map(p => p.value)
       });
@@ -417,7 +418,7 @@ export default function CreateGroup({ setModalOpen, setCreateStatus }) {
 
             <button
               onClick={handleCreate}
-              disabled={loading || !name || !selectedClient || !fieldId || !leaderWorkerId}
+              disabled={loading || !name || !selectedClient || !fieldId}
             >
               {loading ? <Spinner color="#ffffff" /> : "יצירה"}
             </button>
