@@ -7,7 +7,7 @@ import Select from "react-select";
 
 import Spinner from "@/components/spinner";
 
-import PDFTemplateForm from "@/components/pdf/pdfTemplateForm";
+import PDFTemplateForm from "@/components/pdf/pdfTemplateForm.js";
 import { generate as pdfmeGenerate } from "@pdfme/generator";
 import { getFontsData, getPlugins } from "@/components/pdf/helper";
 import Modal from "@/components/modal";
