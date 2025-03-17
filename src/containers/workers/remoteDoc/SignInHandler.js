@@ -7,7 +7,7 @@ import { validatePasswordForRemoteDocSignIn } from "@/app/(backend)/actions/work
 import { resendPasswordForRemoteDoc } from "@/app/(backend)/actions/workers/digitalForm/resendPasswordForRemoteDoc";
 import { getLanguageFromCountryCode } from "@/lib/utils/languageMappings";
 import { languageTranslations } from "@/lib/utils/languageMappings";
-import styles from "@/styles/containers/workers/remoteDoc/SignInHandler.module.scss";
+import styles from "@/styles/containers/workers/remoteDoc/signInHandler.module.scss";
 
 function SignInHandler({ slug, onAuthSuccess, requiresPassword, countryCode }) {
   const [password, setPassword] = useState("");
