@@ -1,0 +1,148 @@
+// Form Editor Styles
+
+// Main container styles
+.container {
+  background-color: white;
+  padding: 1.5rem;
+  border-radius: 0.5rem;
+  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+}
+
+// Headings
+.title {
+  font-size: 1.25rem;
+  font-weight: 600;
+  margin-bottom: 1rem;
+}
+
+.sectionTitle {
+  font-size: 1.125rem;
+  font-weight: 500;
+  margin-bottom: 0.5rem;
+}
+
+// Details section
+.detailsSection {
+  margin-bottom: 2rem;
+}
+
+.detailsGrid {
+  display: grid;
+  grid-template-columns: 1fr;
+  gap: 1rem;
+}
+
+@media (min-width: 768px) {
+  .detailsGrid {
+    grid-template-columns: 1fr 1fr;
+  }
+}
+
+.detailItem {
+  margin-bottom: 0.5rem;
+}
+
+.detailLabel {
+  display: block;
+  color: #4a5568;
+  margin-bottom: 0.25rem;
+}
+
+.detailValue {
+  color: #1a202c;
+  font-weight: 500;
+}
+
+// Editor section
+.editorSection {
+  border: 1px solid #e2e8f0;
+  border-radius: 0.5rem;
+  padding: 1rem;
+  background-color: #f8fafc;
+  margin-bottom: 1rem;
+}
+
+.pdfFormWrapper {
+  background-color: white;
+  border-radius: 0.5rem;
+  border: 1px solid #e2e8f0;
+  overflow: hidden;
+  min-height: 700px;
+}
+
+// PDF Error Container
+.pdfErrorContainer {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  padding: 2rem;
+  height: 100%;
+  min-height: 400px;
+  text-align: center;
+}
+
+.pdfErrorTitle {
+  font-size: 1.25rem;
+  font-weight: 600;
+  margin-bottom: 1rem;
+  color: #e53e3e;
+}
+
+.pdfErrorText {
+  margin-bottom: 1.5rem;
+  color: #4a5568;
+  max-width: 500px;
+}
+
+// Loader
+.loaderContainer {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  height: 100%;
+}
+
+.loaderText {
+  margin-left: 0.5rem;
+  color: #4a5568;
+}
+
+// Action buttons
+.actionButtonsContainer {
+  display: flex;
+  justify-content: flex-end;
+  gap: 1rem;
+  margin-top: 1rem;
+}
+
+.cancelButton {
+  padding: 0.5rem 1rem;
+  border: 1px solid #e2e8f0;
+  border-radius: 0.375rem;
+  color: #4a5568;
+  background-color: transparent;
+  cursor: pointer;
+}
+
+.cancelButton:hover {
+  background-color: #f8fafc;
+}
+
+.submitButton {
+  padding: 0.5rem 1rem;
+  border-radius: 0.375rem;
+  color: white;
+  background-color: #2563eb;
+  border: none;
+  cursor: pointer;
+}
+
+.submitButton:hover {
+  background-color: #1d4ed8;
+}
+
+.submitButton:disabled {
+  opacity: 0.5;
+  cursor: not-allowed;
+}

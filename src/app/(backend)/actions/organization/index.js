@@ -27,6 +27,7 @@ export async function getOrganization() {
     return {
       status: 200,
       data: organization,
+      ok: true,
     };
   } catch (error) {
     console.error("Error getting organization:", error);

@@ -6,6 +6,7 @@ import Species from "@/containers/settings/species";
 import HarvestTypes from "@/containers/settings/harvestTypes";
 import OrganizationSettings from "@/containers/settings/organization";
 import DocumentCategories from "@/containers/settings/documentCategories";
+import DocumentManagement from "@/containers/settings/documentManagement";
 import styles from "@/styles/screens/settings.module.scss";
 import { useSearchParams } from "next/navigation";
 import { ToastContainer } from "react-toastify";
@@ -25,6 +26,12 @@ export default function Settings() {
         return <HarvestTypes />;
       case "document-categories":
         return <DocumentCategories />;
+      case "document-template-categories":
+        return <DocumentCategories initialTab="template" />;
+      case "document-simple-categories":
+        return <DocumentCategories initialTab="simple" />;
+      case "document-management":
+        return <DocumentManagement />;
       default:
         return <OrganizationSettings />;
     }

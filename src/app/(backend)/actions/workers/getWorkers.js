@@ -107,7 +107,7 @@ const getWorkers = async (filters = {}) => {
       orderBy: [{ nameHe: "asc" }, { surnameHe: "asc" }],
     });
 
-    console.log("Workers found:", workers);
+    // console.log("Workers found:", workers);
 
     return {
       status: 200,

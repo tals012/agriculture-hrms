@@ -12,7 +12,10 @@ const SideBox = () => {
     { id: "organization", label: "ארגון" },
     { id: "species", label: "מינים" },
     { id: "harvest-types", label: "סוגי קטיף" },
-    { id: "document-categories", label: "קטגוריות מסמכים" },
+    // { id: "document-categories", label: "קטגוריות מסמכים" },
+    // { id: "document-simple-categories", label: "קטגוריות פשוטות" },
+    // { id: "document-template-categories", label: "קטגוריות תבניות" },
+    { id: "document-management", label: "ניהול מסמכים" },
   ];
 
   const handleTabChange = (tabId) => {

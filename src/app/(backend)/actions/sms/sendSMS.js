@@ -27,6 +27,13 @@ const sendSMS = async (
   );
 
   try {
+    console.log("------------- SENDING SMS -------------");
+    console.log({
+      encodedURL,
+      workerId,
+      phone,
+      message,
+    });
     const response = await axios.get(encodedURL);
     const body = response.data;
     console.log("Response from SMS gateway:", body);
@@ -35,7 +42,7 @@ const sendSMS = async (
     const smsRecord = await prisma.SMS.create({
       data: {
         message: message,
-        status: response.status === 200 && body === "1" ? "SENT" : "FAILED",
+        status: body === "1" || body === 1 ? "SENT" : "FAILED",
         ...(workerId && { workerId }),
         ...(clientId && { clientId }),
         ...(organizationId && { organizationId }),
@@ -44,11 +51,11 @@ const sendSMS = async (
       },
     });
     console.log("SMS Record Created:", smsRecord);
-    return response.status === 200 && body === "1";
+    return body === "1" || body === 1;
   } catch (error) {
     console.error("Error in sendSMS function:", error);
     return false;
   }
-}
+};
 
 export default sendSMS;

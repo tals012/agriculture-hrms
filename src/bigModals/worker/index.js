@@ -11,6 +11,7 @@ import Spinner from "@/components/spinner";
 import Image from "next/image";
 // import HarvestEntries from "./tabs/harvestEntries";
 import styles from "@/styles/bigModals/worker/index.module.scss";
+import Documents from "./tabs/documents";
 
 const Worker = ({ isOpen, onClose }) => {
   const [activeTab, setActiveTab] = useState(0);
@@ -143,8 +144,15 @@ const Worker = ({ isOpen, onClose }) => {
 
   if (loading) {
     return (
-      <div className={`${styles.modalOverlay} ${isOpen === false ? styles.close : styles.open}`}>
-        <div className={styles.modalContent} onClick={(e) => e.stopPropagation()}>
+      <div
+        className={`${styles.modalOverlay} ${
+          isOpen === false ? styles.close : styles.open
+        }`}
+      >
+        <div
+          className={styles.modalContent}
+          onClick={(e) => e.stopPropagation()}
+        >
           <div className={styles.loading}>
             <Spinner size={100} />
           </div>
@@ -154,7 +162,12 @@ const Worker = ({ isOpen, onClose }) => {
   }
 
   return (
-    <div className={`${styles.modalOverlay} ${isOpen === false ? styles.close : styles.open}`} onClick={onClose}>
+    <div
+      className={`${styles.modalOverlay} ${
+        isOpen === false ? styles.close : styles.open
+      }`}
+      onClick={onClose}
+    >
       <div className={styles.modalContent} onClick={(e) => e.stopPropagation()}>
         <Top onClose={onClose} data={data} setData={setData} />
 
@@ -173,6 +186,12 @@ const Worker = ({ isOpen, onClose }) => {
                 width: 24,
                 height: 24,
               },
+              {
+                icon: "/assets/icons/doc-1.svg",
+                title: "מסמכים",
+                width: 24,
+                height: 24,
+              },
             ]}
             activeTab={activeTab}
             setActiveTab={setActiveTab}
@@ -186,6 +205,8 @@ const Worker = ({ isOpen, onClose }) => {
             />
           ) : activeTab === 1 ? (
             <Credentials workerId={isOpen} workerData={data} />
+          ) : activeTab === 2 ? (
+            <Documents workerId={isOpen} />
           ) : null}
 
           <Image
@@ -193,7 +214,9 @@ const Worker = ({ isOpen, onClose }) => {
             alt="menu"
             width={20}
             height={20}
-            className={`${styles.menuIcon} ${isSideDetailsOpen ? styles.menuIconOpen : styles.menuIconClose}`}
+            className={`${styles.menuIcon} ${
+              isSideDetailsOpen ? styles.menuIconOpen : styles.menuIconClose
+            }`}
             onClick={() => setIsSideDetailsOpen(!isSideDetailsOpen)}
           />
 

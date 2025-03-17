@@ -12,13 +12,18 @@ import { updateWorkerSimpleCategory } from "@/app/(backend)/actions/workers/docu
 import { deleteWorkerTemplateCategory } from "@/app/(backend)/actions/workers/documentCategory/deleteWorkerTemplateCategory";
 import { deleteWorkerSimpleCategory } from "@/app/(backend)/actions/workers/documentCategory/deleteWorkerSimpleCategory";
 
-const DocumentCategories = () => {
-  const [activeTab, setActiveTab] = useState("template");
+const DocumentCategories = ({ initialTab = "template" }) => {
+  const [activeTab, setActiveTab] = useState(initialTab);
   const [showAddForm, setShowAddForm] = useState(false);
   const [editingCategory, setEditingCategory] = useState(null);
   const [formData, setFormData] = useState({ name: "" });
   const [templateCategories, setTemplateCategories] = useState([]);
   const [simpleCategories, setSimpleCategories] = useState([]);
+
+  // When initialTab prop changes, update activeTab
+  useEffect(() => {
+    setActiveTab(initialTab);
+  }, [initialTab]);
 
   // * fetch template categories
   const fetchTemplateCategories = async () => {
@@ -121,6 +126,10 @@ const DocumentCategories = () => {
       } else {
         fetchSimpleCategories();
       }
+
+      // Dispatch custom event for other components to refresh data
+      const event = new CustomEvent("workerCategoryUpdated");
+      window.dispatchEvent(event);
     } catch (error) {
       console.error(error);
       toast.error("שגיאה בשמירת הקטגוריה");
@@ -153,6 +162,10 @@ const DocumentCategories = () => {
       } else {
         fetchSimpleCategories();
       }
+
+      // Dispatch custom event for other components to refresh data
+      const event = new CustomEvent("workerCategoryUpdated");
+      window.dispatchEvent(event);
     } catch (error) {
       console.error(error);
       toast.error("שגיאה במחיקת הקטגוריה");
@@ -168,21 +181,24 @@ const DocumentCategories = () => {
   return (
     <div className={styles.container}>
       <h2 className={styles.title}>קטגוריות מסמכים</h2>
-
-      <div className={styles.tabs}>
-        <div
-          className={`${styles.tab} ${activeTab === "template" ? styles.active : ""}`}
-          onClick={() => handleTabChange("template")}
-        >
-          קטגוריות תבניות
+      
+      {/* Show tabs only when no initialTab is provided or when document-categories is used */}
+      {(!initialTab || initialTab === "document-categories") && (
+        <div className={styles.tabs}>
+          <div
+            className={`${styles.tab} ${activeTab === "template" ? styles.active : ""}`}
+            onClick={() => handleTabChange("template")}
+          >
+            קטגוריות תבניות
+          </div>
+          <div
+            className={`${styles.tab} ${activeTab === "simple" ? styles.active : ""}`}
+            onClick={() => handleTabChange("simple")}
+          >
+            קטגוריות פשוטות
+          </div>
         </div>
-        <div
-          className={`${styles.tab} ${activeTab === "simple" ? styles.active : ""}`}
-          onClick={() => handleTabChange("simple")}
-        >
-          קטגוריות פשוטות
-        </div>
-      </div>
+      )}
 
       <div className={styles.content}>
         <div className={styles.header}>
@@ -217,21 +233,25 @@ const DocumentCategories = () => {
         )}
 
         <div className={styles.categoriesList}>
-          {currentCategories.map((category) => (
-            <div key={category.id} className={styles.categoryItem}>
-              <div className={styles.categoryInfo}>
-                <h4>{category.name}</h4>
+          {currentCategories.length === 0 ? (
+            <div className={styles.emptyState}>אין קטגוריות זמינות</div>
+          ) : (
+            currentCategories.map((category) => (
+              <div key={category.id} className={styles.categoryItem}>
+                <div className={styles.categoryInfo}>
+                  <h4>{category.name}</h4>
+                </div>
+                <div className={styles.categoryActions}>
+                  <button className={styles.editButton} onClick={() => handleEdit(category)}>
+                    עריכה
+                  </button>
+                  <button className={styles.deleteButton} onClick={() => handleDelete(category.id)}>
+                    מחיקה
+                  </button>
+                </div>
               </div>
-              <div className={styles.categoryActions}>
-                <button className={styles.editButton} onClick={() => handleEdit(category)}>
-                  עריכה
-                </button>
-                <button className={styles.deleteButton} onClick={() => handleDelete(category.id)}>
-                  מחיקה
-                </button>
-              </div>
-            </div>
-          ))}
+            ))
+          )}
         </div>
       </div>
     </div>
