@@ -1,8 +1,7 @@
-"use client";
-
-import Spinner from "@/components/spinner";
-import Form from "@/containers/screens/worker/signedForm/Form";
 import { Suspense } from "react";
+import Spinner from "@/components/spinner";
+import Form from "@/containers/signedForm/form";
+import styles from "@/styles/screens/signed-form.module.scss";
 
 export default function SignedForm({ params }) {
   const { id } = params;
@@ -11,21 +10,12 @@ export default function SignedForm({ params }) {
   }
 
   return (
-    <div style={{ 
-      maxWidth: '1200px', 
-      margin: '0 auto',
-      padding: '1.5rem'
-    }}>
-      <div style={{ 
-        backgroundColor: 'white',
-        borderRadius: '0.5rem',
-        boxShadow: '0 4px 6px -1px rgba(0, 0, 0, 0.1), 0 2px 4px -1px rgba(0, 0, 0, 0.06)',
-        padding: '2rem'
-      }}>
+    <div className={styles.container}>
+      <div className={styles.wrapper}>
         <Suspense fallback={<Spinner />}>
-          <Form workerId={id} source="ADMIN" />
+          <Form foreignWorkerId={id} source={"ADMIN"} />
         </Suspense>
       </div>
     </div>
   );
-} 
+}

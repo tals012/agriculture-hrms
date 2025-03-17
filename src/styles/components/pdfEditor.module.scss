@@ -7,17 +7,25 @@
 
 .header {
   padding: 20px;
-  display: flex;
-  justify-content: space-between;
-  align-items: center;
   background-color: #f9fafb;
   border-bottom: 1px solid #e5e7eb;
-  height: 80px;
+  height: auto;
+  display: flex;
+  flex-direction: column;
+  align-items: flex-end;
+  justify-content: end;
+  gap: 15px;
 
   h1 {
     font-size: 1.5rem;
     font-weight: 600;
     margin: 0;
+  }
+
+  .buttons {
+    display: flex;
+    align-items: center;
+    gap: 10px;
   }
 }
 
@@ -25,6 +33,7 @@
   display: inline-flex;
   align-items: center;
   justify-content: center;
+  gap: 10px;
   padding: 8px 16px;
   font-size: 0.875rem;
   font-weight: 500;
@@ -40,10 +49,14 @@
   }
   
   &.secondary {
-    background-color: #6b7280;
+    background-color: #6b72801c;
+    width: 70px;
+    height: 30px;
+    color: #6b7280;
     
     &:hover {
       background-color: #4b5563;
+      color: #fff;
     }
   }
 }
@@ -86,6 +99,29 @@
   width: 100%;
   height: calc(100vh - 80px);
   overflow: hidden;
+  
+  /* Inner content will be centered by the Designer component */
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  direction: ltr; /* Override RTL for the viewer itself */
+  
+  /* Global styles for PDF display - ensures PDF pages are centered */
+  :global(.pdfme-ui-designer) {
+    direction: ltr !important; /* Force LTR for the designer component */
+  }
+  
+  :global(.pdfme-ui-designer-body) {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    direction: ltr !important;
+  }
+  
+  :global(.pdfme-ui-designer-page-container) {
+    margin: auto;
+    direction: ltr !important;
+  }
 }
 
 .designerContainer {
@@ -232,4 +268,168 @@
 
 .dictionaryPortal {
   direction: rtl;
+}
+
+/* Signature Modal Styles */
+.signatureModalContent {
+  display: flex;
+  flex-direction: row;
+  gap: 24px;
+  padding: 0;
+  height: 100%;
+  
+  @media (max-width: 768px) {
+    flex-direction: column;
+  }
+}
+
+.signatureModalCanvas {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  padding: 24px;
+  background-color: #fff;
+  border-radius: 8px;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.05);
+}
+
+.signatureModalCanvasTitle {
+  margin-bottom: 16px !important;
+  font-weight: 600 !important;
+  color: #111827 !important;
+  font-size: 1.25rem !important;
+}
+
+.signatureModalCanvasContainer {
+  border: 2px dashed #d1d5db;
+  border-radius: 8px;
+  background-color: #f9fafb;
+  margin-bottom: 20px;
+  position: relative;
+  overflow: hidden;
+  transition: border-color 0.2s;
+  
+  &:hover {
+    border-color: #9ca3af;
+  }
+}
+
+.signatureModalCanvasWrapper {
+  width: 100% !important;
+  height: 200px !important;
+  touch-action: none;
+  cursor: crosshair !important;
+}
+
+.signatureModalButton {
+  padding: 10px 16px;
+  border-radius: 6px;
+  font-weight: 500;
+  font-size: 0.875rem;
+  cursor: pointer;
+  transition: all 0.2s;
+  border: none;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+  
+  &:disabled {
+    opacity: 0.5;
+    cursor: not-allowed;
+  }
+}
+
+.signatureModalButtonClear {
+  background-color: #f3f4f6;
+  color: #4b5563;
+  
+  &:hover:not(:disabled) {
+    background-color: #e5e7eb;
+  }
+}
+
+.signatureModalButtonSave {
+  background-color: #2563eb;
+  color: white;
+  
+  &:hover:not(:disabled) {
+    background-color: #1d4ed8;
+  }
+}
+
+.signatureModalButtonSignAll {
+  background-color: #059669;
+  color: white;
+  
+  &:hover:not(:disabled) {
+    background-color: #047857;
+  }
+}
+
+.signatureModalButtonComplete {
+  background-color: #059669;
+  color: white;
+  font-weight: 600;
+  
+  &:hover:not(:disabled) {
+    background-color: #047857;
+  }
+}
+
+.signatureModalSidebar {
+  width: 280px;
+  background-color: #f9fafb;
+  border-left: 1px solid #e5e7eb;
+  overflow-y: auto;
+  
+  @media (max-width: 768px) {
+    width: 100%;
+    border-left: none;
+    border-top: 1px solid #e5e7eb;
+  }
+}
+
+.signatureFieldItem {
+  padding: 12px;
+  border-radius: 6px;
+  margin-bottom: 8px;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  transition: all 0.2s;
+  background-color: white;
+  border: 1px solid #e5e7eb;
+  
+  &:hover {
+    border-color: #d1d5db;
+    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.05);
+  }
+  
+  &.active {
+    border-color: #2563eb;
+    background-color: #eff6ff;
+  }
+  
+  &.signed {
+    border-color: #059669;
+    background-color: #ecfdf5;
+  }
+}
+
+.pulse {
+  animation: pulse 1.5s infinite;
+}
+
+@keyframes pulse {
+  0% {
+    box-shadow: 0 0 0 0 rgba(37, 99, 235, 0.4);
+  }
+  70% {
+    box-shadow: 0 0 0 10px rgba(37, 99, 235, 0);
+  }
+  100% {
+    box-shadow: 0 0 0 0 rgba(37, 99, 235, 0);
+  }
 } 

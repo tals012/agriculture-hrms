@@ -1,9 +1,9 @@
 "use client";
 
 import TemplateDesigner from "@/containers/settings/templateDesigner";
-import styles from "@/styles/screens/addTemplate.module.scss";
 import { ToastContainer } from "react-toastify";
 import "react-toastify/dist/ReactToastify.css";
+import styles from "@/styles/screens/addTemplate.module.scss";
 
 export default function AddTemplate() {
   return (

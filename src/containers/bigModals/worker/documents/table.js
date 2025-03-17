@@ -170,7 +170,7 @@ const DocumentsTable = ({
         
         const response = await getWorkerDocuments({ workerId });
 
-        console.log(response, "response")
+        console.log(response, "docs response")
         
         if (response.ok) {
           setData(response.data);
@@ -638,7 +638,7 @@ const DocumentsTable = ({
                 <td>
                   <div className={styles.actionsContainer}>
                     <button
-                      onClick={() => window.open(row.link, "_blank")}
+                      onClick={() => window.open(row.url, "_blank")}
                       className={styles.iconButton}
                       title="צפה במסמך"
                     >

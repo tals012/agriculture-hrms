@@ -894,14 +894,14 @@ model SMS {
   sentBy SMSSentBy?
   sentTo SMSSentTo?
 
-  organization   Organization @relation(fields: [organizationId], references: [id])
-  organizationId String
+  organization   Organization? @relation(fields: [organizationId], references: [id])
+  organizationId String?
 
-  client   Client @relation(fields: [clientId], references: [id])
-  clientId String
+  client   Client? @relation(fields: [clientId], references: [id])
+  clientId String?
 
-  worker   Worker @relation(fields: [workerId], references: [id])
-  workerId String
+  worker   Worker? @relation(fields: [workerId], references: [id])
+  workerId String?
 
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt

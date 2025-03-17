@@ -113,7 +113,7 @@ const EditTemplate = () => {
     <div
       style={{
         width: "100%",
-        position: "relative",
+        position: "relative"
       }}
     >
       {file && (

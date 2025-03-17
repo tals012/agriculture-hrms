@@ -89,7 +89,7 @@ const getWorkers = async (filters = {}) => {
       ],
     });
 
-    console.log("Workers found:", workers);
+    // console.log("Workers found:", workers);
 
     return {
       status: 200,
