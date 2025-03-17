@@ -2,6 +2,7 @@
 const nextConfig = {
   webpack: (config) => {
     config.resolve.alias.canvas = false;
+    config.resolve.alias['@'] = require('path').resolve(__dirname, 'src');
     return config;
   },
   experimental: {

@@ -4,10 +4,11 @@ import React, { useEffect, useState, useCallback, useRef } from "react";
 import { useRouter } from "next/navigation";
 import { toast } from "react-toastify";
 import Select from "react-select";
+import dynamic from 'next/dynamic';
 
 import Spinner from "@/components/spinner";
 
-import PDFTemplateForm from "@/components/pdf/pdfTemplateForm.js";
+const PDFTemplateForm = dynamic(() => import('@/components/pdf/pdfTemplateForm'), { ssr: false });
 import { generate as pdfmeGenerate } from "@pdfme/generator";
 import { getFontsData, getPlugins } from "@/components/pdf/helper";
 import Modal from "@/components/modal";
