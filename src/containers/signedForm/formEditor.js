@@ -7,7 +7,7 @@ import Select from "react-select";
 
 import Spinner from "@/components/spinner";
 
-import PDFTemplateForm from "../../components/pdf/pdfTemplateForm";
+import PdfTemplateFormTemp from "../../components/pdf/pdfTemplateFormTemp";
 import { generate as pdfmeGenerate } from "@pdfme/generator";
 import { getFontsData, getPlugins } from "@/components/pdf/helper";
 import Modal from "@/components/modal";
@@ -247,7 +247,7 @@ function FormEditor({
   return (
     <div style={{ width: "100%", position: "relative", minHeight: "100px" }}>
       {!!file && !!workerDetails && !!organizationSettings ? (
-        <PDFTemplateForm
+        <PdfTemplateFormTemp
           template={file}
           organizationSettings={organizationSettings}
           workerDetails={workerDetails}
