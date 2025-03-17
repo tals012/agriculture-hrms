@@ -1,7 +1,7 @@
 "use server";
 
 import prisma from "@/lib/prisma";
-import { sendSms } from "@/app/(backend)/actions/sms/sendSMS";
+import sendSms from "@/app/(backend)/actions/sms/sendSMS";
 import bcrypt from "bcryptjs";
 
 export async function resendPasswordForRemoteDoc({ slug, phone }) {
