@@ -55,10 +55,7 @@ function RemoteFormEditor({ slug, sessionSlug, countryCode }) {
         setData({ workerId: res.data.workerId });
       } else {
         if (res.alreadySubmitted) {
-          const url = await getSignedUrl(res.documentAsset.filePath);
-          // window.open(url, "_blank");
-          // router.replace(url);
-          window.location.href = url;
+          router.push(`/remote-signature/${_slug}/thank-you`);
         } else {
           toast.error(res.message, {
             position: "top-center",
@@ -119,10 +116,11 @@ function RemoteFormEditor({ slug, sessionSlug, countryCode }) {
           // if (sessionSlug) {
           //   router.replace(`/worker-documents/${sessionSlug}/documents`);
           // } else {
-            const url = await getSignedUrl(res.documentAsset.filePath);
-            // window.open(url, "_blank");
-            window.location.href = url;
+          // const url = await getSignedUrl(res.documentAsset.filePath);
+          // window.open(url, "_blank");
+          // window.location.href = url;
           // }
+          router.push(`/remote-signature/${slug}/thank-you`);
         } else {
           toast.error(res.message, {
             position: "top-center",

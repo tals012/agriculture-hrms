@@ -2,6 +2,11 @@ import { NextResponse } from "next/server";
 import * as jose from "jose";
 
 export async function middleware(request) {
+  // Allow public access to remote-signature pages
+  if (request.nextUrl.pathname.startsWith('/remote-signature')) {
+    return NextResponse.next();
+  }
+
   // Get the token from the cookies
   const token = request.cookies.get("token")?.value;
 

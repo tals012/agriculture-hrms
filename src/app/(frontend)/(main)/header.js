@@ -77,6 +77,25 @@ const Header = () => {
     );
   }
 
+  // Simplified header for remote-signature pages
+  if (pathname.startsWith('/remote-signature')) {
+    return (
+      <header className={styles.container}>
+        <div className={styles.wrapper}>
+          <div className={styles.right}>
+            <Image
+              src="/assets/icons/logowave.png"
+              alt="logo"
+              width={130}
+              height={50}
+              className={styles.logo}
+            />
+          </div>
+        </div>
+      </header>
+    );
+  }
+
   return (
     <header className={styles.container}>
       <div className={styles.wrapper}>

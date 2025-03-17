@@ -53,7 +53,7 @@ export async function resendPasswordForRemoteDoc({ slug, phone }) {
     console.log("Sending SMS to:", document.worker.primaryPhone);
     const isSuccess = await sendSms({
       phone: phone ?? document.worker.primaryPhone,
-      message: `קוד חדש לחתימה על מסמכים: ${_password}\nקישור למסמכים: ${process.env.NEXT_PUBLIC_API_URL}/${slug}`,
+      message: `קוד חדש לחתימה על מסמכים: ${_password}\nקישור למסמכים: ${process.env.NEXT_PUBLIC_API_URL}/remote-signature/${slug}`,
     });
     console.log("SMS send result:", isSuccess);
 

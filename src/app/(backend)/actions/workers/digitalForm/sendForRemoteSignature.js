@@ -29,7 +29,12 @@ const getUniqueSlug = async () => {
   return slug;
 };
 
-const sendLinkToWorker = async ({ workerDocumentId, phone, slug, workerId }) => {
+const sendLinkToWorker = async ({
+  workerDocumentId,
+  phone,
+  slug,
+  workerId,
+}) => {
   console.log("------------- SENDING LINK TO WORKER -------------");
   console.log({
     workerDocumentId,
@@ -41,8 +46,8 @@ const sendLinkToWorker = async ({ workerDocumentId, phone, slug, workerId }) => 
 
   const isSuccess = await sendSms(
     phone,
-    `Please fill and sign the document at the following link: ${process.env.NEXT_PUBLIC_API_URL}/${slug} \nThe password for the document is ${_password}`,
-    workerId,
+    `Please fill and sign the document at the following link: ${process.env.NEXT_PUBLIC_API_URL}/remote-signature/${slug} \nThe password for the document is ${_password}`,
+    workerId
   );
   console.log("------------- SENDING LINK TO WORKER SUCCESS -------------");
   console.log({
