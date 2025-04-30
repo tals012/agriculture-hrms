@@ -33,6 +33,10 @@ const sendSMS = async (
       workerId,
       phone,
       message,
+      organizationId,
+      sentBy,
+      sentTo,
+      clientId,
     });
     const response = await axios.get(encodedURL);
     const body = response.data;
