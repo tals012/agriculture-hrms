@@ -18,11 +18,6 @@ const sendSMS = async (
   sentBy,
   sentTo
 ) => {
-  if (!workerId) {
-    console.error("No worker ID provided");
-    return false;
-  }
-
   const encodedURL = encodeURI(
     `${SMS_GATEWAY_URL}?UserName=${SMS_USERNAME}&Password=${SMS_PASSWORD}&SenderCellNumber=${SMS_SENDER}&CellNumber=${phone}&MessageString=${message}`
   );
