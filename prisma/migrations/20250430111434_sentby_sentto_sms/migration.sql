@@ -1,0 +1,5 @@
+-- AlterEnum
+ALTER TYPE "SMSSentBy" ADD VALUE 'MANAGER';
+
+-- AlterEnum
+ALTER TYPE "SMSSentTo" ADD VALUE 'MANAGER';

@@ -3,6 +3,7 @@
 import prisma from "@/lib/prisma";
 import { z } from "zod";
 import bcrypt from "bcryptjs";
+import sendSMS from "../sms/sendSMS";
 
 const SALT_ROUNDS = 10;
 
@@ -24,11 +25,11 @@ const createManager = async ({ payload }) => {
     }
 
     const parsedData = createManagerSchema.safeParse(payload);
-    
+
     if (!parsedData.success) {
-      const formattedErrors = parsedData.error.issues.map(issue => ({
-        field: issue.path.join('.'),
-        message: issue.message
+      const formattedErrors = parsedData.error.issues.map((issue) => ({
+        field: issue.path.join("."),
+        message: issue.message,
       }));
 
       return {
@@ -44,10 +45,10 @@ const createManager = async ({ payload }) => {
       include: {
         managers: {
           include: {
-            user: true
-          }
-        }
-      }
+            user: true,
+          },
+        },
+      },
     });
 
     if (!client) {
@@ -70,13 +71,13 @@ const createManager = async ({ payload }) => {
       };
     }
 
-    const firstName = parsedData.data.name.split(' ')[0].toLowerCase();
+    const firstName = parsedData.data.name.split(" ")[0].toLowerCase();
 
     let username = firstName;
     let counter = 1;
     while (true) {
       const existingUser = await prisma.user.findUnique({
-        where: { username }
+        where: { username },
       });
       if (!existingUser) break;
       username = `${firstName}${counter}`;
@@ -124,7 +125,18 @@ const createManager = async ({ payload }) => {
         },
       });
 
-      return { user, manager };
+      let message = `Your login credentials for the system: Username: ${username}, Password: systempassword123. Please complete your login at: ${process.env.NEXT_PUBLIC_APP_URL}/login`;
+
+      const smsResult = await sendSMS(
+        manager.phone,
+        message,
+        manager.id,
+        organization.id,
+        "ORGANIZATION",
+        "MANAGER"
+      );
+
+      return { user, manager, smsResult };
     });
 
     return {
@@ -132,14 +144,14 @@ const createManager = async ({ payload }) => {
       message: "חשבון המנהל והמשתמש נוצרו בהצלחה",
       data: result.manager,
     };
-
   } catch (error) {
     console.error("Error creating manager:", error);
-    
-    if (error.code === 'P2002') {
+
+    if (error.code === "P2002") {
       return {
         status: 409,
-        message: "הפרה של אילוץ ייחודיות. ייתכן שהאימייל או שם המשתמש כבר בשימוש",
+        message:
+          "הפרה של אילוץ ייחודיות. ייתכן שהאימייל או שם המשתמש כבר בשימוש",
         data: null,
       };
     }
@@ -153,4 +165,4 @@ const createManager = async ({ payload }) => {
   }
 };
 
-export default createManager; 
+export default createManager;
