@@ -130,6 +130,8 @@ const createManager = async ({ payload }) => {
       const smsResult = await sendSMS(
         manager.phone,
         message,
+        null,
+        client.id,
         manager.id,
         organization.id,
         "ORGANIZATION",

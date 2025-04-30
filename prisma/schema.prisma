@@ -310,6 +310,7 @@ model Manager {
   client           Client             @relation(fields: [clientId], references: [id], onDelete: Cascade)
   fields           Field[] // Fields managed by this manager
   workerAttendance WorkerAttendance[]
+  sms              SMS[]
 
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
@@ -902,6 +903,9 @@ model SMS {
 
   worker   Worker? @relation(fields: [workerId], references: [id])
   workerId String?
+
+  manager   Manager? @relation(fields: [managerId], references: [id])
+  managerId String?
 
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt

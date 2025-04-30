@@ -13,6 +13,7 @@ const sendSMS = async (
   message,
   workerId,
   clientId,
+  managerId,
   organizationId,
   sentBy,
   sentTo
@@ -37,6 +38,7 @@ const sendSMS = async (
       sentBy,
       sentTo,
       clientId,
+      managerId,
     });
     const response = await axios.get(encodedURL);
     const body = response.data;
@@ -49,6 +51,7 @@ const sendSMS = async (
         status: body === "1" || body === 1 ? "SENT" : "FAILED",
         ...(workerId && { workerId }),
         ...(clientId && { clientId }),
+        ...(managerId && { managerId }),
         ...(organizationId && { organizationId }),
         ...(sentBy && { sentBy }),
         ...(sentTo && { sentTo }),
