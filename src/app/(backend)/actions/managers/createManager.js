@@ -125,21 +125,21 @@ const createManager = async ({ payload }) => {
         },
       });
 
-      let message = `Your login credentials for the system: Username: ${username}, Password: systempassword123. Please complete your login at: ${process.env.NEXT_PUBLIC_APP_URL}/login`;
-
-      const smsResult = await sendSMS(
-        manager.phone,
-        message,
-        null,
-        client.id,
-        manager.id,
-        organization.id,
-        "ORGANIZATION",
-        "MANAGER"
-      );
-
-      return { user, manager, smsResult };
+      return { user, manager };
     });
+
+    let message = `Your login credentials for the system: Username: ${username}, Password: systempassword123. Please complete your login at: ${process.env.NEXT_PUBLIC_APP_URL}/login`;
+
+    await sendSMS(
+      result.manager.phone,
+      message,
+      null,
+      client.id,
+      result.manager.id,
+      organization.id,
+      "ORGANIZATION",
+      "MANAGER"
+    );
 
     return {
       status: 201,
