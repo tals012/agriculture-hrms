@@ -33,4 +33,27 @@
       grid-template-columns: 1fr;
     }
   }
+}
+
+.addNewButton {
+  margin-top: 8px;
+  background: none;
+  border: none;
+  color: #0ea5e9;
+  font-size: 14px;
+  font-weight: 500;
+  cursor: pointer;
+  padding: 0;
+  text-align: right;
+  display: block;
+  
+  &:hover {
+    text-decoration: underline;
+  }
+  
+  &:disabled {
+    color: #999;
+    cursor: not-allowed;
+    text-decoration: none;
+  }
 } 
