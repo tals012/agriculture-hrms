@@ -18,32 +18,63 @@ const sendSMS = async (
   sentBy,
   sentTo
 ) => {
-  const encodedURL = encodeURI(
-    `${SMS_GATEWAY_URL}?UserName=${SMS_USERNAME}&Password=${SMS_PASSWORD}&SenderCellNumber=${SMS_SENDER}&CellNumber=${phone}&MessageString=${message}`
-  );
-
   try {
+    // Check if required SMS environment variables are defined
+    if (!SMS_GATEWAY_URL || !SMS_USERNAME || !SMS_PASSWORD || !SMS_SENDER) {
+      console.warn(
+        "SMS environment variables are not configured. SMS sending skipped."
+      );
+
+      // Still create an SMS record to track the attempt
+      await prisma.sMS.create({
+        data: {
+          message: message,
+          status: "FAILED",
+          failureReason: "SMS gateway not configured",
+          ...(workerId && { workerId }),
+          ...(clientId && { clientId }),
+          ...(managerId && { managerId }),
+          ...(organizationId && { organizationId }),
+          ...(sentBy && { sentBy }),
+          ...(sentTo && { sentTo }),
+        },
+      });
+
+      return false;
+    }
+
+    // Validate phone number is available
+    if (!phone) {
+      console.warn("No phone number provided for SMS. SMS sending skipped.");
+      return false;
+    }
+
+    const encodedURL = encodeURI(
+      `${SMS_GATEWAY_URL}?UserName=${SMS_USERNAME}&Password=${SMS_PASSWORD}&SenderCellNumber=${SMS_SENDER}&CellNumber=${phone}&MessageString=${message}`
+    );
+
     console.log("------------- SENDING SMS -------------");
     console.log({
-      encodedURL,
-      workerId,
       phone,
       message,
+      workerId,
+      clientId,
+      managerId,
       organizationId,
       sentBy,
       sentTo,
-      clientId,
-      managerId,
     });
+
     const response = await axios.get(encodedURL);
     const body = response.data;
     console.log("Response from SMS gateway:", body);
-    console.log("Sending SMS to worker ID:", workerId);
 
     const smsRecord = await prisma.sMS.create({
       data: {
         message: message,
         status: body === "1" || body === 1 ? "SENT" : "FAILED",
+        failureReason:
+          body !== "1" && body !== 1 ? `Gateway response: ${body}` : null,
         ...(workerId && { workerId }),
         ...(clientId && { clientId }),
         ...(managerId && { managerId }),
@@ -56,6 +87,26 @@ const sendSMS = async (
     return body === "1" || body === 1;
   } catch (error) {
     console.error("Error in sendSMS function:", error);
+
+    // Try to create an SMS record even if there was an error
+    try {
+      await prisma.sMS.create({
+        data: {
+          message: message,
+          status: "FAILED",
+          failureReason: error.message,
+          ...(workerId && { workerId }),
+          ...(clientId && { clientId }),
+          ...(managerId && { managerId }),
+          ...(organizationId && { organizationId }),
+          ...(sentBy && { sentBy }),
+          ...(sentTo && { sentTo }),
+        },
+      });
+    } catch (dbError) {
+      console.error("Failed to record SMS failure in database:", dbError);
+    }
+
     return false;
   }
 };

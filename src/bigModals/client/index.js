@@ -48,15 +48,25 @@ const Client = ({ isOpen, onClose }) => {
     updatedAt: null,
   });
 
-  const [isCreateManagerModalOpen, setIsCreateManagerModalOpen] = useState(false);
+  const [isCreateManagerModalOpen, setIsCreateManagerModalOpen] =
+    useState(false);
   const [createManagerStatus, setCreateManagerStatus] = useState(null);
   const [isCreateFieldModalOpen, setIsCreateFieldModalOpen] = useState(false);
   const [createFieldStatus, setCreateFieldStatus] = useState(null);
-  const [isCreatePricingModalOpen, setIsCreatePricingModalOpen] = useState(false);
+  const [isCreatePricingModalOpen, setIsCreatePricingModalOpen] =
+    useState(false);
   const [createPricingStatus, setCreatePricingStatus] = useState(null);
 
   useEffect(() => {
     if (isOpen === false) return;
+
+    // Validate that isOpen is a valid non-empty string
+    if (!isOpen || typeof isOpen !== "string" || isOpen.trim() === "") {
+      console.error("Invalid client ID provided:", isOpen);
+      onClose();
+      return;
+    }
+
     const fetchData = async () => {
       setLoading(true);
       setPersonalData({
@@ -85,7 +95,7 @@ const Client = ({ isOpen, onClose }) => {
         updatedAt: null,
       });
       try {
-        const res = await getClientById({ payload: { clientId: isOpen } });
+        const res = await getClientById({ clientId: isOpen });
         const { data, status } = res;
         if (status === 200) {
           setData(data);
@@ -231,21 +241,21 @@ const Client = ({ isOpen, onClose }) => {
        // * MODALS =========================
        // * ================================
        */}
-      {isCreateManagerModalOpen && (
+      {isCreateManagerModalOpen && isOpen && typeof isOpen === "string" && (
         <CreateManager
           setModalOpen={setIsCreateManagerModalOpen}
           setCreateStatus={setCreateManagerStatus}
           clientId={isOpen}
         />
       )}
-      {isCreateFieldModalOpen && (
+      {isCreateFieldModalOpen && isOpen && typeof isOpen === "string" && (
         <CreateField
           setModalOpen={setIsCreateFieldModalOpen}
           setCreateStatus={setCreateFieldStatus}
           clientId={isOpen}
         />
       )}
-      {isCreatePricingModalOpen && (
+      {isCreatePricingModalOpen && isOpen && typeof isOpen === "string" && (
         <CreatePricing
           setModalOpen={setIsCreatePricingModalOpen}
           setCreateStatus={setCreatePricingStatus}

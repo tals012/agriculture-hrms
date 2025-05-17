@@ -7,7 +7,7 @@ const deleteManagerSchema = z.object({
   managerId: z.string().min(1, "נדרש מזהה מנהל"),
 });
 
-const deleteManager = async ({ payload }) => {
+const deleteManager = async (payload) => {
   try {
     if (!payload) {
       return {
@@ -18,11 +18,11 @@ const deleteManager = async ({ payload }) => {
     }
 
     const parsedData = deleteManagerSchema.safeParse(payload);
-    
+
     if (!parsedData.success) {
-      const formattedErrors = parsedData.error.issues.map(issue => ({
-        field: issue.path.join('.'),
-        message: issue.message
+      const formattedErrors = parsedData.error.issues.map((issue) => ({
+        field: issue.path.join("."),
+        message: issue.message,
       }));
 
       return {
@@ -36,8 +36,8 @@ const deleteManager = async ({ payload }) => {
     const manager = await prisma.manager.findUnique({
       where: { id: parsedData.data.managerId },
       select: {
-        userId: true
-      }
+        userId: true,
+      },
     });
 
     if (!manager) {
@@ -65,11 +65,10 @@ const deleteManager = async ({ payload }) => {
       message: "המנהל וחשבון המשתמש המשויך נמחקו בהצלחה",
       data: null,
     };
-
   } catch (error) {
     console.error("Error deleting manager:", error);
-    
-    if (error.code === 'P2025') {
+
+    if (error.code === "P2025") {
       return {
         status: 404,
         message: "המנהל לא נמצא או כבר נמחק",
@@ -86,4 +85,4 @@ const deleteManager = async ({ payload }) => {
   }
 };
 
-export default deleteManager; 
+export default deleteManager;

@@ -25,9 +25,9 @@ const ManagersTable = ({
       setLoading(true);
       const filters = {
         clientId,
-        ...(searchQuery && { search: searchQuery })
+        ...(searchQuery && { search: searchQuery }),
       };
-      
+
       const res = await getManagers(filters);
       if (res?.status === 200) {
         setData(res.data);
@@ -82,9 +82,7 @@ const ManagersTable = ({
 
   const handleDelete = async (managerId) => {
     try {
-      const res = await deleteManager({
-        payload: { managerId }
-      });
+      const res = await deleteManager({ managerId });
 
       if (res?.status === 200) {
         toast.success(res.message, {

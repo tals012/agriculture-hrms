@@ -7,7 +7,11 @@ import Spinner from "@/components/spinner";
 import createManager from "@/app/(backend)/actions/managers/createManager";
 import styles from "@/styles/smallModals/client/createClient.module.scss";
 
-export default function CreateManager({ setModalOpen, setCreateStatus, clientId }) {
+export default function CreateManager({
+  setModalOpen,
+  setCreateStatus,
+  clientId,
+}) {
   const [loading, setLoading] = useState(false);
   const [formData, setFormData] = useState({
     name: "",
@@ -17,21 +21,38 @@ export default function CreateManager({ setModalOpen, setCreateStatus, clientId 
 
   const handleInputChange = (e) => {
     const { name, value } = e.target;
-    setFormData(prev => ({
+    setFormData((prev) => ({
       ...prev,
-      [name]: value
+      [name]: value,
     }));
   };
 
   const handleCreate = async () => {
     try {
       setLoading(true);
+      // Debug: Log client ID and form data
+      console.log("Creating manager with clientId:", clientId);
+      console.log("Form data:", formData);
+
+      // Make sure clientId is a string and valid
+      if (!clientId) {
+        console.error("Invalid clientId:", clientId);
+        toast.error("מזהה לקוח חסר או לא תקין", {
+          position: "top-center",
+          autoClose: 3000,
+        });
+        setLoading(false);
+        return;
+      }
+
       const payload = {
         ...formData,
-        clientId,
+        clientId: String(clientId), // Ensure clientId is a string
       };
 
-      const res = await createManager({ payload });
+      console.log("Sending payload to createManager:", payload);
+      const res = await createManager(payload);
+      console.log("Response from createManager:", res);
 
       if (res?.status === 201) {
         toast.success(res.message, {
@@ -42,7 +63,7 @@ export default function CreateManager({ setModalOpen, setCreateStatus, clientId 
         setModalOpen(false);
       } else {
         if (res?.errors) {
-          res.errors.forEach(error => {
+          res.errors.forEach((error) => {
             toast.error(`${error.field}: ${error.message}`, {
               position: "top-center",
               autoClose: 3000,

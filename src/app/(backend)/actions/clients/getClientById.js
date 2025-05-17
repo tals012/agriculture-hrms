@@ -7,7 +7,7 @@ const getClientByIdSchema = z.object({
   clientId: z.string().min(1, "נדרש מזהה לקוח"),
 });
 
-const getClientById = async ({ payload }) => {
+const getClientById = async (payload) => {
   try {
     if (!payload) {
       return {
@@ -18,11 +18,11 @@ const getClientById = async ({ payload }) => {
     }
 
     const parsedData = getClientByIdSchema.safeParse(payload);
-    
+
     if (!parsedData.success) {
-      const formattedErrors = parsedData.error.issues.map(issue => ({
-        field: issue.path.join('.'),
-        message: issue.message
+      const formattedErrors = parsedData.error.issues.map((issue) => ({
+        field: issue.path.join("."),
+        message: issue.message,
       }));
 
       return {
