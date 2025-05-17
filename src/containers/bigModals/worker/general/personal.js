@@ -14,14 +14,19 @@ import styles from "@/styles/containers/bigModals/worker/general/personal.module
 import { getBranches } from "@/app/(backend)/actions/branch/getBranches";
 import { getBanks } from "@/app/(backend)/actions/bank/getBanks";
 import { format, parseISO } from "date-fns";
+import React from "react";
+import DatePicker from "react-datepicker";
+import "react-datepicker/dist/react-datepicker.css";
+import { he } from "date-fns/locale";
+import Image from "next/image";
 
 // Helper function to format date in dd/mm/yyyy
 const formatDate = (date) => {
   if (!date) return null;
   try {
     // If the date is a string (ISO format), parse it first
-    const dateObj = typeof date === 'string' ? parseISO(date) : date;
-    return format(dateObj, 'dd/MM/yyyy');
+    const dateObj = typeof date === "string" ? parseISO(date) : date;
+    return format(dateObj, "dd/MM/yyyy");
   } catch (error) {
     console.error("Date formatting error:", error);
     return date;
@@ -145,24 +150,44 @@ const Personal = ({ personalData, setPersonalData }) => {
 
   return (
     <div className={styles.container}>
-      <div className={styles.block}>
-        <div className={styles.right}>
-          <h3>פרטים אישיים</h3>
-        </div>
-        <div className={styles.left}>
+      <div className={styles.formGrid}>
+        <div className={styles.formSection}>
+          <div className={styles.title}>
+            <h3>פרטים אישיים</h3>
+          </div>
           <div className={styles.fields}>
-            <TextField
-              label="שם בעברית"
-              width="48.3%"
-              value={personalData.nameHe}
-              onChange={(e) => handleChange(e, "nameHe")}
-            />
-            <TextField
-              label="שם משפחה בעברית"
-              width="48.3%"
-              value={personalData.surnameHe}
-              onChange={(e) => handleChange(e, "surnameHe")}
-            />
+            <div className={styles.formField}>
+              <TextField
+                label="שם פרטי בעברית"
+                width="100%"
+                value={personalData.nameHe || ""}
+                onChange={(e) => handleChange({ nameHe: e.target.value })}
+              />
+            </div>
+            <div className={styles.formField}>
+              <TextField
+                label="שם משפחה בעברית"
+                width="100%"
+                value={personalData.surnameHe || ""}
+                onChange={(e) => handleChange({ surnameHe: e.target.value })}
+              />
+            </div>
+            <div className={styles.formField}>
+              <TextField
+                label="שם פרטי"
+                width="100%"
+                value={personalData.name || ""}
+                onChange={(e) => handleChange({ name: e.target.value })}
+              />
+            </div>
+            <div className={styles.formField}>
+              <TextField
+                label="שם משפחה"
+                width="100%"
+                value={personalData.surname || ""}
+                onChange={(e) => handleChange({ surname: e.target.value })}
+              />
+            </div>
             <div style={{ width: "48.3%" }}>
               <ReactSelect
                 options={[
@@ -402,11 +427,11 @@ const Personal = ({ personalData, setPersonalData }) => {
         </div>
       </div>
 
-      <div className={styles.block}>
-        <div className={styles.right}>
-          <h3>מסמכים</h3>
-        </div>
-        <div className={styles.left}>
+      <div className={styles.formGrid}>
+        <div className={styles.formSection}>
+          <div className={styles.title}>
+            <h3>מסמכים</h3>
+          </div>
           <div className={styles.fields}>
             <TextField
               label="דרכון"
@@ -447,87 +472,6 @@ const Personal = ({ personalData, setPersonalData }) => {
           </div>
         </div>
       </div>
-
-      {/* <div className={styles.block}>
-        <div className={styles.right}>
-          <h3>פרטים נוספים</h3>
-        </div>
-        <div className={styles.left}>
-          <div className={styles.fields}>
-            <div style={{ width: "48.3%" }}>
-              <ReactSelect
-                options={[
-                  { value: "ACTIVE", label: "פעיל" },
-                  { value: "INACTIVE", label: "לא פעיל" },
-                  { value: "FREEZE", label: "מוקפא" },
-                  { value: "COMMITTEE", label: "ועדה" },
-                  { value: "HIDDEN", label: "מוסתר" },
-                  { value: "IN_TRANSIT", label: "במעבר" },
-                ]}
-                components={{
-                  IndicatorSeparator: () => null,
-                }}
-                placeholder="סטטוס"
-                value={
-                  personalData.workerStatus
-                    ? {
-                        value: personalData.workerStatus,
-                        label: {
-                          ACTIVE: "פעיל",
-                          INACTIVE: "לא פעיל",
-                          FREEZE: "מוקפא",
-                          COMMITTEE: "ועדה",
-                          HIDDEN: "מוסתר",
-                          IN_TRANSIT: "במעבר",
-                        }[personalData.workerStatus],
-                      }
-                    : null
-                }
-                onChange={(option) =>
-                  setPersonalData({
-                    ...personalData,
-                    workerStatus: option ? option.value : null,
-                  })
-                }
-                menuPortalTarget={document.body}
-                menuPosition={"fixed"}
-                styles={selectStyle}
-              />
-            </div>
-            {clients && (
-              <div style={{ width: "48.3%" }}>
-                <ReactSelect
-                  options={clients.map((client) => ({
-                    value: client.id,
-                    label: client.name,
-                  }))}
-                  components={{
-                    IndicatorSeparator: () => null,
-                  }}
-                  placeholder="לקוח"
-                  value={
-                    personalData.clientId
-                      ? {
-                          value: personalData.clientId,
-                          label: clients.find((c) => c.id === personalData.clientId)?.name,
-                        }
-                      : null
-                  }
-                  onChange={(option) =>
-                    setPersonalData({
-                      ...personalData,
-                      clientId: option ? option.value : null,
-                    })
-                  }
-                  menuPortalTarget={document.body}
-                  menuPosition={"fixed"}
-                  styles={selectStyle}
-                />
-              </div>
-            )}
-          </div>
-        </div>
-      </div> */}
 
       <div className={styles.btns}>
         <button>ביטול</button>

@@ -2,9 +2,9 @@
   display: flex;
   flex-direction: column;
   width: 100%;
-  padding: 20px 20px 60px 20px;
-  height: 100vh;
+  padding: 0 20px;
   overflow-y: auto;
+  height: calc(100vh - 53px);
 
   &::-webkit-scrollbar {
     display: none;
@@ -12,24 +12,68 @@
 
   .head {
     display: flex;
-    justify-content: space-between;
     align-items: center;
+    justify-content: space-between;
+    margin-bottom: 20px;
 
     h1 {
-      font-size: 30px;
-      font-weight: 600;
-      line-height: 36px;
-      letter-spacing: -0.01em;
-      color: #020608;
-      margin-bottom: 20px;
+      font-size: 28px;
+      font-weight: 700;
+      color: #1a1a1a;
     }
 
     button {
-      background-color: #007bff;
-      color: #fff;
+      background-color: #2b85ff;
+      color: white;
       border: none;
-      padding: 10px 20px;
-      border-radius: 5px;
+      padding: 8px 16px;
+      border-radius: 6px;
+      font-size: 14px;
+      cursor: pointer;
+      transition: background-color 0.2s;
+
+      &:hover {
+        background-color: #1a73e8;
+      }
+
+      &:disabled {
+        background-color: #cccccc;
+        cursor: not-allowed;
+      }
+    }
+  }
+}
+
+/* Media queries for responsive layout */
+@media screen and (max-width: 1024px) {
+  .container {
+    padding: 0 15px;
+    
+    .head {
+      flex-direction: column;
+      align-items: flex-start;
+      gap: 10px;
+      margin-bottom: 15px;
+      
+      h1 {
+        font-size: 24px;
+      }
+    }
+  }
+}
+
+@media screen and (max-width: 768px) {
+  .container {
+    padding: 0 10px;
+    
+    .head {
+      h1 {
+        font-size: 20px;
+      }
+      
+      button {
+        width: 100%;
+      }
     }
   }
 }

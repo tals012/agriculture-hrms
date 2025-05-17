@@ -92,71 +92,83 @@
 }
 
 .note {
-  display: flex;
-  flex-direction: column;
-  justify-content: flex-end;
-  gap: 15px;
-  flex-grow: 2;
-  padding-bottom: 10px;
+  padding: 20px;
+  width: 100%;
 
   .title {
     display: flex;
     align-items: center;
-    gap: 10px;
-
-    .icon {
-      width: 36px;
-      height: 36px;
-      display: flex;
-      align-items: center;
-      justify-content: center;
-      background: #f8f8f8;
-    }
+    gap: 5px;
+    margin-bottom: 10px;
 
     h3 {
-      font-size: 18px;
+      font-size: 16px;
       font-weight: 600;
-      line-height: 20px;
-      letter-spacing: -0.01em;
+      line-height: 24px;
+      letter-spacing: -0.005em;
       color: #020608;
     }
   }
 
+  .notesLoading {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    padding: 40px 0;
+    justify-content: center;
+    color: #666;
+    font-size: 14px;
+  }
+
   textarea {
     width: 100%;
-    height: 114px;
-    padding: 8px;
+    height: 100px;
+    border: 1px solid #eeeef3;
     border-radius: 6px;
-    border: 1px solid #e6e6e6;
+    padding: 14px;
     font-size: 14px;
     font-weight: 400;
     line-height: 20px;
-    letter-spacing: -0.10000000149011612px;
     color: #020608;
     resize: none;
+    margin-bottom: 10px;
+    transition: border-color 0.2s;
+
+    &:focus {
+      outline: none;
+      border-color: #2b85ff;
+    }
   }
 
-  .noteBtn {
-    width: 100%;
-    height: 48px;
-    border: none;
-    border-radius: 6px;
-    background: #2b85ff;
-    font-size: 15px;
-    font-weight: 600;
-    line-height: 24px;
-    letter-spacing: -0.005em;
-    text-align: center;
-    color: #ffffff;
-    display: flex;
-    justify-content: center;
-    align-items: center;
-    cursor: pointer;
-    transition: background-color 0.2s ease;
+  .saveStatus {
+    font-size: 12px;
+    color: #666;
+    margin-top: 6px;
+    min-height: 20px;
 
-    &:hover {
-      background: #1a73e8;
+    .savingIndicator, .savedIndicator, .errorIndicator {
+      display: flex;
+      align-items: center;
+      gap: 6px;
+      animation: fadeIn 0.3s ease;
     }
+
+    .savedIndicator {
+      color: #2e7d32;
+    }
+
+    .errorIndicator {
+      color: #d32f2f;
+    }
+  }
+}
+
+@keyframes fadeIn {
+  from {
+    opacity: 0;
+  }
+  to {
+    opacity: 1;
   }
 }
 
