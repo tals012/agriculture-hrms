@@ -665,3 +665,84 @@ $gray-500: #6b7280;
     }
   }
 }
+
+.containersCell {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 8px;
+
+  span {
+    margin-right: auto;
+  }
+  
+  .editButton {
+    padding: 4px;
+    border-radius: 4px;
+    background-color: #f0f0f0;
+    border: 1px solid #ddd;
+    transition: all 0.2s ease;
+    
+    &:hover {
+      background-color: #e0e0e0;
+      transform: scale(1.05);
+    }
+  }
+}
+
+.editIconSvg {
+  color: #0077cc;
+  transition: color 0.2s ease;
+  
+  &:hover {
+    color: #005599;
+  }
+}
+
+.editContainersContainer {
+  display: flex;
+  align-items: center;
+  gap: 4px;
+  
+  .editContainersInput {
+    width: 60px;
+    padding: 4px;
+    border: 1px solid #0077cc;
+    border-radius: 4px;
+    text-align: center;
+  }
+  
+  .editContainersActions {
+    display: flex;
+    gap: 4px;
+    
+    .saveButton {
+      background-color: #4caf50;
+      color: white;
+      border: none;
+      border-radius: 4px;
+      padding: 4px;
+      
+      &:hover {
+        background-color: #388e3c;
+      }
+    }
+    
+    .cancelButton {
+      background-color: #f44336;
+      color: white;
+      border: none;
+      border-radius: 4px;
+      padding: 4px;
+      
+      &:hover {
+        background-color: #d32f2f;
+      }
+    }
+  }
+}
+
+.editingRow {
+  background-color: #f8f9fa;
+  transition: background-color 0.3s ease;
+}
