@@ -33,10 +33,10 @@ const makeGroupLeader = async (input) => {
             include: {
               worker: {
                 include: {
-                  user: true
-                }
-              }
-            }
+                  user: true,
+                },
+              },
+            },
           },
         },
       });
@@ -48,19 +48,21 @@ const makeGroupLeader = async (input) => {
       const worker = await tx.worker.findUnique({
         where: { id: workerId },
         include: {
-          user: true
-        }
+          user: true,
+        },
       });
 
       if (!worker) {
         throw new Error("העובד לא נמצא");
       }
 
-      const currentLeaders = group.members.filter(member => member.isGroupLeader);
+      const currentLeaders = group.members.filter(
+        (member) => member.isGroupLeader
+      );
       for (const leader of currentLeaders) {
         if (leader.worker.userId) {
           await tx.user.delete({
-            where: { id: leader.worker.userId }
+            where: { id: leader.worker.userId },
           });
         }
       }
@@ -81,19 +83,21 @@ const makeGroupLeader = async (input) => {
           throw new Error("לא קיים ארגון");
         }
 
-        const firstName = (worker.name || worker.nameHe || "user").split(' ')[0].toLowerCase();
+        const firstName = (worker.name || worker.nameHe || "user")
+          .split(" ")[0]
+          .toLowerCase();
         let username = firstName;
         let counter = 1;
         while (true) {
           const existingUser = await tx.user.findUnique({
-            where: { username }
+            where: { username },
           });
           if (!existingUser) break;
           username = `${firstName}${counter}`;
           counter++;
         }
 
-        const hashedPassword = await bcrypt.hash("systempassword123", SALT_ROUNDS);
+        const hashedPassword = await bcrypt.hash("10203040", SALT_ROUNDS);
 
         const user = await tx.user.create({
           data: {
@@ -109,7 +113,7 @@ const makeGroupLeader = async (input) => {
 
         await tx.worker.update({
           where: { id: workerId },
-          data: { userId: user.id }
+          data: { userId: user.id },
         });
       }
 

@@ -2,46 +2,59 @@
 
 import prisma from "@/lib/prisma";
 import { z } from "zod";
+
 const schema = z.object({
-  groupId: z.string().min(1, "Group ID is required"),
+  groupId: z.string().min(1, "נדרש מזהה קבוצה"),
 });
 
 const getGroupById = async (input) => {
   try {
-    const parsedData = schema.safeParse(input);
+    const validatedInput = schema.safeParse(input);
 
-    if (!parsedData.success) {
+    if (!validatedInput.success) {
       return {
         status: 400,
-        message: "נתונים לא תקינים",
-        errors: parsedData.error.issues,
+        message: "הנתונים שהוזנו אינם תקינים",
+        errors: validatedInput.error.issues,
       };
     }
 
-    const { groupId } = parsedData.data;
+    const { groupId } = validatedInput.data;
 
     const group = await prisma.group.findUnique({
       where: { id: groupId },
       include: {
-        field: {
-          select: {
-            name: true,
+        field: true,
+        members: {
+          include: {
+            worker: {
+              include: {
+                user: true,
+              },
+            },
           },
         },
       },
     });
 
+    if (!group) {
+      return {
+        status: 404,
+        message: "הקבוצה לא נמצאה",
+      };
+    }
+
     return {
       status: 200,
-      message: "קבוצה נשלפה בהצלחה",
+      message: "הקבוצה נטענה בהצלחה",
       data: group,
     };
   } catch (error) {
     console.error("Error fetching group:", error);
     return {
       status: 500,
-      message: "שגיאת שרת פנימית",
-      data: null,
+      message: "אירעה שגיאה בטעינת נתוני הקבוצה",
+      error: error.message,
     };
   } finally {
     await prisma.$disconnect();

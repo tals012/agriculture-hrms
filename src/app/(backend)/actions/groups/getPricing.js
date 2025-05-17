@@ -10,26 +10,27 @@ const getPricingSchema = z.object({
 export const getPricing = async (filters = {}) => {
   try {
     const parsedFilters = getPricingSchema.safeParse(filters);
-    
+
     if (!parsedFilters.success) {
-      const formattedErrors = parsedFilters.error.issues.map(issue => ({
-        field: issue.path.join('.'),
-        message: issue.message
+      const formattedErrors = parsedFilters.error.issues.map((issue) => ({
+        field: issue.path.join("."),
+        message: issue.message,
       }));
 
       return {
         status: 400,
         message: "הפילטרים שסופקו אינם תקינים",
         errors: formattedErrors,
-        data: []
+        data: [],
       };
     }
 
     const where = { AND: [] };
 
-    if (parsedFilters.data.groupId) {
-      where.AND.push({ groups: { some: { id: parsedFilters.data.groupId } } });
-    }
+    // Skip filtering by groupId to show all pricing combinations
+    // if (parsedFilters.data.groupId) {
+    //   where.AND.push({ groups: { some: { id: parsedFilters.data.groupId } } });
+    // }
 
     const pricing = await prisma.clientPricingCombination.findMany({
       where: where.AND.length > 0 ? where : {},
@@ -42,37 +43,36 @@ export const getPricing = async (filters = {}) => {
           select: {
             id: true,
             name: true,
-          }
+          },
         },
         species: {
           select: {
             id: true,
             name: true,
-          }
+          },
         },
         createdAt: true,
         updatedAt: true,
       },
       orderBy: {
-        createdAt: 'desc'
-      }
+        createdAt: "desc",
+      },
     });
 
     return {
       status: 200,
       message: "צירופי המחירים נטענו בהצלחה",
-      data: pricing
+      data: pricing,
     };
-
   } catch (error) {
     console.error("שגיאה בטעינת צירופי המחירים:", error);
     return {
       status: 500,
       message: "שגיאת שרת פנימית",
       error: error.message,
-      data: []
+      data: [],
     };
   }
-}; 
+};
 
 export default getPricing;

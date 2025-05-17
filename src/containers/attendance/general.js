@@ -29,7 +29,13 @@ const selectStyle = {
   menu: (provided) => ({ ...provided, zIndex: 9999 }),
 };
 
-export default function General({ data, onUpdate, onStepChange, managerId, leaderId }) {
+export default function General({
+  data,
+  onUpdate,
+  onStepChange,
+  managerId,
+  leaderId,
+}) {
   const [formData, setFormData] = useState({
     fullName: data?.fullName || "",
     reportDate: data?.reportDate || new Date(),
@@ -173,6 +179,7 @@ export default function General({ data, onUpdate, onStepChange, managerId, leade
             wrapperClassName={styles.dateWrapper}
             enableTabLoop={false}
             placeholderText="תאריך דיווח"
+            dateFormat="dd/MM/yyyy"
             icon={
               <Image
                 src="/assets/icons/calendar-1.svg"

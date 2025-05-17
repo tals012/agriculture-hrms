@@ -12,11 +12,23 @@ import removeWorkersFromGroup from "@/app/(backend)/actions/groups/removeWorkers
 import styles from "@/styles/bigModals/group/tabs/members.module.scss";
 import getGroupById from "@/app/(backend)/actions/groups/getGroupById";
 import { IoMdClose } from "react-icons/io";
+import { FaEye, FaEyeSlash, FaUserEdit } from "react-icons/fa";
+import updateLeaderCredentials from "@/app/(backend)/actions/groups/updateLeaderCredentials";
+import getUserById from "@/app/(backend)/actions/users/getUserById";
 
 const Members = ({ groupId, members, onUpdate }) => {
   const [search, setSearch] = useState("");
   const [loading, setLoading] = useState(false);
+  const [fetchingUser, setFetchingUser] = useState(false);
   const [isAddWorkersModalOpen, setIsAddWorkersModalOpen] = useState(false);
+  const [isLeaderCredentialsModalOpen, setIsLeaderCredentialsModalOpen] =
+    useState(false);
+  const [selectedLeader, setSelectedLeader] = useState(null);
+  const [credentials, setCredentials] = useState({
+    username: "",
+    password: "",
+    showPassword: false,
+  });
 
   const filteredMembers = members.filter((record) => {
     if (!search) return true;
@@ -99,6 +111,121 @@ const Members = ({ groupId, members, onUpdate }) => {
     } catch (error) {
       console.error("Error sending attendance request:", error);
       toast.error("שליחת בקשת נוכחות נכשלה");
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  const openLeaderCredentialsModal = async (record) => {
+    try {
+      setSelectedLeader(record);
+      setFetchingUser(true);
+      setIsLeaderCredentialsModalOpen(true);
+
+      // If user exists, fetch its details
+      if (record.worker.userId) {
+        // Fetch the full user details from the server
+        const response = await getUserById({
+          userId: record.worker.userId,
+        });
+
+        if (response.status === 200 && response.data) {
+          // Update the record with the user data for future reference
+          record.worker.user = response.data;
+
+          setCredentials({
+            username: response.data.username || "",
+            password: "",
+            showPassword: false,
+          });
+        } else {
+          // Failed to fetch user data
+          setCredentials({
+            username: "",
+            password: "",
+            showPassword: false,
+          });
+
+          toast.warning("לא ניתן לטעון את פרטי המשתמש", {
+            position: "top-center",
+            autoClose: 3000,
+          });
+        }
+      } else {
+        // Reset to defaults if no user is associated
+        setCredentials({
+          username: "",
+          password: "",
+          showPassword: false,
+        });
+
+        toast.warning("העובד אינו משויך למשתמש במערכת", {
+          position: "top-center",
+          autoClose: 3000,
+        });
+      }
+    } catch (error) {
+      console.error("Error fetching user details:", error);
+      toast.error("שגיאה בטעינת פרטי המשתמש", {
+        position: "top-center",
+        autoClose: 3000,
+      });
+
+      setCredentials({
+        username: "",
+        password: "",
+        showPassword: false,
+      });
+    } finally {
+      setFetchingUser(false);
+    }
+  };
+
+  const handleCredentialsUpdate = async () => {
+    try {
+      setLoading(true);
+
+      if (!selectedLeader?.worker?.user?.id) {
+        toast.error("מזהה משתמש לא נמצא", {
+          position: "top-center",
+          autoClose: 3000,
+        });
+        return;
+      }
+
+      if (!credentials.username.trim()) {
+        toast.error("יש להזין שם משתמש", {
+          position: "top-center",
+          autoClose: 3000,
+        });
+        return;
+      }
+
+      const res = await updateLeaderCredentials({
+        userId: selectedLeader.worker.user.id,
+        username: credentials.username,
+        password: credentials.password || undefined,
+      });
+
+      if (res.status === 200) {
+        toast.success(res.message, {
+          position: "top-center",
+          autoClose: 3000,
+        });
+        setIsLeaderCredentialsModalOpen(false);
+        onUpdate(); // Refresh data
+      } else {
+        toast.error(res.message || "עדכון פרטי ההתחברות נכשל", {
+          position: "top-center",
+          autoClose: 3000,
+        });
+      }
+    } catch (error) {
+      console.error("Error updating credentials:", error);
+      toast.error("עדכון פרטי ההתחברות נכשל", {
+        position: "top-center",
+        autoClose: 3000,
+      });
     } finally {
       setLoading(false);
     }
@@ -226,6 +353,33 @@ const Members = ({ groupId, members, onUpdate }) => {
                           </button>
                         </div>
                       )}
+                      {record.isGroupLeader && !loading && (
+                        <div className={styles.actions}>
+                          <button
+                            className={styles.actionButton}
+                            onClick={() => openLeaderCredentialsModal(record)}
+                          >
+                            <FaUserEdit style={{ marginLeft: "5px" }} />
+                            פרטי התחברות
+                          </button>
+                          <button
+                            className={styles.actionButton}
+                            onClick={() =>
+                              handleSendAttendanceRequest(record.worker.id)
+                            }
+                            disabled={loading}
+                          >
+                            שלח בקשת נוכחות
+                          </button>
+                          <button
+                            className={styles.closeButton}
+                            onClick={() => handleRemoveWorker(record.worker.id)}
+                            disabled={loading}
+                          >
+                            <IoMdClose color="#ffffff" fontSize={20} />
+                          </button>
+                        </div>
+                      )}
                       {loading === record.worker.id && (
                         <div className={styles.spinnerContainer}>
                           <Spinner size={20} />
@@ -246,6 +400,112 @@ const Members = ({ groupId, members, onUpdate }) => {
           groupId={groupId}
           onUpdate={onUpdate}
         />
+      )}
+
+      {isLeaderCredentialsModalOpen && selectedLeader && (
+        <div className={styles.modalOverlay}>
+          <div className={styles.modal}>
+            <div className={styles.modalHeader}>
+              <h2>פרטי התחברות למנהל קבוצה</h2>
+              <button
+                className={styles.closeModalButton}
+                onClick={() => setIsLeaderCredentialsModalOpen(false)}
+              >
+                <IoMdClose fontSize={24} />
+              </button>
+            </div>
+            <div className={styles.modalContent}>
+              <p className={styles.workerName}>
+                {selectedLeader.worker.nameHe} {selectedLeader.worker.surnameHe}
+              </p>
+
+              {fetchingUser ? (
+                <div className={styles.spinnerContainer}>
+                  <Spinner size={30} />
+                </div>
+              ) : (
+                <>
+                  <div className={styles.formGroup}>
+                    <label>שם משתמש</label>
+                    <input
+                      type="text"
+                      value={credentials.username}
+                      onChange={(e) =>
+                        setCredentials({
+                          ...credentials,
+                          username: e.target.value,
+                        })
+                      }
+                      placeholder="שם משתמש"
+                      className={styles.input}
+                    />
+                  </div>
+
+                  <div className={styles.formGroup}>
+                    <label>סיסמה חדשה</label>
+                    <div className={styles.passwordContainer}>
+                      <input
+                        type={credentials.showPassword ? "text" : "password"}
+                        value={credentials.password}
+                        onChange={(e) =>
+                          setCredentials({
+                            ...credentials,
+                            password: e.target.value,
+                          })
+                        }
+                        placeholder="סיסמה חדשה (השאר ריק אם אין שינוי)"
+                        className={styles.input}
+                      />
+                      <button
+                        type="button"
+                        className={styles.passwordToggle}
+                        onClick={() =>
+                          setCredentials({
+                            ...credentials,
+                            showPassword: !credentials.showPassword,
+                          })
+                        }
+                      >
+                        {credentials.showPassword ? (
+                          <FaEyeSlash fontSize={18} />
+                        ) : (
+                          <FaEye fontSize={18} />
+                        )}
+                      </button>
+                    </div>
+                  </div>
+
+                  <div className={styles.infoBox}>
+                    <p>
+                      ברירת המחדל לסיסמה היא 10203040 עבור מנהלי קבוצות חדשים.
+                    </p>
+                    {selectedLeader?.worker?.user?.email && (
+                      <p className={styles.emailInfo}>
+                        אימייל: {selectedLeader.worker.user.email}
+                      </p>
+                    )}
+                  </div>
+                </>
+              )}
+
+              <div className={styles.modalActions}>
+                <button
+                  className={styles.saveButton}
+                  onClick={handleCredentialsUpdate}
+                  disabled={loading || fetchingUser}
+                >
+                  {loading ? <Spinner size={20} /> : "שמור שינויים"}
+                </button>
+                <button
+                  className={styles.cancelButton}
+                  onClick={() => setIsLeaderCredentialsModalOpen(false)}
+                >
+                  ביטול
+                </button>
+              </div>
+            </div>
+          </div>
+        </div>
       )}
     </div>
   );
