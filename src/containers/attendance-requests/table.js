@@ -1,5 +1,5 @@
 "use client";
-import { useState } from "react";
+import { useState, useRef, useEffect } from "react";
 import { FaCheck, FaTimes, FaEye } from "react-icons/fa";
 import { toast } from "react-toastify";
 import styles from "@/styles/screens/attendance-requests.module.scss";
@@ -92,6 +92,24 @@ export default function AttendanceRequestsTable({
   const [rejectionRequest, setRejectionRequest] = useState(null);
   const [editingContainers, setEditingContainers] = useState(null);
   const [containerValue, setContainerValue] = useState("");
+
+  // Add a key to force re-render
+  const [refreshKey, setRefreshKey] = useState(0);
+
+  // Create a map to track container value cells
+  const containerCellsRef = useRef({});
+
+  // Force re-render the entire table
+  const forceRefresh = () => {
+    setRefreshKey((prevKey) => prevKey + 1);
+  };
+
+  // Register a cell reference
+  const registerContainerCell = (requestId, ref) => {
+    if (ref) {
+      containerCellsRef.current[requestId] = ref;
+    }
+  };
 
   // Handle approve action
   const handleApprove = async (requestId) => {
@@ -193,22 +211,33 @@ export default function AttendanceRequestsTable({
 
       console.log("Updated containers value:", updatedContainers); // Debug log
 
-      // Find the record in our current state
-      const recordIndex = requests.findIndex((req) => req.id === requestId);
+      // Exit edit mode
+      setEditingContainers(null);
 
-      if (recordIndex !== -1) {
-        // Create a new array with the updated record
-        const newRequests = [...requests];
-        newRequests[recordIndex] = {
-          ...newRequests[recordIndex],
-          totalContainersFilled: updatedContainers,
-        };
+      // Update state (even though the render might not show it)
+      setRequests((prevRequests) =>
+        prevRequests.map((req) =>
+          req.id === requestId
+            ? { ...req, totalContainersFilled: updatedContainers }
+            : req
+        )
+      );
 
-        // Update state with the new array
-        setRequests(newRequests);
+      // Direct DOM update (brutal but effective)
+      setTimeout(() => {
+        // Use the ref to get the DOM element
+        const cellRef = containerCellsRef.current[requestId];
+        if (cellRef) {
+          console.log("Directly updating DOM element");
+          // Find the span containing the value and update it
+          const valueSpan = cellRef.querySelector("span");
+          if (valueSpan) {
+            valueSpan.textContent = updatedContainers;
+          }
+        }
+      }, 50);
 
-        console.log("State updated with new containers value"); // Debug log
-      }
+      console.log("Value should be updated:", updatedContainers);
 
       // Notify parent component of the update if callback exists
       if (typeof onRecordUpdate === "function") {
@@ -229,7 +258,6 @@ export default function AttendanceRequestsTable({
         rtl: true,
       });
     } finally {
-      setEditingContainers(null);
       setProcessingIds((prev) => prev.filter((id) => id !== requestId));
     }
   };
@@ -275,7 +303,7 @@ export default function AttendanceRequestsTable({
 
   return (
     <>
-      <div className={styles.tableContainer}>
+      <div className={styles.tableContainer} key={refreshKey}>
         <table className={styles.table}>
           <thead>
             <tr>
@@ -292,7 +320,7 @@ export default function AttendanceRequestsTable({
           <tbody>
             {requests.map((request) => (
               <tr
-                key={request.id}
+                key={`${request.id}-${request.totalContainersFilled}`}
                 className={
                   editingContainers === request.id ? styles.editingRow : ""
                 }
@@ -351,7 +379,10 @@ export default function AttendanceRequestsTable({
                       </div>
                     </div>
                   ) : (
-                    <div className={styles.containersCell}>
+                    <div
+                      className={styles.containersCell}
+                      ref={(ref) => registerContainerCell(request.id, ref)}
+                    >
                       <span>
                         {request.totalContainersFilled !== undefined
                           ? request.totalContainersFilled
