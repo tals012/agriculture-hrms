@@ -12,7 +12,14 @@ const DateField = ({ label, width, maxWidth, value, onChange, disabled }) => {
       wrapperClassName={styles.wrapper}
       enableTabLoop={false}
       placeholderText={label}
-      icon={<Image src="/assets/icons/calendar-1.svg" width={30} height={30} />}
+      icon={
+        <Image
+          src="/assets/icons/calendar-1.svg"
+          width={30}
+          height={30}
+          alt="Calendar icon"
+        />
+      }
       showIcon={true}
       calendarIconClassName="calendar-icon"
       locale={he}

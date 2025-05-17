@@ -1,0 +1,22 @@
+.tabContent {
+  padding: 20px 0;
+  
+  .formFields {
+    display: grid;
+    grid-template-columns: repeat(2, 1fr);
+    gap: 20px;
+  }
+  
+  .formField {
+    width: 100%;
+  }
+}
+
+/* Media queries for responsive layout */
+@media screen and (max-width: 768px) {
+  .tabContent {
+    .formFields {
+      grid-template-columns: 1fr;
+    }
+  }
+} 
