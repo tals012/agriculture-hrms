@@ -3,6 +3,7 @@
 import prisma from "@/lib/prisma";
 import { z } from "zod";
 import bcrypt from "bcryptjs";
+import sendSMS from "../sms/sendSMS";
 
 const SALT_ROUNDS = 10;
 
@@ -24,6 +25,8 @@ const makeGroupLeader = async (input) => {
     }
 
     const { groupId, workerId } = parsedData.data;
+    let createdUserId = null;
+    let userCreated = false;
 
     await prisma.$transaction(async (tx) => {
       const group = await tx.group.findUnique({
@@ -111,6 +114,9 @@ const makeGroupLeader = async (input) => {
           },
         });
 
+        createdUserId = user.id;
+        userCreated = true;
+
         await tx.worker.update({
           where: { id: workerId },
           data: { userId: user.id },
@@ -139,6 +145,56 @@ const makeGroupLeader = async (input) => {
         });
       }
     });
+
+    // If a new user was created, send an SMS with the credentials
+    if (userCreated && createdUserId) {
+      try {
+        // Get the worker with their phone number
+        const worker = await prisma.worker.findUnique({
+          where: { id: workerId },
+          select: {
+            primaryPhone: true,
+            nameHe: true,
+            name: true,
+            user: {
+              select: {
+                username: true,
+                organizationId: true,
+              },
+            },
+          },
+        });
+
+        if (worker && worker.primaryPhone && worker.user) {
+          // Get the base URL from environment variables or use a default
+          const BASE_URL =
+            process.env.NEXT_PUBLIC_APP_URL ||
+            "https://agriculture-hrms.vercel.app";
+          const loginUrl = `${BASE_URL}/login`;
+
+          // Send SMS with login credentials
+          const message = `שלום ${worker.name || worker.nameHe || ""},
+פרטי הגישה שלך למערכת:
+שם משתמש: ${worker.user.username}
+סיסמה: 10203040
+קישור לכניסה: ${loginUrl}`;
+
+          await sendSMS(
+            worker.primaryPhone,
+            message,
+            workerId,
+            null,
+            null,
+            worker.user.organizationId,
+            "ORGANIZATION",
+            "WORKER"
+          );
+        }
+      } catch (smsError) {
+        console.error("Error sending SMS with credentials:", smsError);
+        // We don't throw here to avoid failing the entire operation
+      }
+    }
 
     return {
       status: 200,

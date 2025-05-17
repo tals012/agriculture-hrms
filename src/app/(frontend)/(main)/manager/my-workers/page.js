@@ -102,10 +102,12 @@ export default function MyWorkersPage() {
 
   const fetchAvailableWorkers = async () => {
     if (!selectedGroup?.value) return;
-    
+
     try {
       setLoadingWorkers(true);
-      const response = await getAvailableWorkers({ groupId: selectedGroup.value });
+      const response = await getAvailableWorkers({
+        groupId: selectedGroup.value,
+      });
       if (response.status === 200) {
         setAvailableWorkers(response.data);
       } else {
@@ -138,7 +140,7 @@ export default function MyWorkersPage() {
       setAdding(true);
       const response = await addWorkersToGroup({
         groupId: selectedGroup.value,
-        workers: selectedWorkers
+        workers: selectedWorkers,
       });
 
       if (response.status === 200) {
@@ -168,9 +170,9 @@ export default function MyWorkersPage() {
   };
 
   const handleToggleWorker = (workerId) => {
-    setSelectedWorkers(prev => 
+    setSelectedWorkers((prev) =>
       prev.includes(workerId)
-        ? prev.filter(id => id !== workerId)
+        ? prev.filter((id) => id !== workerId)
         : [...prev, workerId]
     );
   };
@@ -227,7 +229,7 @@ export default function MyWorkersPage() {
               </div>
             </div>
           </div>
-          <button 
+          <button
             className={styles.addButton}
             onClick={() => setShowAddModal(true)}
           >
@@ -263,9 +265,19 @@ export default function MyWorkersPage() {
                   </thead>
                   <tbody>
                     {workers.map((member) => (
-                      <tr key={member.id}>
+                      <tr
+                        key={member.id}
+                        className={member.isGroupLeader ? styles.leaderRow : ""}
+                      >
                         <td>
-                          <p>{member.worker.nameHe || member.worker.name}</p>
+                          <p>
+                            {member.worker.nameHe || member.worker.name}
+                            {member.isGroupLeader && (
+                              <span className={styles.leaderBadge}>
+                                מנהל קבוצה
+                              </span>
+                            )}
+                          </p>
                         </td>
                         <td>
                           <p>{member.worker.passport || "-"}</p>
@@ -277,7 +289,16 @@ export default function MyWorkersPage() {
                           <p>{member.group.field.name}</p>
                         </td>
                         <td>
-                          <p>{new Date(member.startDate).toLocaleDateString("he-IL")}</p>
+                          <p>
+                            {new Date(member.startDate).toLocaleDateString(
+                              "he-IL",
+                              {
+                                day: "2-digit",
+                                month: "2-digit",
+                                year: "numeric",
+                              }
+                            )}
+                          </p>
                         </td>
                       </tr>
                     ))}
@@ -294,7 +315,7 @@ export default function MyWorkersPage() {
           <div className={styles.modalContent}>
             <div className={styles.modalHeader}>
               <h3>הוספת עובדים לקבוצה</h3>
-              <button 
+              <button
                 className={styles.closeButton}
                 onClick={() => {
                   setShowAddModal(false);
@@ -305,14 +326,14 @@ export default function MyWorkersPage() {
                 ✕
               </button>
             </div>
-            
+
             <div className={styles.modalBody}>
               <div className={styles.groupSelect}>
                 <label>בחר קבוצה:</label>
                 <ReactSelect
-                  options={groups.map(group => ({
+                  options={groups.map((group) => ({
                     value: group.id,
-                    label: `${group.name} - ${group.field.name}`
+                    label: `${group.name} - ${group.field.name}`,
                   }))}
                   components={{
                     IndicatorSeparator: () => null,
@@ -329,36 +350,40 @@ export default function MyWorkersPage() {
                 />
               </div>
 
-              {selectedGroup?.value && (
-                loadingWorkers ? (
+              {selectedGroup?.value &&
+                (loadingWorkers ? (
                   <div className={styles.loading}>
                     <Spinner size={30} color="#4f46e5" />
                     <p>טוען עובדים זמינים...</p>
                   </div>
                 ) : availableWorkers.length === 0 ? (
-                  <div className={styles.noWorkers}>אין עובדים זמינים להוספה</div>
+                  <div className={styles.noWorkers}>
+                    אין עובדים זמינים להוספה
+                  </div>
                 ) : (
                   <div className={styles.workersList}>
-                    {availableWorkers.map(worker => (
-                      <div 
+                    {availableWorkers.map((worker) => (
+                      <div
                         key={worker.id}
                         className={`${styles.workerItem} ${
-                          selectedWorkers.includes(worker.id) ? styles.selected : ''
+                          selectedWorkers.includes(worker.id)
+                            ? styles.selected
+                            : ""
                         }`}
                         onClick={() => handleToggleWorker(worker.id)}
                       >
                         <div className={styles.workerInfo}>
-                          <InitialsCircle
-                            name={worker.nameHe || worker.name}
-                          />
+                          <InitialsCircle name={worker.nameHe || worker.name} />
                           <div className={styles.workerDetails}>
                             <p className={styles.name}>
                               {worker.nameHe || worker.name}
                             </p>
-                            <p className={styles.passport}>{worker.passport || "-"}</p>
+                            <p className={styles.passport}>
+                              {worker.passport || "-"}
+                            </p>
                           </div>
                         </div>
-                        <input 
+                        <input
                           type="checkbox"
                           checked={selectedWorkers.includes(worker.id)}
                           onChange={() => {}}
@@ -366,8 +391,7 @@ export default function MyWorkersPage() {
                       </div>
                     ))}
                   </div>
-                )
-              )}
+                ))}
             </div>
 
             <div className={styles.modalFooter}>
@@ -384,7 +408,9 @@ export default function MyWorkersPage() {
               <button
                 className={styles.addButton}
                 onClick={handleAddWorkers}
-                disabled={adding || selectedWorkers.length === 0 || !selectedGroup}
+                disabled={
+                  adding || selectedWorkers.length === 0 || !selectedGroup
+                }
               >
                 {adding ? (
                   <span className={styles.buttonContent}>
@@ -392,7 +418,7 @@ export default function MyWorkersPage() {
                     מוסיף...
                   </span>
                 ) : (
-                  'הוסף עובדים'
+                  "הוסף עובדים"
                 )}
               </button>
             </div>

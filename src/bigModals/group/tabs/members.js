@@ -12,9 +12,10 @@ import removeWorkersFromGroup from "@/app/(backend)/actions/groups/removeWorkers
 import styles from "@/styles/bigModals/group/tabs/members.module.scss";
 import getGroupById from "@/app/(backend)/actions/groups/getGroupById";
 import { IoMdClose } from "react-icons/io";
-import { FaEye, FaEyeSlash, FaUserEdit } from "react-icons/fa";
+import { FaEye, FaEyeSlash, FaUserEdit, FaSms } from "react-icons/fa";
 import updateLeaderCredentials from "@/app/(backend)/actions/groups/updateLeaderCredentials";
 import getUserById from "@/app/(backend)/actions/users/getUserById";
+import sendCredentialsSMS from "@/app/(backend)/actions/users/sendCredentialsSMS";
 
 const Members = ({ groupId, members, onUpdate }) => {
   const [search, setSearch] = useState("");
@@ -231,6 +232,44 @@ const Members = ({ groupId, members, onUpdate }) => {
     }
   };
 
+  const handleSendCredentialsSMS = async () => {
+    try {
+      if (!selectedLeader?.worker?.user?.id) {
+        toast.error("מזהה משתמש לא נמצא", {
+          position: "top-center",
+          autoClose: 3000,
+        });
+        return;
+      }
+
+      setLoading("sms");
+
+      const res = await sendCredentialsSMS({
+        userId: selectedLeader.worker.user.id,
+      });
+
+      if (res.status === 200) {
+        toast.success(res.message, {
+          position: "top-center",
+          autoClose: 3000,
+        });
+      } else {
+        toast.error(res.message || "שליחת פרטי ההתחברות נכשלה", {
+          position: "top-center",
+          autoClose: 3000,
+        });
+      }
+    } catch (error) {
+      console.error("Error sending credentials SMS:", error);
+      toast.error("שליחת פרטי ההתחברות נכשלה", {
+        position: "top-center",
+        autoClose: 3000,
+      });
+    } finally {
+      setLoading(false);
+    }
+  };
+
   const [groupName, setGroupName] = useState(null);
 
   useEffect(() => {
@@ -300,10 +339,16 @@ const Members = ({ groupId, members, onUpdate }) => {
                 </tr>
               ) : (
                 filteredMembers.map((record) => (
-                  <tr key={record.id}>
+                  <tr
+                    key={record.id}
+                    className={record.isGroupLeader ? styles.leaderRow : ""}
+                  >
                     <td>
                       <p>
                         {record.worker.nameHe} {record.worker.surnameHe}
+                        {record.isGroupLeader && (
+                          <span className={styles.leaderBadge}>מנהל קבוצה</span>
+                        )}
                       </p>
                     </td>
                     <td>
@@ -313,12 +358,24 @@ const Members = ({ groupId, members, onUpdate }) => {
                       <p>{record.worker.passport}</p>
                     </td>
                     <td>
-                      <p>{new Date(record.startDate).toLocaleDateString()}</p>
+                      <p>
+                        {new Date(record.startDate).toLocaleDateString(
+                          "he-IL",
+                          { day: "2-digit", month: "2-digit", year: "numeric" }
+                        )}
+                      </p>
                     </td>
                     <td>
                       <p>
                         {record.endDate
-                          ? new Date(record.endDate).toLocaleDateString()
+                          ? new Date(record.endDate).toLocaleDateString(
+                              "he-IL",
+                              {
+                                day: "2-digit",
+                                month: "2-digit",
+                                year: "numeric",
+                              }
+                            )
                           : "נוכחי"}
                       </p>
                     </td>
@@ -490,11 +547,27 @@ const Members = ({ groupId, members, onUpdate }) => {
 
               <div className={styles.modalActions}>
                 <button
+                  className={styles.smsButton}
+                  onClick={handleSendCredentialsSMS}
+                  disabled={
+                    loading || fetchingUser || !selectedLeader?.worker?.user?.id
+                  }
+                >
+                  {loading === "sms" ? (
+                    <Spinner size={20} />
+                  ) : (
+                    <>
+                      <FaSms style={{ marginLeft: "8px" }} />
+                      שלח פרטים ב-SMS
+                    </>
+                  )}
+                </button>
+                <button
                   className={styles.saveButton}
                   onClick={handleCredentialsUpdate}
                   disabled={loading || fetchingUser}
                 >
-                  {loading ? <Spinner size={20} /> : "שמור שינויים"}
+                  {loading === true ? <Spinner size={20} /> : "שמור שינויים"}
                 </button>
                 <button
                   className={styles.cancelButton}
