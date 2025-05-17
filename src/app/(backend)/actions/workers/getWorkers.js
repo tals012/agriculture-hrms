@@ -12,8 +12,8 @@ const getWorkers = async (filters = {}) => {
       where.AND.push({
         OR: [
           { name: { contains: filters.search, mode: "insensitive" } },
-          { nameHe: { contains: filters.search, mode: "insensitive" } },
           { surname: { contains: filters.search, mode: "insensitive" } },
+          { nameHe: { contains: filters.search, mode: "insensitive" } },
           { surnameHe: { contains: filters.search, mode: "insensitive" } },
           { primaryPhone: { contains: filters.search, mode: "insensitive" } },
           { secondaryPhone: { contains: filters.search, mode: "insensitive" } },
@@ -63,6 +63,15 @@ const getWorkers = async (filters = {}) => {
         ],
       });
     }
+
+    // Serial Number filter
+    if (filters.serialNumber?.trim()) {
+      const serialNum = parseInt(filters.serialNumber.trim());
+      if (!isNaN(serialNum)) {
+        where.AND.push({ serialNumber: serialNum });
+      }
+    }
+
     if (filters.phone?.trim()) {
       where.AND.push({
         OR: [
@@ -84,6 +93,9 @@ const getWorkers = async (filters = {}) => {
       where: where.AND.length > 0 ? where : {},
       select: {
         id: true,
+        serialNumber: true,
+        name: true,
+        surname: true,
         nameHe: true,
         surnameHe: true,
         passport: true,
@@ -104,7 +116,7 @@ const getWorkers = async (filters = {}) => {
           },
         },
       },
-      orderBy: [{ nameHe: "asc" }, { surnameHe: "asc" }],
+      orderBy: { serialNumber: "asc" },
     });
 
     // console.log("Workers found:", workers);

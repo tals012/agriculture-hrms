@@ -22,7 +22,7 @@ const statusColorMap = {
   COMMITTEE: { text: "#E65100", bg: "#FFF3E0" },
   HIDDEN: { text: "#424242", bg: "#F5F5F5" },
   IN_TRANSIT: { text: "#4A148C", bg: "#EDE7F6" },
-  DEFAULT: { text: "#424242", bg: "#F5F5F5" } // Fallback for unknown status
+  DEFAULT: { text: "#424242", bg: "#F5F5F5" }, // Fallback for unknown status
 };
 
 const Table = ({ data = [], setWorkerId }) => {
@@ -36,6 +36,7 @@ const Table = ({ data = [], setWorkerId }) => {
                 <th>
                   <input type="checkbox" />
                 </th>
+                <th>מס״ד</th>
                 <th>שם העובד</th>
                 <th>דרכון</th>
                 <th>טלפון</th>
@@ -48,17 +49,23 @@ const Table = ({ data = [], setWorkerId }) => {
 
             <tbody>
               {data.map((item, index) => {
-                const status = item.workerStatus || 'DEFAULT';
+                const status = item.workerStatus || "DEFAULT";
                 const colors = statusColorMap[status] || statusColorMap.DEFAULT;
-                const fullName = `${item.nameHe || ''} ${item.surnameHe || ''}`.trim();
-                const groupNames = item.groups && item.groups.length > 0 
-                  ? item.groups.map(g => g.group.name).join(', ')
-                  : '-';
-                
+                const fullName = `${item.name || ""} ${
+                  item.surname || ""
+                }`.trim();
+                const groupNames =
+                  item.groups && item.groups.length > 0
+                    ? item.groups.map((g) => g.group.name).join(", ")
+                    : "-";
+
                 return (
                   <tr key={index}>
                     <td>
                       <input type="checkbox" />
+                    </td>
+                    <td>
+                      <p>{item.serialNumber || "-"}</p>
                     </td>
                     <td onClick={() => setWorkerId(item.id)}>
                       <div className={styles.user}>

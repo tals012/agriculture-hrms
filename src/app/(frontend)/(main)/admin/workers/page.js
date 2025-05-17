@@ -39,14 +39,14 @@ const FilterBox = ({ setIsOpen, filters, setFilters, handleSearch }) => {
       boxShadow: "none",
       "&:hover": {
         border: "1px solid #E6E6E6",
-      }
+      },
     }),
     valueContainer: (provided) => ({
       ...provided,
       padding: "0 8px",
       height: "42px",
       display: "flex",
-      alignItems: "center"
+      alignItems: "center",
     }),
     placeholder: (provided) => ({
       ...provided,
@@ -56,20 +56,20 @@ const FilterBox = ({ setIsOpen, filters, setFilters, handleSearch }) => {
       marginLeft: "0",
       marginRight: "0",
       top: "50%",
-      transform: "translateY(-50%)"
+      transform: "translateY(-50%)",
     }),
     input: (provided) => ({
       ...provided,
       margin: "0",
-      padding: "0"
+      padding: "0",
     }),
     singleValue: (provided) => ({
       ...provided,
-      margin: "0"
+      margin: "0",
     }),
     indicatorsContainer: (provided) => ({
       ...provided,
-      height: "42px"
+      height: "42px",
     }),
     menu: (provided) => ({
       ...provided,
@@ -144,14 +144,21 @@ const FilterBox = ({ setIsOpen, filters, setFilters, handleSearch }) => {
         />
         <input
           type="text"
+          placeholder="מס״ד"
+          value={filters.serialNumber}
+          onChange={(e) =>
+            setFilters({ ...filters, serialNumber: e.target.value })
+          }
+        />
+        <input
+          type="text"
           placeholder="טלפון"
           value={filters.phone}
           onChange={(e) => setFilters({ ...filters, phone: e.target.value })}
         />
-        {/* passport */}
         <input
           type="text"
-          placeholder="ת.ז"
+          placeholder="דרכון"
           value={filters.passport}
           onChange={(e) => setFilters({ ...filters, passport: e.target.value })}
         />
@@ -261,6 +268,7 @@ export default function Workers() {
   const [filterOpen, setFilterOpen] = useState(false);
   const [filters, setFilters] = useState({
     name: "",
+    serialNumber: "",
     status: "",
     phone: "",
     passport: "",
@@ -275,10 +283,17 @@ export default function Workers() {
       const payload = {
         ...(searchQuery ? { search: searchQuery } : {}),
         ...(currentFilters.name ? { name: currentFilters.name } : {}),
+        ...(currentFilters.serialNumber
+          ? { serialNumber: currentFilters.serialNumber }
+          : {}),
         ...(currentFilters.status ? { status: currentFilters.status } : {}),
         ...(currentFilters.phone ? { phone: currentFilters.phone } : {}),
-        ...(currentFilters.passport ? { passport: currentFilters.passport } : {}),
-        ...(currentFilters.countryId ? { countryId: currentFilters.countryId } : {}),
+        ...(currentFilters.passport
+          ? { passport: currentFilters.passport }
+          : {}),
+        ...(currentFilters.countryId
+          ? { countryId: currentFilters.countryId }
+          : {}),
         ...(currentFilters.groupId ? { groupId: currentFilters.groupId } : {}),
       };
 
