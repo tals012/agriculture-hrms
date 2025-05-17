@@ -42,7 +42,7 @@ export default async function AppLayout({ children }) {
   };
 
   return (
-    <div className="app-layout">
+    <div className={`app-layout ${ibm.className}`}>
       {getHeader()}
       {children}
     </div>

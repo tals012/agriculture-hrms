@@ -35,6 +35,7 @@ const TextField = ({
       style={{
         width,
         ...(maxWidth && { maxWidth }),
+        fontFamily: "var(--font-family)",
       }}
     >
       <InputComponent
@@ -51,6 +52,7 @@ const TextField = ({
         disabled={disabled}
         style={{
           backgroundColor: disabled ? "#FFFBE6" : "inherit",
+          fontFamily: "var(--font-family)",
           ...(style || {}),
         }}
         {...props}
@@ -58,6 +60,7 @@ const TextField = ({
       <label
         htmlFor="input"
         className={`${focused || value ? styles.shrink : ""}`}
+        style={{ fontFamily: "var(--font-family)" }}
       >
         {label}
       </label>

@@ -28,6 +28,7 @@ const DateField = ({ label, width, maxWidth, value, onChange, disabled }) => {
         backgroundColor: disabled ? "#FFFBE6" : "inherit",
         width,
         ...(maxWidth && { maxWidth }),
+        fontFamily: "var(--font-family)",
       }}
       timeZone="Asia/Jerusalem"
       dateFormat="dd/MM/yyyy"

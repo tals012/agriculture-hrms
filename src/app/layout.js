@@ -14,11 +14,12 @@ const ibm = IBM_Plex_Sans_Hebrew({
   display: "swap",
   weight: ["200", "300", "400", "500", "600", "700"],
   preload: true,
+  variable: "--font-ibm-plex",
 });
 
 export default function RootLayout({ children }) {
   return (
-    <html lang="he" className={ibm.className}>
+    <html lang="he" className={`${ibm.className} ${ibm.variable}`}>
       <body>
         <Toaster position="top-center" />
         {children}

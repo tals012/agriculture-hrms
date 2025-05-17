@@ -6,6 +6,7 @@
   padding: 20px;
   overflow-y: auto;
   height: calc(100vh - 53px);
+  font-family: var(--font-family);
 
   &::-webkit-scrollbar {
     display: none;
@@ -22,17 +23,20 @@
     font-size: 28px;
     font-weight: 700;
     color: #1a1a1a;
+    font-family: var(--font-family);
   }
 }
 
 .workerTabs {
   margin-bottom: 20px;
+  font-family: var(--font-family);
   
   :global(.ant-tabs-nav) {
     margin-bottom: 20px;
     background-color: transparent;
     padding: 0;
     border-bottom: 1px solid #e8e8e8;
+    font-family: var(--font-family);
   }
   
   :global(.ant-tabs-tab) {
@@ -44,12 +48,14 @@
     margin: 0;
     margin-left: 4px;
     color: #666;
+    font-family: var(--font-family);
     
     &:global(.ant-tabs-tab-active) {
       background-color: transparent;
       color: #2b85ff;
       font-weight: 600;
       position: relative;
+      font-family: var(--font-family);
       
       &::after {
         content: '';
@@ -73,11 +79,16 @@
     padding: 16px;
     background-color: #fff;
     box-shadow: 0 1px 3px rgba(0, 0, 0, 0.05);
+    font-family: var(--font-family);
   }
   
   :global(.ant-tabs-ink-bar) {
     background-color: #2b85ff;
     height: 3px;
+  }
+
+  :global(.ant-tabs-tab-btn) {
+    font-family: var(--font-family);
   }
 }
 
@@ -88,6 +99,8 @@
   margin-top: 20px;
   
   button {
+    font-family: var(--font-family);
+    
     &:first-child {
       min-width: 120px;
     }

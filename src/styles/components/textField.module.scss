@@ -1,6 +1,7 @@
 .textfield {
   position: relative;
   min-height: 44px;
+  font-family: var(--font-family);
 
   input {
     font-size: 14px;
@@ -11,6 +12,7 @@
     border-radius: 5px;
     border: 1px solid #e6e6e6;
     box-shadow: 0px 0px 0px 0px #00000000 inset;
+    font-family: var(--font-family);
 
     &:focus {
       outline: none;
@@ -23,12 +25,14 @@
     &:-webkit-autofill:active {
       -webkit-box-shadow: 0 0 0 30px white inset !important;
       transition: background-color 5000s ease-in-out 0s;
+      font-family: var(--font-family) !important;
     }
     
     /* RTL support for time inputs */
     &[type="time"] {
       direction: rtl;
       text-align: right;
+      font-family: var(--font-family);
       
       &::-webkit-calendar-picker-indicator {
         margin-right: auto;
@@ -38,6 +42,7 @@
       &::-webkit-datetime-edit {
         direction: rtl;
         text-align: right;
+        font-family: var(--font-family);
       }
     }
   }
@@ -49,6 +54,7 @@
     border-radius: 5px;
     border: 1px solid #e6e6e6;
     box-shadow: 0px 0px 0px 0px #00000000 inset;
+    font-family: var(--font-family);
 
     &:focus {
       outline: none;
@@ -65,6 +71,7 @@
     top: 50%;
     transform: translateY(-50%);
     transition: 0.2s ease all;
+    font-family: var(--font-family);
 
     &.shrink {
       top: 10px;
