@@ -117,8 +117,9 @@ enum ClientStatus {
 }
 
 model Worker {
-  id         String  @id @default(cuid())
-  workerCode String?
+  id           String  @id @default(cuid())
+  workerCode   String?
+  serialNumber Int     @default(autoincrement())
 
   name                String?
   surname             String?

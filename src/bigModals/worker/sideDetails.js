@@ -202,7 +202,7 @@ const SideDetails = ({
           height={95}
         /> */}
         <InitialsCircle
-          name={data.nameHe + " " + data.surnameHe}
+          name={data.name + " " + data.surname}
           width={95}
           height={95}
           fontSize={20}
@@ -213,9 +213,9 @@ const SideDetails = ({
         />
         <span className={styles.divider}></span>
         <div className={styles.text}>
-          {data.nameHe && data.surnameHe && (
+          {data.name && data.surname && (
             <h4>
-              {data.nameHe} {data.surnameHe}
+              {data.name} {data.surname}
             </h4>
           )}
         </div>

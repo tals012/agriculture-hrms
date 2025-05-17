@@ -6,7 +6,6 @@ import { SyncOutlined } from "@ant-design/icons";
 import PersonalTab from "@/containers/bigModals/worker/general/tabs/personalTab";
 import AddressTab from "@/containers/bigModals/worker/general/tabs/addressTab";
 import BankTab from "@/containers/bigModals/worker/general/tabs/bankTab";
-import DocumentsTab from "@/containers/bigModals/worker/general/tabs/documentsTab";
 import styles from "@/styles/bigModals/worker/tabs/general.module.scss";
 import getCities from "@/app/(backend)/actions/misc/getCities";
 import getCountries from "@/app/(backend)/actions/misc/getCountries";
@@ -66,12 +65,24 @@ const General = ({ personalData, setPersonalData, workerId }) => {
       });
 
       if (response.ok) {
-        message.success("סונכרן עם מערכת השכר");
+        message.success({
+          content: "סונכרן עם מערכת השכר בהצלחה",
+          duration: 4,
+          style: { marginTop: "20px" },
+        });
       } else {
-        message.error("נכשל בסנכרון עם מערכת השכר");
+        message.error({
+          content: "נכשל בסנכרון עם מערכת השכר",
+          duration: 4,
+          style: { marginTop: "20px" },
+        });
       }
     } catch (error) {
-      message.error("נכשל בסנכרון עם מערכת השכר");
+      message.error({
+        content: "נכשל בסנכרון עם מערכת השכר: שגיאת תקשורת",
+        duration: 4,
+        style: { marginTop: "20px" },
+      });
     } finally {
       setIsSyncing(false);
     }
@@ -90,14 +101,31 @@ const General = ({ personalData, setPersonalData, workerId }) => {
       const { message: responseMessage, status } = res;
 
       if (status === 200) {
-        message.success(responseMessage);
-      }
-
-      if (status === 400) {
-        message.error(responseMessage);
+        message.success({
+          content: responseMessage || "פרטי העובד נשמרו בהצלחה",
+          duration: 4,
+          style: { marginTop: "20px" },
+        });
+      } else if (status === 400) {
+        message.error({
+          content: responseMessage || "שגיאה בשמירת פרטי העובד",
+          duration: 4,
+          style: { marginTop: "20px" },
+        });
+      } else {
+        message.error({
+          content: responseMessage || "שגיאה לא צפויה. נסה שנית מאוחר יותר",
+          duration: 4,
+          style: { marginTop: "20px" },
+        });
       }
     } catch (error) {
       console.log(error);
+      message.error({
+        content: "שגיאת שרת. אנא נסה שנית מאוחר יותר",
+        duration: 4,
+        style: { marginTop: "20px" },
+      });
     } finally {
       setLoading(false);
     }
@@ -135,16 +163,6 @@ const General = ({ personalData, setPersonalData, workerId }) => {
           setPersonalData={setPersonalData}
           banks={banks}
           branches={branches}
-        />
-      ),
-    },
-    {
-      key: "4",
-      label: "מסמכים",
-      children: (
-        <DocumentsTab
-          personalData={personalData}
-          setPersonalData={setPersonalData}
         />
       ),
     },

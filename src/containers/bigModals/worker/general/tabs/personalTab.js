@@ -23,7 +23,13 @@ const selectStyle = {
 
 const PersonalTab = ({ personalData, setPersonalData }) => {
   const handleChange = (e, key) => {
-    if (key === "birthday") {
+    if (
+      key === "birthday" ||
+      key === "passportValidity" ||
+      key === "visaValidity" ||
+      key === "inscriptionDate" ||
+      key === "entryDate"
+    ) {
       return setPersonalData({ ...personalData, [key]: e });
     }
     setPersonalData({ ...personalData, [key]: e.target.value });
@@ -32,22 +38,6 @@ const PersonalTab = ({ personalData, setPersonalData }) => {
   return (
     <div className={styles.tabContent}>
       <div className={styles.formFields}>
-        <div className={styles.formField}>
-          <TextField
-            label="שם פרטי בעברית"
-            width="100%"
-            value={personalData.nameHe || ""}
-            onChange={(e) => handleChange(e, "nameHe")}
-          />
-        </div>
-        <div className={styles.formField}>
-          <TextField
-            label="שם משפחה בעברית"
-            width="100%"
-            value={personalData.surnameHe || ""}
-            onChange={(e) => handleChange(e, "surnameHe")}
-          />
-        </div>
         <div className={styles.formField}>
           <TextField
             label="שם פרטי"
@@ -123,6 +113,60 @@ const PersonalTab = ({ personalData, setPersonalData }) => {
             width="100%"
             value={personalData.email || ""}
             onChange={(e) => handleChange(e, "email")}
+          />
+        </div>
+
+        {/* Passport Details Section */}
+        <div className={styles.sectionHeading}>
+          <h3>פרטי דרכון</h3>
+        </div>
+
+        <div className={styles.formField}>
+          <TextField
+            label="דרכון"
+            width="100%"
+            value={personalData.passport || ""}
+            onChange={(e) => handleChange(e, "passport")}
+          />
+        </div>
+        <div className={styles.formField}>
+          <DateField
+            label="תוקף דרכון"
+            width="100%"
+            value={personalData.passportValidity}
+            onChange={(e) => handleChange(e, "passportValidity")}
+          />
+        </div>
+        <div className={styles.formField}>
+          <TextField
+            label="ויזה"
+            width="100%"
+            value={personalData.visa || ""}
+            onChange={(e) => handleChange(e, "visa")}
+          />
+        </div>
+        <div className={styles.formField}>
+          <DateField
+            label="תוקף ויזה"
+            width="100%"
+            value={personalData.visaValidity}
+            onChange={(e) => handleChange(e, "visaValidity")}
+          />
+        </div>
+        <div className={styles.formField}>
+          <DateField
+            label="תאריך רישום"
+            width="100%"
+            value={personalData.inscriptionDate}
+            onChange={(e) => handleChange(e, "inscriptionDate")}
+          />
+        </div>
+        <div className={styles.formField}>
+          <DateField
+            label="תאריך כניסה"
+            width="100%"
+            value={personalData.entryDate}
+            onChange={(e) => handleChange(e, "entryDate")}
           />
         </div>
       </div>

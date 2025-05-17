@@ -10,6 +10,20 @@
   .formField {
     width: 100%;
   }
+  
+  .sectionHeading {
+    grid-column: 1 / -1;
+    margin-top: 30px;
+    margin-bottom: 10px;
+    padding-bottom: 8px;
+    border-bottom: 1px solid #e8e8e8;
+    
+    h3 {
+      font-size: 18px;
+      font-weight: 600;
+      color: #2b85ff;
+    }
+  }
 }
 
 /* Media queries for responsive layout */

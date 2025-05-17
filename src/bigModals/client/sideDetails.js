@@ -71,7 +71,7 @@ const SideDetails = ({
         />
         <span className={styles.divider}></span>
         <div className={styles.text}>
-          <h4>{data.name}</h4>
+          <h4>{data.nameEnglish || data.name}</h4>
           <p className={styles.label}>מספר רישיון </p>
           <p>{data.licenseNumber || "-"}</p>
         </div>
@@ -85,6 +85,11 @@ const SideDetails = ({
             textColor={data.status === "ACTIVE" ? "#00B341" : "#FF0000"}
             bgColor={data.status === "ACTIVE" ? "#E6F4EA" : "#FEE8E8"}
           />
+        </div>
+
+        <div className={styles.block}>
+          <label>מספר דרכון</label>
+          <p>{data.businessGovId || "-"}</p>
         </div>
 
         <div className={styles.block}>
