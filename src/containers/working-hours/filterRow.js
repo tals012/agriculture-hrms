@@ -38,13 +38,13 @@ const createSelectStyle = (zIndex) => ({
     background: "transparent",
     zIndex,
   }),
-  menuPortal: (provided) => ({ 
-    ...provided, 
-    zIndex: zIndex + 1000 
+  menuPortal: (provided) => ({
+    ...provided,
+    zIndex: zIndex + 1000,
   }),
-  menu: (provided) => ({ 
-    ...provided, 
-    zIndex: zIndex + 1000 
+  menu: (provided) => ({
+    ...provided,
+    zIndex: zIndex + 1000,
   }),
 });
 
@@ -55,7 +55,10 @@ const workerSelectStyle = createSelectStyle(5000);
 
 const FilterRow = ({ onFilterChange }) => {
   const [filters, setFilters] = useState({
-    month: { value: new Date().getMonth() + 1, label: months[new Date().getMonth()].label },
+    month: {
+      value: new Date().getMonth() + 1,
+      label: months[new Date().getMonth()].label,
+    },
     year: { value: currentYear, label: String(currentYear) },
     selectedWorker: null,
   });
@@ -69,20 +72,22 @@ const FilterRow = ({ onFilterChange }) => {
   // Fetch workers
   useEffect(() => {
     const fetchWorkers = async () => {
-      setLoading(prev => ({ ...prev, workers: true }));
+      setLoading((prev) => ({ ...prev, workers: true }));
       try {
         const response = await getWorkers();
         if (response.status === 200) {
-          setWorkers(response.data.map(worker => ({
-            value: worker.id,
-            label: `${worker.nameHe} ${worker.surnameHe || ""}`.trim(),
-            data: worker
-          })));
+          setWorkers(
+            response.data.map((worker) => ({
+              value: worker.id,
+              label: `${worker.name} ${worker.surname || ""}`.trim(),
+              data: worker,
+            }))
+          );
         }
       } catch (error) {
         console.error("Error fetching workers:", error);
       } finally {
-        setLoading(prev => ({ ...prev, workers: false }));
+        setLoading((prev) => ({ ...prev, workers: false }));
       }
     };
 
@@ -92,24 +97,28 @@ const FilterRow = ({ onFilterChange }) => {
   const handleFilterChange = (value, field) => {
     const newFilters = { ...filters, [field]: value };
     setFilters(newFilters);
-    
+
     // Only trigger API call if we have all required fields
-    if (newFilters.month?.value && 
-        newFilters.year?.value && 
-        newFilters.selectedWorker?.value) {
+    if (
+      newFilters.month?.value &&
+      newFilters.year?.value &&
+      newFilters.selectedWorker?.value
+    ) {
       handleSubmit(newFilters);
     }
   };
 
   const handleSubmit = async (currentFilters = filters) => {
-    if (!currentFilters.month?.value || 
-        !currentFilters.year?.value || 
-        !currentFilters.selectedWorker?.value || 
-        loading.submit) {
+    if (
+      !currentFilters.month?.value ||
+      !currentFilters.year?.value ||
+      !currentFilters.selectedWorker?.value ||
+      loading.submit
+    ) {
       return;
     }
 
-    setLoading(prev => ({ ...prev, submit: true }));
+    setLoading((prev) => ({ ...prev, submit: true }));
     try {
       await onFilterChange({
         month: currentFilters.month.value,
@@ -117,7 +126,7 @@ const FilterRow = ({ onFilterChange }) => {
         workerId: currentFilters.selectedWorker.value,
       });
     } finally {
-      setLoading(prev => ({ ...prev, submit: false }));
+      setLoading((prev) => ({ ...prev, submit: false }));
     }
   };
 
@@ -128,7 +137,7 @@ const FilterRow = ({ onFilterChange }) => {
           <ReactSelect
             options={months}
             value={filters.month}
-            onChange={(option) => handleFilterChange(option, 'month')}
+            onChange={(option) => handleFilterChange(option, "month")}
             placeholder="חודש"
             components={{
               IndicatorSeparator: () => null,
@@ -140,7 +149,7 @@ const FilterRow = ({ onFilterChange }) => {
           <ReactSelect
             options={years}
             value={filters.year}
-            onChange={(option) => handleFilterChange(option, 'year')}
+            onChange={(option) => handleFilterChange(option, "year")}
             placeholder="שנה"
             components={{
               IndicatorSeparator: () => null,
@@ -156,7 +165,7 @@ const FilterRow = ({ onFilterChange }) => {
             options={workers}
             isLoading={loading.workers}
             value={filters.selectedWorker}
-            onChange={(option) => handleFilterChange(option, 'selectedWorker')}
+            onChange={(option) => handleFilterChange(option, "selectedWorker")}
             placeholder="בחר עובד"
             components={{
               IndicatorSeparator: () => null,
@@ -167,7 +176,7 @@ const FilterRow = ({ onFilterChange }) => {
           />
         </div>
 
-        <button 
+        <button
           className={styles.submitButton}
           onClick={() => handleSubmit()}
           disabled={loading.submit || !filters.selectedWorker}

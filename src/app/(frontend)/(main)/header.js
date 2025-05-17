@@ -78,7 +78,7 @@ const Header = () => {
   }
 
   // Simplified header for remote-signature pages
-  if (pathname.startsWith('/remote-signature')) {
+  if (pathname.startsWith("/remote-signature")) {
     return (
       <header className={styles.container}>
         <div className={styles.wrapper}>
@@ -149,59 +149,130 @@ const Header = () => {
                 </li>
               </Link>
 
-              <Link href="/admin/schedule-builder">
+              <div className={styles.dropdownContainer}>
                 <li
-                  className={
-                    pathname === "/admin/schedule-builder" ? styles.active : ""
-                  }
+                  className={[
+                    pathname === "/admin/schedule-builder" ||
+                    pathname === "/admin/working-hours" ||
+                    pathname === "/admin/salary"
+                      ? styles.active
+                      : "",
+                  ].join(" ")}
                 >
-                  בונה הגדרות יומן נוכחות
+                  שכר שעות עבודה
+                  <svg
+                    width="12"
+                    height="12"
+                    viewBox="0 0 24 24"
+                    fill="none"
+                    xmlns="http://www.w3.org/2000/svg"
+                    style={{ marginRight: "4px" }}
+                  >
+                    <path
+                      d="M6 9L12 15L18 9"
+                      stroke="currentColor"
+                      strokeWidth="2"
+                      strokeLinecap="round"
+                      strokeLinejoin="round"
+                    />
+                  </svg>
                 </li>
-              </Link>
-
-              <Link href="/admin/working-hours">
-                <li
-                  className={
-                    pathname === "/admin/working-hours" ? styles.active : ""
-                  }
-                >
-                  שעות עבודה
-                </li>
-              </Link>
-
-              <Link href="/admin/salary">
-                <li
-                  className={pathname === "/admin/salary" ? styles.active : ""}
-                >
-                  שכר
-                </li>
-              </Link>
+                <div className={styles.dropdownContent}>
+                  <Link href="/admin/schedule-builder">
+                    <div
+                      className={
+                        pathname === "/admin/schedule-builder"
+                          ? styles.activeDropItem
+                          : ""
+                      }
+                    >
+                      בונה הגדרות יומן נוכחות
+                    </div>
+                  </Link>
+                  <Link href="/admin/working-hours">
+                    <div
+                      className={
+                        pathname === "/admin/working-hours"
+                          ? styles.activeDropItem
+                          : ""
+                      }
+                    >
+                      שעות עבודה
+                    </div>
+                  </Link>
+                  <Link href="/admin/salary">
+                    <div
+                      className={
+                        pathname === "/admin/salary"
+                          ? styles.activeDropItem
+                          : ""
+                      }
+                    >
+                      שכר
+                    </div>
+                  </Link>
+                </div>
+              </div>
 
               <div className={styles.dropdownContainer}>
-                <li 
+                <li
                   className={[
-                    pathname === "/admin/attendance-requests" || 
-                    pathname === "/admin/attendance-groups" || 
-                    pathname === "/admin/attendance-history" 
-                      ? styles.active 
-                      : ""
+                    pathname === "/admin/attendance-requests" ||
+                    pathname === "/admin/attendance-groups" ||
+                    pathname === "/admin/attendance-history"
+                      ? styles.active
+                      : "",
                   ].join(" ")}
                 >
                   נוכחות
+                  <svg
+                    width="12"
+                    height="12"
+                    viewBox="0 0 24 24"
+                    fill="none"
+                    xmlns="http://www.w3.org/2000/svg"
+                    style={{ marginRight: "4px" }}
+                  >
+                    <path
+                      d="M6 9L12 15L18 9"
+                      stroke="currentColor"
+                      strokeWidth="2"
+                      strokeLinecap="round"
+                      strokeLinejoin="round"
+                    />
+                  </svg>
                 </li>
                 <div className={styles.dropdownContent}>
                   <Link href="/admin/attendance-requests">
-                    <div className={pathname === "/admin/attendance-requests" ? styles.activeDropItem : ""}>
+                    <div
+                      className={
+                        pathname === "/admin/attendance-requests"
+                          ? styles.activeDropItem
+                          : ""
+                      }
+                    >
                       דיווחים ממתינים
                     </div>
                   </Link>
                   <Link href="/admin/attendance-groups">
-                    <div className={pathname === "/admin/attendance-groups" ? styles.activeDropItem : ""}>
+                    <div
+                      className={
+                        pathname === "/admin/attendance-groups"
+                          ? styles.activeDropItem
+                          : ""
+                      }
+                    >
                       דיווחי קבוצות
                     </div>
                   </Link>
                   <Link href="/admin/attendance-history">
-                    <div className={pathname === "/admin/attendance-history" ? styles.activeDropItem : ""}>
+                    <div
+                      className={
+                        pathname === "/admin/attendance-history"
+                          ? styles.activeDropItem
+                          : ""
+                      }
+                    >
                       היסטוריית דיווחים
                     </div>
                   </Link>
