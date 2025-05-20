@@ -39,7 +39,7 @@ const formatDate = (dateString) => {
   }
 };
 
-// Status component with appropriate styling based on status
+// Status component with appropriate styling based on status for the table
 const RequestStatus = ({ status }) => {
   const statusMap = {
     PENDING: { text: "ממתין לאישור", className: styles.pending },
