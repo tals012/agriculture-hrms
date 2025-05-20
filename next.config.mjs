@@ -4,21 +4,30 @@ const nextConfig = {
     config.resolve.alias.canvas = false;
     return config;
   },
-  experimental: {
-    serverComponentsExternalPackages: ["pdf-lib", "@pdf-lib/fontkit", "dayjs"],
-    esmExternals: "loose",
-  },
+
+  // ✅ Moved out of `experimental`
+  serverExternalPackages: ["pdf-lib", "@pdf-lib/fontkit", "dayjs"],
+
+  // ❌ Removed deprecated `esmExternals` setting
+  // experimental: {
+  //   serverComponentsExternalPackages: ["pdf-lib", "@pdf-lib/fontkit", "dayjs"],
+  //   esmExternals: "loose",
+  // },
+
   images: {
     domains: [
       `${process.env.AWS_S3_BUCKET_NAME}.s3.${process.env.AWS_REGION}.amazonaws.com`,
     ],
   },
-  productionBrowserSourceMaps: false, // Disable source maps in development
+
+  productionBrowserSourceMaps: false,
+
   eslint: {
-    ignoreDuringBuilds: true, // Ignore ESLint errors during build
+    ignoreDuringBuilds: true,
   },
+
   typescript: {
-    ignoreBuildErrors: true, // Ignore TypeScript errors during build
+    ignoreBuildErrors: true,
   },
 };
 
