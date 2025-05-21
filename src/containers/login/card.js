@@ -46,6 +46,8 @@ export default function Card() {
             router.push("/group-leader/my-group");
           } else if (res.role === "FIELD_MANAGER") {
             router.push("/manager/my-fields");
+          } else if (res.role === "REGION_MANAGER") {
+            router.push("/region-manager/my-fields");
           } else if (res.role === "WORKER") {
             router.push("/worker/attendance");
           } else {

@@ -55,6 +55,7 @@ model User {
   organization   Organization @relation(fields: [organizationId], references: [id])
 
   manager Manager?
+  regionManager RegionManager?
   worker  Worker?
 
   workerAttendance WorkerAttendance[]
@@ -67,6 +68,7 @@ model User {
 enum Role {
   ADMIN
   FIELD_MANAGER
+  REGION_MANAGER
   GROUP_LEADER
   WORKER
 }
@@ -95,6 +97,7 @@ model Client {
 
   fields         Field[] // Client's agricultural fields
   managers       Manager[] // Field managers employed by the client
+  regionManagers RegionManager[] // Region managers employed by the client
   currentWorkers Worker[]              @relation("CurrentWorkers") // Currently employed foreign workers
   workerHistory  WorkerClientHistory[] // Historical record of all workers
 
@@ -245,6 +248,8 @@ model Field {
 
   managerId String?
   manager   Manager?  @relation(fields: [managerId], references: [id])
+  regionManagerId String?
+  regionManager   RegionManager? @relation(fields: [regionManagerId], references: [id])
   groups    Group[] // Groups working in this field
   harvests  Harvest[] // Harvest records for this field
 
@@ -312,6 +317,24 @@ model Manager {
   fields           Field[] // Fields managed by this manager
   workerAttendance WorkerAttendance[]
   sms              SMS[]
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+}
+
+model RegionManager {
+  id    String @id @default(cuid())
+  name  String
+  email String @unique
+  phone String
+
+  userId String? @unique
+  user   User?   @relation(fields: [userId], references: [id])
+
+  clientId String
+  client   Client @relation(fields: [clientId], references: [id], onDelete: Cascade)
+  fields   Field[]
+  sms      SMS[]
 
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
@@ -907,6 +930,8 @@ model SMS {
 
   manager   Manager? @relation(fields: [managerId], references: [id])
   managerId String?
+  regionManager   RegionManager? @relation(fields: [regionManagerId], references: [id])
+  regionManagerId String?
 
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt

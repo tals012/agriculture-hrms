@@ -22,6 +22,8 @@ export async function middleware(request) {
       redirectUrl = "/group-leader/my-group";
     } else if (role === "FIELD_MANAGER") {
       redirectUrl = "/manager/my-fields";
+    } else if (role === "REGION_MANAGER") {
+      redirectUrl = "/region-manager/my-fields";
     } else if (role === "WORKER") {
       redirectUrl = "/worker/attendance";
     }

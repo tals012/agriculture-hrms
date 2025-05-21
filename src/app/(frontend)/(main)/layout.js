@@ -34,6 +34,8 @@ export default async function AppLayout({ children }) {
         return <GroupLeaderHeader />;
       case "FIELD_MANAGER":
         return <ManagerHeader />;
+      case "REGION_MANAGER":
+        return <ManagerHeader />;
       case "WORKER":
         return null;
       default:

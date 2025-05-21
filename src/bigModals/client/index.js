@@ -8,8 +8,10 @@ import getClientById from "@/app/(backend)/actions/clients/getClientById";
 import Spinner from "@/components/spinner";
 import Image from "next/image";
 import CreateManager from "@/smallModals/client/createManager";
+import CreateRegionManager from "@/smallModals/client/createRegionManager";
 import CreateField from "@/smallModals/client/createField";
 import Managers from "./tabs/managers";
+import RegionManagers from "./tabs/regionManagers";
 import Fields from "./tabs/fields";
 import styles from "@/styles/bigModals/client/index.module.scss";
 import Pricing from "./tabs/pricing";
@@ -51,6 +53,9 @@ const Client = ({ isOpen, onClose }) => {
   const [isCreateManagerModalOpen, setIsCreateManagerModalOpen] =
     useState(false);
   const [createManagerStatus, setCreateManagerStatus] = useState(null);
+  const [isCreateRegionManagerModalOpen, setIsCreateRegionManagerModalOpen] =
+    useState(false);
+  const [createRegionManagerStatus, setCreateRegionManagerStatus] = useState(null);
   const [isCreateFieldModalOpen, setIsCreateFieldModalOpen] = useState(false);
   const [createFieldStatus, setCreateFieldStatus] = useState(null);
   const [isCreatePricingModalOpen, setIsCreatePricingModalOpen] =
@@ -163,6 +168,12 @@ const Client = ({ isOpen, onClose }) => {
                 height: 32.5,
               },
               {
+                icon: "/assets/icons/user-1.svg",
+                title: "מנהלי אזור",
+                width: 24.83,
+                height: 32.5,
+              },
+              {
                 icon: "/assets/icons/apartments-1.svg",
                 title: "שדות",
                 width: 24.83,
@@ -199,20 +210,27 @@ const Client = ({ isOpen, onClose }) => {
               clientId={isOpen}
             />
           ) : activeTab === 2 ? (
+            <RegionManagers
+              setIsCreateRegionManagerModalOpen={setIsCreateRegionManagerModalOpen}
+              createRegionManagerStatus={createRegionManagerStatus}
+              setCreateRegionManagerStatus={setCreateRegionManagerStatus}
+              clientId={isOpen}
+            />
+          ) : activeTab === 3 ? (
             <Fields
               setIsCreateFieldModalOpen={setIsCreateFieldModalOpen}
               createFieldStatus={createFieldStatus}
               setCreateFieldStatus={setCreateFieldStatus}
               clientId={isOpen}
             />
-          ) : activeTab === 3 ? (
+          ) : activeTab === 4 ? (
             <Pricing
               setIsCreatePricingModalOpen={setIsCreatePricingModalOpen}
               createPricingStatus={createPricingStatus}
               setCreatePricingStatus={setCreatePricingStatus}
               clientId={isOpen}
             />
-          ) : activeTab === 4 ? (
+          ) : activeTab === 5 ? (
             <WorkerHistory clientId={isOpen} />
           ) : null}
 
@@ -245,6 +263,13 @@ const Client = ({ isOpen, onClose }) => {
         <CreateManager
           setModalOpen={setIsCreateManagerModalOpen}
           setCreateStatus={setCreateManagerStatus}
+          clientId={isOpen}
+        />
+      )}
+      {isCreateRegionManagerModalOpen && isOpen && typeof isOpen === "string" && (
+        <CreateRegionManager
+          setModalOpen={setIsCreateRegionManagerModalOpen}
+          setCreateStatus={setCreateRegionManagerStatus}
           clientId={isOpen}
         />
       )}
