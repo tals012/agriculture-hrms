@@ -2,6 +2,7 @@
 import { useState } from "react";
 import ManagersTable from "@/containers/bigModals/client/managers/managersTable";
 import AssignFields from "@/containers/bigModals/client/managers/assignFields";
+import AssignGroups from "@/containers/bigModals/client/managers/assignGroups";
 import styles from "@/styles/bigModals/client/tabs/managers.module.scss";
 
 const Managers = ({
@@ -25,12 +26,18 @@ const Managers = ({
         >
           <p>מנהלים</p>
         </div>
-        <div
-          className={`${styles.tab} ${activeTab === 1 ? styles.active : ""}`}
-          onClick={() => setActiveTab(1)}
-        >
-          <p>שייך לשדה</p>
-        </div>
+      <div
+        className={`${styles.tab} ${activeTab === 1 ? styles.active : ""}`}
+        onClick={() => setActiveTab(1)}
+      >
+        <p>שייך לשדה</p>
+      </div>
+      <div
+        className={`${styles.tab} ${activeTab === 2 ? styles.active : ""}`}
+        onClick={() => setActiveTab(2)}
+      >
+        <p>שייך לקבוצה</p>
+      </div>
       </div>
 
       {/* 
@@ -45,6 +52,8 @@ const Managers = ({
         />
       ) : activeTab === 1 ? (
         <AssignFields clientId={clientId} />
+      ) : activeTab === 2 ? (
+        <AssignGroups clientId={clientId} />
       ) : null}
     </div>
   );

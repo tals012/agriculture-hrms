@@ -75,6 +75,12 @@ const getGroups = async (input) => {
             name: true,
           },
         },
+        manager: {
+          select: {
+            id: true,
+            name: true,
+          },
+        },
         members: {
           select: {
             id: true,

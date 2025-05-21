@@ -10,6 +10,7 @@ const createGroupSchema = z.object({
   name: z.string().min(1, "Name is required"),
   description: z.string().optional(),
   fieldId: z.string().min(1, "Field ID is required"),
+  managerId: z.string().optional(),
   workerIds: z.array(z.string()).optional(),
   leaderWorkerId: z.string().optional(),
   clientPricingCombinationIds: z.array(z.string()).optional(),
@@ -36,6 +37,7 @@ export const createGroup = async (input) => {
       name,
       description,
       fieldId,
+      managerId,
       workerIds,
       clientPricingCombinationIds,
       leaderWorkerId,
@@ -126,6 +128,7 @@ export const createGroup = async (input) => {
           name,
           description,
           fieldId,
+          ...(managerId && { managerId }),
           ...(clientPricingCombinationIds && {
             clientPricingCombination: {
               connect: clientPricingCombinationIds.map((id) => ({ id })),

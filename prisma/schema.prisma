@@ -315,6 +315,7 @@ model Manager {
   clientId         String
   client           Client             @relation(fields: [clientId], references: [id], onDelete: Cascade)
   fields           Field[] // Fields managed by this manager
+  groups           Group[]
   workerAttendance WorkerAttendance[]
   sms              SMS[]
 
@@ -347,6 +348,8 @@ model Group {
 
   fieldId                  String
   field                    Field                      @relation(fields: [fieldId], references: [id], onDelete: Cascade)
+  managerId                String?
+  manager                  Manager?                   @relation(fields: [managerId], references: [id])
   members                  GroupMember[]
   clientPricingCombination ClientPricingCombination[]
   workingSchedule          WorkingSchedule[]

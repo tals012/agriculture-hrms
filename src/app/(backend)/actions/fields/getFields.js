@@ -42,6 +42,10 @@ const getFields = async (filters = {}) => {
     where.AND.push({ regionManagerId: parsedFilters.data.regionManagerId });
   }
 
+    if (parsedFilters.data.regionManagerId) {
+      where.AND.push({ regionManagerId: parsedFilters.data.regionManagerId });
+    }
+
     if (parsedFilters.data.search?.trim()) {
       where.AND.push({
         OR: [

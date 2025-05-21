@@ -15,11 +15,11 @@ const createRegionManagerSchema = z.object({
 });
 
 const createRegionManager = async (payload) => {
-  console.log("createRegionManager called with payload:", payload);
+
 
   try {
     if (!payload) {
-    console.error("No payload provided to createRegionManager");
+
       return {
         status: 400,
         message: "לא סופק מידע",
@@ -33,7 +33,7 @@ const createRegionManager = async (payload) => {
     }
 
   const parsedData = createRegionManagerSchema.safeParse(payload);
-    console.log("Zod validation result:", parsedData.success);
+
 
     if (!parsedData.success) {
       const formattedErrors = parsedData.error.issues.map((issue) => ({
@@ -41,7 +41,7 @@ const createRegionManager = async (payload) => {
         message: issue.message,
       }));
 
-      console.error("Validation errors:", formattedErrors);
+
       return {
         status: 400,
         message: "האימות נכשל",
@@ -50,7 +50,7 @@ const createRegionManager = async (payload) => {
       };
     }
 
-    console.log("Looking for client with ID:", parsedData.data.clientId);
+
     const client = await prisma.client.findUnique({
       where: { id: parsedData.data.clientId },
       include: {
@@ -63,7 +63,7 @@ const createRegionManager = async (payload) => {
     });
 
     if (!client) {
-      console.error("Client not found with ID:", parsedData.data.clientId);
+
       return {
         status: 404,
         message: "הלקוח לא נמצא",
@@ -71,16 +71,13 @@ const createRegionManager = async (payload) => {
       };
     }
 
-    console.log(
-      "Checking for existing region manager with email:",
-      parsedData.data.email
-    );
+
     const existingRegionManager = await prisma.regionManager.findUnique({
       where: { email: parsedData.data.email },
     });
 
     if (existingRegionManager) {
-      console.log("Region manager with email already exists:", parsedData.data.email);
+
       return {
         status: 409,
         message: "כתובת האימייל כבר בשימוש",
@@ -89,16 +86,13 @@ const createRegionManager = async (payload) => {
     }
 
     // Check if a user with this email already exists
-    console.log(
-      "Checking for existing user with email:",
-      parsedData.data.email
-    );
+
     const existingUser = await prisma.user.findUnique({
       where: { email: parsedData.data.email },
     });
 
     if (existingUser) {
-      console.log("User with email already exists:", parsedData.data.email);
+
       return {
         status: 409,
         message: "כתובת האימייל כבר בשימוש במערכת עבור משתמש אחר",
@@ -119,10 +113,10 @@ const createRegionManager = async (payload) => {
       counter++;
     }
 
-    console.log("Looking for organization");
+
     const organization = await prisma.organization.findFirst();
     if (!organization) {
-      console.error("No organization found");
+
       return {
         status: 404,
         message: "לא קיים ארגון",
@@ -130,15 +124,14 @@ const createRegionManager = async (payload) => {
       };
     }
 
-    console.log("Creating hashed password");
+
     const hashedPassword = await bcrypt.hash("systempassword123", SALT_ROUNDS);
 
-    console.log("Starting transaction to create user and region manager");
 
     let result;
     try {
       result = await prisma.$transaction(async (tx) => {
-        console.log("Creating user...");
+
         const user = await tx.user.create({
           data: {
             name: parsedData.data.name,
@@ -151,7 +144,7 @@ const createRegionManager = async (payload) => {
           },
         });
 
-        console.log("Creating region manager...");
+
         const regionManagerData = {
           name: parsedData.data.name,
           email: parsedData.data.email,
@@ -160,7 +153,6 @@ const createRegionManager = async (payload) => {
           userId: user.id,
         };
 
-        console.log("Region manager data:", regionManagerData);
 
         const regionManager = await tx.regionManager.create({
           data: regionManagerData,
@@ -178,20 +170,8 @@ const createRegionManager = async (payload) => {
 
         return { user, regionManager };
       });
-      console.log("Transaction completed successfully");
+
     } catch (txError) {
-      // Safe error logging - avoid directly passing error object to console.error
-      console.error("Transaction error occurred");
-
-      if (txError) {
-        console.error("Error message:", txError.message || "Unknown error");
-
-        if (txError.stack) {
-          console.error("Error stack trace available");
-        }
-      } else {
-        console.error("Received null/undefined error object");
-      }
 
       // Re-throw a new error with a clear message
       throw new Error(
@@ -207,7 +187,7 @@ const createRegionManager = async (payload) => {
 
     // Try to send SMS but don't let it fail the whole operation
     try {
-      console.log("Attempting to send SMS");
+
       await sendSMS(
         result.regionManager.phone,
         message,
@@ -218,6 +198,7 @@ const createRegionManager = async (payload) => {
         "ORGANIZATION",
         "MANAGER"
       );
+
       console.log("SMS sent successfully");
     } catch (smsError) {
       console.error(
@@ -226,7 +207,7 @@ const createRegionManager = async (payload) => {
       );
     }
 
-    console.log("Returning success response");
+
     return {
       status: 201,
       message: "חשבון מנהל האזור והמשתמש נוצרו בהצלחה",
