@@ -4,9 +4,21 @@ import prisma from "@/lib/prisma";
 import { z } from "zod";
 import sendSMS from "../sms/sendSMS";
 
-const schema = z.object({
-  userIds: z.array(z.string().min(1)).min(1, "נדרשים משתמשים"),
-});
+
+const schema = z
+  .object({
+    userIds: z.array(z.string().min(1)).optional(),
+    workerIds: z.array(z.string().min(1)).optional(),
+  })
+  .refine(
+    (data) =>
+      (data.userIds && data.userIds.length > 0) ||
+      (data.workerIds && data.workerIds.length > 0),
+    {
+      message: "נדרש לפחות משתמש אחד או עובד אחד",
+    }
+  );
+
 
 const sendBulkCredentialsSMS = async (input) => {
   try {
@@ -20,7 +32,29 @@ const sendBulkCredentialsSMS = async (input) => {
       };
     }
 
-    const { userIds } = parsed.data;
+
+    let { userIds, workerIds } = parsed.data;
+
+    userIds = userIds || [];
+
+    if (workerIds && workerIds.length > 0) {
+      const workers = await prisma.worker.findMany({
+        where: { id: { in: workerIds } },
+        select: { userId: true },
+      });
+      userIds = [
+        ...userIds,
+        ...workers.filter((w) => w.userId).map((w) => w.userId),
+      ];
+    }
+
+    // Remove duplicates
+    userIds = Array.from(new Set(userIds));
+
+    if (userIds.length === 0) {
+      return { status: 400, message: "לא נמצאו משתמשים לשליחה" };
+    }
+
 
     const users = await prisma.user.findMany({
       where: { id: { in: userIds } },
