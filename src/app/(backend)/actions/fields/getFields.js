@@ -7,6 +7,7 @@ const getFieldsSchema = z.object({
   clientId: z.string().optional(),
   search: z.string().optional(),
   managerId: z.string().optional(),
+  regionManagerId: z.string().optional(),
 });
 
 const getFields = async (filters = {}) => {
@@ -33,9 +34,13 @@ const getFields = async (filters = {}) => {
       where.AND.push({ clientId: parsedFilters.data.clientId });
     }
 
-    if (parsedFilters.data.managerId) {
-      where.AND.push({ managerId: parsedFilters.data.managerId });
-    }
+  if (parsedFilters.data.managerId) {
+    where.AND.push({ managerId: parsedFilters.data.managerId });
+  }
+
+  if (parsedFilters.data.regionManagerId) {
+    where.AND.push({ regionManagerId: parsedFilters.data.regionManagerId });
+  }
 
     if (parsedFilters.data.search?.trim()) {
       where.AND.push({
