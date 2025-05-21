@@ -16,8 +16,10 @@ const createRegionManagerSchema = z.object({
 
 const createRegionManager = async (payload) => {
 
+
   try {
     if (!payload) {
+
       return {
         status: 400,
         message: "לא סופק מידע",
@@ -32,11 +34,13 @@ const createRegionManager = async (payload) => {
 
   const parsedData = createRegionManagerSchema.safeParse(payload);
 
+
     if (!parsedData.success) {
       const formattedErrors = parsedData.error.issues.map((issue) => ({
         field: issue.path.join("."),
         message: issue.message,
       }));
+
 
       return {
         status: 400,
@@ -45,6 +49,7 @@ const createRegionManager = async (payload) => {
         data: null,
       };
     }
+
 
     const client = await prisma.client.findUnique({
       where: { id: parsedData.data.clientId },
@@ -58,6 +63,7 @@ const createRegionManager = async (payload) => {
     });
 
     if (!client) {
+
       return {
         status: 404,
         message: "הלקוח לא נמצא",
@@ -65,11 +71,13 @@ const createRegionManager = async (payload) => {
       };
     }
 
+
     const existingRegionManager = await prisma.regionManager.findUnique({
       where: { email: parsedData.data.email },
     });
 
     if (existingRegionManager) {
+
       return {
         status: 409,
         message: "כתובת האימייל כבר בשימוש",
@@ -78,11 +86,13 @@ const createRegionManager = async (payload) => {
     }
 
     // Check if a user with this email already exists
+
     const existingUser = await prisma.user.findUnique({
       where: { email: parsedData.data.email },
     });
 
     if (existingUser) {
+
       return {
         status: 409,
         message: "כתובת האימייל כבר בשימוש במערכת עבור משתמש אחר",
@@ -103,8 +113,10 @@ const createRegionManager = async (payload) => {
       counter++;
     }
 
+
     const organization = await prisma.organization.findFirst();
     if (!organization) {
+
       return {
         status: 404,
         message: "לא קיים ארגון",
@@ -112,12 +124,14 @@ const createRegionManager = async (payload) => {
       };
     }
 
+
     const hashedPassword = await bcrypt.hash("systempassword123", SALT_ROUNDS);
 
 
     let result;
     try {
       result = await prisma.$transaction(async (tx) => {
+
         const user = await tx.user.create({
           data: {
             name: parsedData.data.name,
@@ -129,6 +143,7 @@ const createRegionManager = async (payload) => {
             organizationId: organization.id,
           },
         });
+
 
         const regionManagerData = {
           name: parsedData.data.name,
@@ -155,6 +170,7 @@ const createRegionManager = async (payload) => {
 
         return { user, regionManager };
       });
+
     } catch (txError) {
 
       // Re-throw a new error with a clear message
@@ -171,6 +187,7 @@ const createRegionManager = async (payload) => {
 
     // Try to send SMS but don't let it fail the whole operation
     try {
+
       await sendSMS(
         result.regionManager.phone,
         message,
@@ -181,8 +198,15 @@ const createRegionManager = async (payload) => {
         "ORGANIZATION",
         "MANAGER"
       );
+
+      console.log("SMS sent successfully");
     } catch (smsError) {
+      console.error(
+        "Failed to send SMS, but region manager was created:",
+        smsError && smsError.message ? smsError.message : "Unknown SMS error"
+      );
     }
+
 
     return {
       status: 201,

@@ -34,9 +34,13 @@ const getFields = async (filters = {}) => {
       where.AND.push({ clientId: parsedFilters.data.clientId });
     }
 
-    if (parsedFilters.data.managerId) {
-      where.AND.push({ managerId: parsedFilters.data.managerId });
-    }
+  if (parsedFilters.data.managerId) {
+    where.AND.push({ managerId: parsedFilters.data.managerId });
+  }
+
+  if (parsedFilters.data.regionManagerId) {
+    where.AND.push({ regionManagerId: parsedFilters.data.regionManagerId });
+  }
 
     if (parsedFilters.data.regionManagerId) {
       where.AND.push({ regionManagerId: parsedFilters.data.regionManagerId });
