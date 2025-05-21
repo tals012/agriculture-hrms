@@ -12,6 +12,8 @@ import addWorkersToGroup from "@/app/(backend)/actions/groups/addWorkersToGroup"
 import InitialsCircle from "@/components/initialsCircle";
 import ReactSelect from "react-select";
 import { toast } from "react-toastify";
+import ProgressBar from "@/components/progressBar";
+import sendBulkCredentialsSMS from "@/app/(backend)/actions/users/sendBulkCredentialsSMS";
 import styles from "@/styles/screens/my-fields.module.scss";
 
 export default function MyWorkersPage() {
@@ -55,6 +57,10 @@ export default function MyWorkersPage() {
   const [availableWorkers, setAvailableWorkers] = useState([]);
   const [loadingWorkers, setLoadingWorkers] = useState(false);
   const [adding, setAdding] = useState(false);
+  const [selectedForSMS, setSelectedForSMS] = useState([]);
+  const [sendingSMS, setSendingSMS] = useState(false);
+  const [sendProgress, setSendProgress] = useState(0);
+  const [showProgressModal, setShowProgressModal] = useState(false);
 
   useEffect(() => {
     const fetchData = async () => {
@@ -177,6 +183,46 @@ export default function MyWorkersPage() {
     );
   };
 
+  const handleToggleSMSWorker = (workerId) => {
+    setSelectedForSMS((prev) =>
+      prev.includes(workerId)
+        ? prev.filter((id) => id !== workerId)
+        : [...prev, workerId]
+    );
+  };
+
+  const handleSelectAllSMS = (checked) => {
+    if (checked) {
+      setSelectedForSMS(workers.map((w) => w.worker.id));
+    } else {
+      setSelectedForSMS([]);
+    }
+  };
+
+  const handleSendCredentials = async () => {
+    if (selectedForSMS.length === 0) return;
+    const CHUNK_SIZE = 10;
+    setShowProgressModal(true);
+    setSendingSMS(true);
+    for (let i = 0; i < selectedForSMS.length; i += CHUNK_SIZE) {
+      const chunk = selectedForSMS.slice(i, i + CHUNK_SIZE);
+      await sendBulkCredentialsSMS({ workerIds: chunk });
+      const progress = Math.min(
+        Math.round(((i + chunk.length) / selectedForSMS.length) * 100),
+        100
+      );
+      setSendProgress(progress);
+    }
+    setSendingSMS(false);
+    toast.success("ההודעות נשלחו", { position: "top-center", autoClose: 3000 });
+  };
+
+  const closeProgressModal = () => {
+    setShowProgressModal(false);
+    setSendProgress(0);
+    setSelectedForSMS([]);
+  };
+
   useEffect(() => {
     fetchWorkers();
   }, [managerId]);
@@ -229,12 +275,21 @@ export default function MyWorkersPage() {
               </div>
             </div>
           </div>
-          <button
-            className={styles.addButton}
-            onClick={() => setShowAddModal(true)}
-          >
-            הוסף עובדים
-          </button>
+          <div style={{ display: "flex", gap: "12px" }}>
+            <button
+              className={styles.addButton}
+              onClick={handleSendCredentials}
+              disabled={selectedForSMS.length === 0}
+            >
+              שלח פרטי התחברות
+            </button>
+            <button
+              className={styles.addButton}
+              onClick={() => setShowAddModal(true)}
+            >
+              הוסף עובדים
+            </button>
+          </div>
         </div>
 
         <div className={styles.tableContainer}>
@@ -256,6 +311,16 @@ export default function MyWorkersPage() {
                 <table>
                   <thead>
                     <tr>
+                      <th>
+                        <input
+                          type="checkbox"
+                          checked={
+                            selectedForSMS.length === workers.length &&
+                            workers.length > 0
+                          }
+                          onChange={(e) => handleSelectAllSMS(e.target.checked)}
+                        />
+                      </th>
                       <th>שם העובד</th>
                       <th>דרכון</th>
                       <th>קבוצה</th>
@@ -269,6 +334,13 @@ export default function MyWorkersPage() {
                         key={member.id}
                         className={member.isGroupLeader ? styles.leaderRow : ""}
                       >
+                        <td>
+                          <input
+                            type="checkbox"
+                            checked={selectedForSMS.includes(member.worker.id)}
+                            onChange={() => handleToggleSMSWorker(member.worker.id)}
+                          />
+                        </td>
                         <td>
                           <p>
                             {member.worker.nameHe || member.worker.name}
@@ -421,6 +493,26 @@ export default function MyWorkersPage() {
                   "הוסף עובדים"
                 )}
               </button>
+            </div>
+          </div>
+        </div>
+      )}
+      {showProgressModal && (
+        <div className={styles.modal}>
+          <div className={styles.modalContent}>
+            <div className={styles.modalHeader}>
+              <h3>שליחת פרטי התחברות</h3>
+            </div>
+            <div className={styles.modalBody}>
+              <ProgressBar progress={sendProgress} />
+              <p style={{ textAlign: "center", marginTop: 12 }}>{sendProgress}%</p>
+            </div>
+            <div className={styles.modalFooter}>
+              {!sendingSMS && (
+                <button className={styles.addButton} onClick={closeProgressModal}>
+                  סגור
+                </button>
+              )}
             </div>
           </div>
         </div>
