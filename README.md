@@ -158,8 +158,7 @@ agriculture-hrms/
 4. Initialize the database:
 
    ```bash
-   npx prisma generate
-   npx prisma db push
+   npx prisma migrate dev
    ```
 
 5. Run the development server:
