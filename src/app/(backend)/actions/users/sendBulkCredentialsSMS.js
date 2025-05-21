@@ -4,6 +4,7 @@ import prisma from "@/lib/prisma";
 import { z } from "zod";
 import sendSMS from "../sms/sendSMS";
 
+
 const schema = z
   .object({
     userIds: z.array(z.string().min(1)).optional(),
@@ -18,6 +19,7 @@ const schema = z
     }
   );
 
+
 const sendBulkCredentialsSMS = async (input) => {
   try {
     const parsed = schema.safeParse(input);
@@ -29,6 +31,7 @@ const sendBulkCredentialsSMS = async (input) => {
         errors: parsed.error.issues,
       };
     }
+
 
     let { userIds, workerIds } = parsed.data;
 
@@ -51,6 +54,7 @@ const sendBulkCredentialsSMS = async (input) => {
     if (userIds.length === 0) {
       return { status: 400, message: "לא נמצאו משתמשים לשליחה" };
     }
+
 
     const users = await prisma.user.findMany({
       where: { id: { in: userIds } },
