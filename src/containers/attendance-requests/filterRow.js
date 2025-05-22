@@ -30,6 +30,7 @@ const getMonthOptions = () => {
   }));
 };
 
+
 // Helper to generate day options ("all" or 1-31)
 const getDayOptions = () => {
   const options = [
@@ -44,6 +45,7 @@ const getDayOptions = () => {
   );
 
   return options;
+
 };
 
 // Helper to generate year options (current year and 2 previous years)
@@ -143,12 +145,14 @@ export default function AttendanceRequestsFilter({
           value: new Date().getMonth() + 1,
           label: getMonthOptions()[new Date().getMonth()]?.label,
         },
+
     day:
       initialFilters && Object.prototype.hasOwnProperty.call(initialFilters, "day")
         ? initialFilters.day !== undefined
           ? { value: initialFilters.day, label: String(initialFilters.day) }
           : { value: "ALL", label: "כל החודש" }
         : { value: new Date().getDate(), label: String(new Date().getDate()) },
+
     workerId: initialFilters?.workerId || null,
     groupId: initialFilters?.groupId || null,
   });
@@ -227,13 +231,16 @@ export default function AttendanceRequestsFilter({
   const handleReset = () => {
     const currentYear = new Date().getFullYear();
     const currentMonth = new Date().getMonth() + 1;
+    const currentDay = new Date().getDate();
     const resetFilters = {
       year: { value: currentYear, label: String(currentYear) },
       month: {
         value: currentMonth,
         label: getMonthOptions()[currentMonth - 1]?.label,
       },
+
       day: { value: "ALL", label: "כל החודש" },
+
       workerId: null,
       groupId: null,
     };
@@ -241,6 +248,7 @@ export default function AttendanceRequestsFilter({
     onFilterChange({
       year: currentYear,
       month: currentMonth,
+      day: currentDay,
       workerId: null,
       groupId: null,
       approvalStatus: "PENDING",
@@ -252,6 +260,7 @@ export default function AttendanceRequestsFilter({
     const formattedFilters = {
       year: filters.year.value,
       month: filters.month.value,
+      day: filters.day.value,
       workerId: filters.workerId?.value,
       groupId: filters.groupId?.value,
       approvalStatus: "PENDING",

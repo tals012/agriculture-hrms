@@ -66,9 +66,11 @@ export default function AttendanceRequestsPage() {
   const handleFilterChange = (newFilters, groupName = null) => {
     // Make sure all fields are present and have appropriate defaults
     const processedFilters = {
+
       year: newFilters.year !== undefined ? newFilters.year : new Date().getFullYear(),
       month:
         newFilters.month !== undefined ? newFilters.month : new Date().getMonth() + 1,
+
       workerId: newFilters.workerId || null,
       groupId: newFilters.groupId || null,
       approvalStatus: "PENDING",
