@@ -30,6 +30,14 @@ const getMonthOptions = () => {
   }));
 };
 
+// Helper to generate day options (1-31)
+const getDayOptions = () => {
+  return Array.from({ length: 31 }, (_, i) => ({
+    value: i + 1,
+    label: String(i + 1),
+  }));
+};
+
 // Helper to generate year options (current year and 2 previous years)
 const getYearOptions = () => {
   const currentYear = new Date().getFullYear();
@@ -127,6 +135,9 @@ export default function AttendanceRequestsFilter({
           value: new Date().getMonth() + 1,
           label: getMonthOptions()[new Date().getMonth()]?.label,
         },
+    day: initialFilters?.day
+      ? { value: initialFilters.day, label: String(initialFilters.day) }
+      : { value: new Date().getDate(), label: String(new Date().getDate()) },
     workerId: initialFilters?.workerId || null,
     groupId: initialFilters?.groupId || null,
   });
@@ -205,12 +216,14 @@ export default function AttendanceRequestsFilter({
   const handleReset = () => {
     const currentYear = new Date().getFullYear();
     const currentMonth = new Date().getMonth() + 1;
+    const currentDay = new Date().getDate();
     const resetFilters = {
       year: { value: currentYear, label: String(currentYear) },
       month: {
         value: currentMonth,
         label: getMonthOptions()[currentMonth - 1]?.label,
       },
+      day: { value: currentDay, label: String(currentDay) },
       workerId: null,
       groupId: null,
     };
@@ -218,6 +231,7 @@ export default function AttendanceRequestsFilter({
     onFilterChange({
       year: currentYear,
       month: currentMonth,
+      day: currentDay,
       workerId: null,
       groupId: null,
       approvalStatus: "PENDING",
@@ -229,6 +243,7 @@ export default function AttendanceRequestsFilter({
     const formattedFilters = {
       year: filters.year.value,
       month: filters.month.value,
+      day: filters.day.value,
       workerId: filters.workerId?.value,
       groupId: filters.groupId?.value,
       approvalStatus: "PENDING",
@@ -258,6 +273,23 @@ export default function AttendanceRequestsFilter({
               value={filters.month}
               onChange={(option) => handleFilterChange(option, "month")}
               placeholder="בחר חודש"
+              components={{
+                IndicatorSeparator: () => null,
+              }}
+              styles={selectStyle}
+              menuPortalTarget={document.body}
+              menuPosition={"fixed"}
+              isRtl={true}
+            />
+          </div>
+
+          <div className={styles.filterItem}>
+            <label className={styles.label}>יום</label>
+            <ReactSelect
+              options={getDayOptions()}
+              value={filters.day}
+              onChange={(option) => handleFilterChange(option, "day")}
+              placeholder="בחר יום"
               components={{
                 IndicatorSeparator: () => null,
               }}

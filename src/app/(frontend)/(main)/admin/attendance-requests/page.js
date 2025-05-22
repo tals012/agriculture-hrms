@@ -20,6 +20,7 @@ export default function AttendanceRequestsPage() {
   const [filters, setFilters] = useState({
     year: new Date().getFullYear(),
     month: new Date().getMonth() + 1,
+    day: new Date().getDate(),
     workerId: null,
     groupId: null,
     approvalStatus: "PENDING"
@@ -32,7 +33,15 @@ export default function AttendanceRequestsPage() {
   async function fetchAttendanceRequests(filterOptions) {
     setLoading(true);
     try {
-      const result = await getAttendanceRequests(filterOptions);
+      // Ensure numeric values are passed to the server action
+      const typedFilters = {
+        ...filterOptions,
+        year: filterOptions.year ? Number(filterOptions.year) : undefined,
+        month: filterOptions.month ? Number(filterOptions.month) : undefined,
+        day: filterOptions.day ? Number(filterOptions.day) : undefined,
+      };
+
+      const result = await getAttendanceRequests(typedFilters);
       if (result.success) {
         console.log(result.data, "result.data");
         setAttendanceRequests(result.data);
@@ -67,6 +76,7 @@ export default function AttendanceRequestsPage() {
     const processedFilters = {
       year: newFilters.year || new Date().getFullYear(),
       month: newFilters.month || new Date().getMonth() + 1,
+      day: newFilters.day || new Date().getDate(),
       workerId: newFilters.workerId || null,
       groupId: newFilters.groupId || null,
       approvalStatus: "PENDING"

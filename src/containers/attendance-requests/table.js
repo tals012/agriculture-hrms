@@ -99,6 +99,11 @@ export default function AttendanceRequestsTable({
   // Create a map to track container value cells
   const containerCellsRef = useRef({});
 
+  // Calculate total containers for summary row
+  const totalContainers = requests.reduce((sum, r) => {
+    return sum + (r.totalContainersFilled || 0);
+  }, 0);
+
   // Force re-render the entire table
   const forceRefresh = () => {
     setRefreshKey((prevKey) => prevKey + 1);
@@ -434,6 +439,13 @@ export default function AttendanceRequestsTable({
               </tr>
             ))}
           </tbody>
+          <tfoot>
+            <tr className={styles.totalRow}>
+              <td colSpan={6}>סך הכל קונטיינרים</td>
+              <td>{totalContainers}</td>
+              <td></td>
+            </tr>
+          </tfoot>
         </table>
       </div>
 
