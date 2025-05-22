@@ -20,6 +20,7 @@ export default function AttendanceRequestsPage() {
   const [filters, setFilters] = useState({
     year: new Date().getFullYear(),
     month: new Date().getMonth() + 1,
+    day: new Date().getDate(),
     workerId: null,
     groupId: null,
     approvalStatus: "PENDING"
@@ -67,6 +68,7 @@ export default function AttendanceRequestsPage() {
     const processedFilters = {
       year: newFilters.year || new Date().getFullYear(),
       month: newFilters.month || new Date().getMonth() + 1,
+      day: newFilters.day || new Date().getDate(),
       workerId: newFilters.workerId || null,
       groupId: newFilters.groupId || null,
       approvalStatus: "PENDING"

@@ -258,10 +258,15 @@ $gray-500: #6b7280;
       &:hover {
         background-color: $gray-50;
       }
-      
+
       &:last-child td {
         border-bottom: none;
       }
+    }
+
+    tfoot td {
+      font-weight: 600;
+      background-color: $gray-50;
     }
   }
 }
