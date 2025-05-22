@@ -30,12 +30,9 @@ const getMonthOptions = () => {
   }));
 };
 
-
 // Helper to generate day options ("all" or 1-31)
 const getDayOptions = () => {
-  const options = [
-    { value: "ALL", label: "כל החודש" },
-  ];
+  const options = [{ value: "ALL", label: "כל החודש" }];
 
   options.push(
     ...Array.from({ length: 31 }, (_, i) => ({
@@ -45,7 +42,6 @@ const getDayOptions = () => {
   );
 
   return options;
-
 };
 
 // Helper to generate year options (current year and 2 previous years)
@@ -147,7 +143,8 @@ export default function AttendanceRequestsFilter({
         },
 
     day:
-      initialFilters && Object.prototype.hasOwnProperty.call(initialFilters, "day")
+      initialFilters &&
+      Object.prototype.hasOwnProperty.call(initialFilters, "day")
         ? initialFilters.day !== undefined
           ? { value: initialFilters.day, label: String(initialFilters.day) }
           : { value: "ALL", label: "כל החודש" }
