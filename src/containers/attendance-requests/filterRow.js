@@ -30,12 +30,22 @@ const getMonthOptions = () => {
   }));
 };
 
-// Helper to generate day options (1-31)
+
+// Helper to generate day options ("all" or 1-31)
 const getDayOptions = () => {
-  return Array.from({ length: 31 }, (_, i) => ({
-    value: i + 1,
-    label: String(i + 1),
-  }));
+  const options = [
+    { value: "ALL", label: "כל החודש" },
+  ];
+
+  options.push(
+    ...Array.from({ length: 31 }, (_, i) => ({
+      value: i + 1,
+      label: String(i + 1),
+    }))
+  );
+
+  return options;
+
 };
 
 // Helper to generate year options (current year and 2 previous years)
@@ -135,9 +145,14 @@ export default function AttendanceRequestsFilter({
           value: new Date().getMonth() + 1,
           label: getMonthOptions()[new Date().getMonth()]?.label,
         },
-    day: initialFilters?.day
-      ? { value: initialFilters.day, label: String(initialFilters.day) }
-      : { value: new Date().getDate(), label: String(new Date().getDate()) },
+
+    day:
+      initialFilters && Object.prototype.hasOwnProperty.call(initialFilters, "day")
+        ? initialFilters.day !== undefined
+          ? { value: initialFilters.day, label: String(initialFilters.day) }
+          : { value: "ALL", label: "כל החודש" }
+        : { value: new Date().getDate(), label: String(new Date().getDate()) },
+
     workerId: initialFilters?.workerId || null,
     groupId: initialFilters?.groupId || null,
   });
@@ -223,7 +238,9 @@ export default function AttendanceRequestsFilter({
         value: currentMonth,
         label: getMonthOptions()[currentMonth - 1]?.label,
       },
-      day: { value: currentDay, label: String(currentDay) },
+
+      day: { value: "ALL", label: "כל החודש" },
+
       workerId: null,
       groupId: null,
     };
@@ -248,6 +265,9 @@ export default function AttendanceRequestsFilter({
       groupId: filters.groupId?.value,
       approvalStatus: "PENDING",
     };
+    if (filters.day.value !== "ALL") {
+      formattedFilters.day = filters.day.value;
+    }
 
     if (filters.groupId && groupMap[filters.groupId.value]) {
       onFilterChange(formattedFilters, groupMap[filters.groupId.value]);

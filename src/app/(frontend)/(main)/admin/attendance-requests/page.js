@@ -66,13 +66,19 @@ export default function AttendanceRequestsPage() {
   const handleFilterChange = (newFilters, groupName = null) => {
     // Make sure all fields are present and have appropriate defaults
     const processedFilters = {
-      year: newFilters.year || new Date().getFullYear(),
-      month: newFilters.month || new Date().getMonth() + 1,
-      day: newFilters.day || new Date().getDate(),
+
+      year: newFilters.year !== undefined ? newFilters.year : new Date().getFullYear(),
+      month:
+        newFilters.month !== undefined ? newFilters.month : new Date().getMonth() + 1,
+
       workerId: newFilters.workerId || null,
       groupId: newFilters.groupId || null,
-      approvalStatus: "PENDING"
+      approvalStatus: "PENDING",
     };
+
+    if (newFilters.day !== undefined) {
+      processedFilters.day = newFilters.day;
+    }
     
     // Store the group name if provided
     if (groupName && processedFilters.groupId) {
