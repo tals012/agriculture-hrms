@@ -31,20 +31,12 @@ const getMonthOptions = () => {
 };
 
 
-// Helper to generate day options ("all" or 1-31)
+// Helper to generate day options (1-31)
 const getDayOptions = () => {
-  const options = [
-    { value: "ALL", label: "כל החודש" },
-  ];
-
-  options.push(
-    ...Array.from({ length: 31 }, (_, i) => ({
-      value: i + 1,
-      label: String(i + 1),
-    }))
-  );
-
-  return options;
+  return Array.from({ length: 31 }, (_, i) => ({
+    value: i + 1,
+    label: String(i + 1),
+  }));
 
 };
 
@@ -146,12 +138,9 @@ export default function AttendanceRequestsFilter({
           label: getMonthOptions()[new Date().getMonth()]?.label,
         },
 
-    day:
-      initialFilters && Object.prototype.hasOwnProperty.call(initialFilters, "day")
-        ? initialFilters.day !== undefined
-          ? { value: initialFilters.day, label: String(initialFilters.day) }
-          : { value: "ALL", label: "כל החודש" }
-        : { value: new Date().getDate(), label: String(new Date().getDate()) },
+    day: initialFilters?.day
+      ? { value: initialFilters.day, label: String(initialFilters.day) }
+      : { value: new Date().getDate(), label: String(new Date().getDate()) },
 
     workerId: initialFilters?.workerId || null,
     groupId: initialFilters?.groupId || null,
@@ -238,8 +227,7 @@ export default function AttendanceRequestsFilter({
         value: currentMonth,
         label: getMonthOptions()[currentMonth - 1]?.label,
       },
-
-      day: { value: "ALL", label: "כל החודש" },
+      day: { value: currentDay, label: String(currentDay) },
 
       workerId: null,
       groupId: null,
