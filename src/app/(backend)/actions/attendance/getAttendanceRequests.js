@@ -7,6 +7,7 @@ import { z } from "zod";
 const filterSchema = z.object({
   year: z.number().int().positive().optional(),
   month: z.number().int().min(1).max(12).optional(),
+  day: z.number().int().min(1).max(31).optional(),
   workerId: z.string().optional().nullable(),
   groupId: z.string().optional().nullable(),
   approvalStatus: z.enum(["PENDING", "APPROVED", "REJECTED", "ALL"]).optional(),
@@ -30,16 +31,26 @@ export async function getAttendanceRequests(filters = {}) {
       };
     }
     
-    const { year, month, workerId, groupId, approvalStatus } = parsedFilters.data;
+    const { year, month, day, workerId, groupId, approvalStatus } = parsedFilters.data;
     
     // Build the where clause for the query
     const where = {};
     
     // Add date filters if year and month are provided
     if (year && month) {
-      const startDate = new Date(year, month - 1, 1);
-      const endDate = new Date(year, month, 0); // Last day of the month
-      
+      let startDate;
+      let endDate;
+
+      if (day) {
+        // Filter for a specific day
+        startDate = new Date(year, month - 1, day);
+        endDate = new Date(year, month - 1, day, 23, 59, 59, 999);
+      } else {
+        // Filter for the whole month
+        startDate = new Date(year, month - 1, 1);
+        endDate = new Date(year, month, 0);
+      }
+
       where.attendanceDate = {
         gte: startDate,
         lte: endDate,
