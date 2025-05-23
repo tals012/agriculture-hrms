@@ -10,6 +10,9 @@ import { debounce } from "@/lib/debounce";
 import getManagers from "@/app/(backend)/actions/managers/getManagers";
 import deleteManager from "@/app/(backend)/actions/managers/deleteManager";
 import sendManagerCredentialsSMS from "@/app/(backend)/actions/managers/sendManagerCredentialsSMS";
+
+import resetManagerPassword from "@/app/(backend)/actions/managers/resetManagerPassword";
+
 import CredentialsSmsModal from "@/components/credentialsSmsModal";
 import styles from "@/styles/containers/bigModals/client/managers/managersTable.module.scss";
 
@@ -24,6 +27,10 @@ const ManagersTable = ({
   const [search, setSearch] = useState("");
   const [selected, setSelected] = useState(null);
   const [smsLoading, setSmsLoading] = useState(false);
+
+  const [passwordLoading, setPasswordLoading] = useState(false);
+  const [generatedPassword, setGeneratedPassword] = useState("");
+
 
   const fetchData = async (searchQuery) => {
     try {
@@ -111,7 +118,12 @@ const ManagersTable = ({
     if (!selected) return;
     try {
       setSmsLoading(true);
-      const res = await sendManagerCredentialsSMS({ managerId: selected.id });
+
+      const res = await sendManagerCredentialsSMS({
+        managerId: selected.id,
+        ...(generatedPassword && { password: generatedPassword }),
+      });
+
       if (res?.status === 200) {
         toast.success(res.message, { position: "top-center" });
       } else {
@@ -122,6 +134,26 @@ const ManagersTable = ({
       toast.error("שליחת ה-SMS נכשלה", { position: "top-center" });
     } finally {
       setSmsLoading(false);
+    }
+  };
+
+
+  const handleGeneratePassword = async () => {
+    if (!selected) return;
+    try {
+      setPasswordLoading(true);
+      const res = await resetManagerPassword({ managerId: selected.id });
+      if (res?.status === 200) {
+        setGeneratedPassword(res.password);
+        toast.success("נוצרה סיסמה חדשה", { position: "top-center" });
+      } else {
+        toast.error(res?.message || "יצירת הסיסמה נכשלה", { position: "top-center" });
+      }
+    } catch (error) {
+      console.error("Error generating password:", error);
+      toast.error("יצירת הסיסמה נכשלה", { position: "top-center" });
+    } finally {
+      setPasswordLoading(false);
     }
   };
 
@@ -206,11 +238,19 @@ const ManagersTable = ({
       {selected && (
         <CredentialsSmsModal
           isOpen={!!selected}
-          onClose={() => setSelected(null)}
+
+          onClose={() => {
+            setSelected(null);
+            setGeneratedPassword("");
+          }}
           name={selected.name}
           username={selected.user?.username}
+          password={generatedPassword}
           onSend={handleSendSMS}
+          onGenerate={handleGeneratePassword}
           loading={smsLoading}
+          generating={passwordLoading}
+
         />
       )}
     </div>

@@ -10,6 +10,9 @@ import { debounce } from "@/lib/debounce";
 import getRegionManagers from "@/app/(backend)/actions/regionManagers/getRegionManagers";
 import deleteRegionManager from "@/app/(backend)/actions/regionManagers/deleteRegionManager";
 import sendRegionManagerCredentialsSMS from "@/app/(backend)/actions/regionManagers/sendRegionManagerCredentialsSMS";
+
+import resetRegionManagerPassword from "@/app/(backend)/actions/regionManagers/resetRegionManagerPassword";
+
 import CredentialsSmsModal from "@/components/credentialsSmsModal";
 import styles from "@/styles/containers/bigModals/client/managers/managersTable.module.scss";
 
@@ -24,6 +27,10 @@ const RegionManagersTable = ({
   const [search, setSearch] = useState("");
   const [selected, setSelected] = useState(null);
   const [smsLoading, setSmsLoading] = useState(false);
+
+  const [passwordLoading, setPasswordLoading] = useState(false);
+  const [generatedPassword, setGeneratedPassword] = useState("");
+
 
   const fetchData = async (searchQuery) => {
     try {
@@ -113,6 +120,9 @@ const RegionManagersTable = ({
       setSmsLoading(true);
       const res = await sendRegionManagerCredentialsSMS({
         regionManagerId: selected.id,
+
+        ...(generatedPassword && { password: generatedPassword }),
+
       });
       if (res?.status === 200) {
         toast.success(res.message, { position: "top-center" });
@@ -126,6 +136,27 @@ const RegionManagersTable = ({
       setSmsLoading(false);
     }
   };
+
+
+  const handleGeneratePassword = async () => {
+    if (!selected) return;
+    try {
+      setPasswordLoading(true);
+      const res = await resetRegionManagerPassword({ regionManagerId: selected.id });
+      if (res?.status === 200) {
+        setGeneratedPassword(res.password);
+        toast.success("נוצרה סיסמה חדשה", { position: "top-center" });
+      } else {
+        toast.error(res?.message || "יצירת הסיסמה נכשלה", { position: "top-center" });
+      }
+    } catch (error) {
+      console.error("Error generating password:", error);
+      toast.error("יצירת הסיסמה נכשלה", { position: "top-center" });
+    } finally {
+      setPasswordLoading(false);
+    }
+  };
+
 
   return (
     <div className={styles.container}>
@@ -208,11 +239,19 @@ const RegionManagersTable = ({
       {selected && (
         <CredentialsSmsModal
           isOpen={!!selected}
-          onClose={() => setSelected(null)}
+
+          onClose={() => {
+            setSelected(null);
+            setGeneratedPassword("");
+          }}
           name={selected.name}
           username={selected.user?.username}
+          password={generatedPassword}
           onSend={handleSendSMS}
+          onGenerate={handleGeneratePassword}
           loading={smsLoading}
+          generating={passwordLoading}
+
         />
       )}
     </div>
