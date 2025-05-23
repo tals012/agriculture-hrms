@@ -10,7 +10,9 @@ import { debounce } from "@/lib/debounce";
 import getRegionManagers from "@/app/(backend)/actions/regionManagers/getRegionManagers";
 import deleteRegionManager from "@/app/(backend)/actions/regionManagers/deleteRegionManager";
 import sendRegionManagerCredentialsSMS from "@/app/(backend)/actions/regionManagers/sendRegionManagerCredentialsSMS";
+
 import resetRegionManagerPassword from "@/app/(backend)/actions/regionManagers/resetRegionManagerPassword";
+
 import CredentialsSmsModal from "@/components/credentialsSmsModal";
 import styles from "@/styles/containers/bigModals/client/managers/managersTable.module.scss";
 
@@ -25,8 +27,10 @@ const RegionManagersTable = ({
   const [search, setSearch] = useState("");
   const [selected, setSelected] = useState(null);
   const [smsLoading, setSmsLoading] = useState(false);
+
   const [passwordLoading, setPasswordLoading] = useState(false);
   const [generatedPassword, setGeneratedPassword] = useState("");
+
 
   const fetchData = async (searchQuery) => {
     try {
@@ -116,7 +120,9 @@ const RegionManagersTable = ({
       setSmsLoading(true);
       const res = await sendRegionManagerCredentialsSMS({
         regionManagerId: selected.id,
+
         ...(generatedPassword && { password: generatedPassword }),
+
       });
       if (res?.status === 200) {
         toast.success(res.message, { position: "top-center" });
@@ -130,6 +136,7 @@ const RegionManagersTable = ({
       setSmsLoading(false);
     }
   };
+
 
   const handleGeneratePassword = async () => {
     if (!selected) return;
@@ -149,6 +156,7 @@ const RegionManagersTable = ({
       setPasswordLoading(false);
     }
   };
+
 
   return (
     <div className={styles.container}>
@@ -231,6 +239,7 @@ const RegionManagersTable = ({
       {selected && (
         <CredentialsSmsModal
           isOpen={!!selected}
+
           onClose={() => {
             setSelected(null);
             setGeneratedPassword("");
@@ -242,6 +251,7 @@ const RegionManagersTable = ({
           onGenerate={handleGeneratePassword}
           loading={smsLoading}
           generating={passwordLoading}
+
         />
       )}
     </div>

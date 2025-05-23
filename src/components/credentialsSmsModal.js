@@ -10,11 +10,13 @@ const CredentialsSmsModal = ({
   onClose,
   name,
   username,
+
   password,
   onSend,
   onGenerate,
   loading,
   generating,
+
 }) => {
   return (
     <Modal isOpen={isOpen} onClose={onClose} title="פרטי התחברות">
@@ -24,6 +26,7 @@ const CredentialsSmsModal = ({
           <label>שם משתמש</label>
           <input type="text" value={username || ""} readOnly />
         </div>
+
         {password && (
           <div className={styles.field}>
             <label>סיסמה</label>
@@ -49,6 +52,7 @@ const CredentialsSmsModal = ({
             )}
           </button>
         </div>
+
       </div>
     </Modal>
   );

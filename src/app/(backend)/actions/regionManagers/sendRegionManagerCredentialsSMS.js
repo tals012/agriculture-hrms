@@ -6,7 +6,9 @@ import sendSMS from "../sms/sendSMS";
 
 const schema = z.object({
   regionManagerId: z.string().min(1, "נדרש מזהה מנהל אזור"),
+
   password: z.string().optional(),
+
 });
 
 const sendRegionManagerCredentialsSMS = async (input) => {
@@ -20,7 +22,9 @@ const sendRegionManagerCredentialsSMS = async (input) => {
       };
     }
 
+
     const { regionManagerId, password } = parsed.data;
+
 
     const regionManager = await prisma.regionManager.findUnique({
       where: { id: regionManagerId },
@@ -41,7 +45,9 @@ const sendRegionManagerCredentialsSMS = async (input) => {
       process.env.NEXT_PUBLIC_APP_URL || "https://agriculture-hrms.vercel.app";
     const loginUrl = `${BASE_URL}/login`;
 
+
     const message = `שלום ${regionManager.name},\nפרטי הגישה שלך למערכת:\nשם משתמש: ${regionManager.user.username}\nסיסמה: ${password || "10203040 (אם לא שינית)"}\nקישור לכניסה: ${loginUrl}`;
+
 
     const smsSent = await sendSMS(
       phone,

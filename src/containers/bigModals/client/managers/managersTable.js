@@ -10,7 +10,9 @@ import { debounce } from "@/lib/debounce";
 import getManagers from "@/app/(backend)/actions/managers/getManagers";
 import deleteManager from "@/app/(backend)/actions/managers/deleteManager";
 import sendManagerCredentialsSMS from "@/app/(backend)/actions/managers/sendManagerCredentialsSMS";
+
 import resetManagerPassword from "@/app/(backend)/actions/managers/resetManagerPassword";
+
 import CredentialsSmsModal from "@/components/credentialsSmsModal";
 import styles from "@/styles/containers/bigModals/client/managers/managersTable.module.scss";
 
@@ -25,8 +27,10 @@ const ManagersTable = ({
   const [search, setSearch] = useState("");
   const [selected, setSelected] = useState(null);
   const [smsLoading, setSmsLoading] = useState(false);
+
   const [passwordLoading, setPasswordLoading] = useState(false);
   const [generatedPassword, setGeneratedPassword] = useState("");
+
 
   const fetchData = async (searchQuery) => {
     try {
@@ -114,10 +118,12 @@ const ManagersTable = ({
     if (!selected) return;
     try {
       setSmsLoading(true);
+
       const res = await sendManagerCredentialsSMS({
         managerId: selected.id,
         ...(generatedPassword && { password: generatedPassword }),
       });
+
       if (res?.status === 200) {
         toast.success(res.message, { position: "top-center" });
       } else {
@@ -130,6 +136,7 @@ const ManagersTable = ({
       setSmsLoading(false);
     }
   };
+
 
   const handleGeneratePassword = async () => {
     if (!selected) return;
@@ -231,6 +238,7 @@ const ManagersTable = ({
       {selected && (
         <CredentialsSmsModal
           isOpen={!!selected}
+
           onClose={() => {
             setSelected(null);
             setGeneratedPassword("");
@@ -242,6 +250,7 @@ const ManagersTable = ({
           onGenerate={handleGeneratePassword}
           loading={smsLoading}
           generating={passwordLoading}
+
         />
       )}
     </div>
