@@ -80,6 +80,15 @@ export default function ManagerHeader() {
                   נוכחות
                 </li>
               </Link>
+              <Link href="/manager/work-view">
+                <li
+                  className={
+                    pathname === "/manager/work-view" ? styles.active : ""
+                  }
+                >
+                  תצוגת עבודה
+                </li>
+              </Link>
             </ul>
           </nav>
         </div>
