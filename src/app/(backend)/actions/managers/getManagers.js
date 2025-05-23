@@ -50,6 +50,12 @@ const getManagers = async (filters = {}) => {
         email: true,
         phone: true,
         clientId: true,
+        userId: true,
+        user: {
+          select: {
+            username: true,
+          },
+        },
         createdAt: true,
         updatedAt: true,
       },

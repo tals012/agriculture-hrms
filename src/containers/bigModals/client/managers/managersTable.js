@@ -5,9 +5,13 @@ import { useCallback, useEffect, useState } from "react";
 import Spinner from "@/components/spinner";
 import { toast } from "react-toastify";
 import { Trash } from "@/svgs/trash";
+import { FaSms } from "react-icons/fa";
 import { debounce } from "@/lib/debounce";
 import getManagers from "@/app/(backend)/actions/managers/getManagers";
 import deleteManager from "@/app/(backend)/actions/managers/deleteManager";
+import sendManagerCredentialsSMS from "@/app/(backend)/actions/managers/sendManagerCredentialsSMS";
+import resetManagerPassword from "@/app/(backend)/actions/managers/resetManagerPassword";
+import CredentialsSmsModal from "@/components/credentialsSmsModal";
 import styles from "@/styles/containers/bigModals/client/managers/managersTable.module.scss";
 
 const ManagersTable = ({
@@ -19,6 +23,10 @@ const ManagersTable = ({
   const [data, setData] = useState([]);
   const [loading, setLoading] = useState(true);
   const [search, setSearch] = useState("");
+  const [selected, setSelected] = useState(null);
+  const [smsLoading, setSmsLoading] = useState(false);
+  const [passwordLoading, setPasswordLoading] = useState(false);
+  const [generatedPassword, setGeneratedPassword] = useState("");
 
   const fetchData = async (searchQuery) => {
     try {
@@ -102,6 +110,46 @@ const ManagersTable = ({
     }
   };
 
+  const handleSendSMS = async () => {
+    if (!selected) return;
+    try {
+      setSmsLoading(true);
+      const res = await sendManagerCredentialsSMS({
+        managerId: selected.id,
+        ...(generatedPassword && { password: generatedPassword }),
+      });
+      if (res?.status === 200) {
+        toast.success(res.message, { position: "top-center" });
+      } else {
+        toast.error(res?.message || "שליחת ה-SMS נכשלה", { position: "top-center" });
+      }
+    } catch (error) {
+      console.error("Error sending SMS:", error);
+      toast.error("שליחת ה-SMS נכשלה", { position: "top-center" });
+    } finally {
+      setSmsLoading(false);
+    }
+  };
+
+  const handleGeneratePassword = async () => {
+    if (!selected) return;
+    try {
+      setPasswordLoading(true);
+      const res = await resetManagerPassword({ managerId: selected.id });
+      if (res?.status === 200) {
+        setGeneratedPassword(res.password);
+        toast.success("נוצרה סיסמה חדשה", { position: "top-center" });
+      } else {
+        toast.error(res?.message || "יצירת הסיסמה נכשלה", { position: "top-center" });
+      }
+    } catch (error) {
+      console.error("Error generating password:", error);
+      toast.error("יצירת הסיסמה נכשלה", { position: "top-center" });
+    } finally {
+      setPasswordLoading(false);
+    }
+  };
+
   return (
     <div className={styles.container}>
       <div className={styles.search}>
@@ -160,6 +208,14 @@ const ManagersTable = ({
                 <td>
                   <div className={styles.icons}>
                     <div
+                      onClick={() => {
+                        setSelected(manager);
+                      }}
+                      style={{ cursor: "pointer" }}
+                    >
+                      <FaSms />
+                    </div>
+                    <div
                       onClick={() => handleDelete(manager.id)}
                       style={{ cursor: "pointer" }}
                     >
@@ -172,6 +228,22 @@ const ManagersTable = ({
           </tbody>
         </table>
       </div>
+      {selected && (
+        <CredentialsSmsModal
+          isOpen={!!selected}
+          onClose={() => {
+            setSelected(null);
+            setGeneratedPassword("");
+          }}
+          name={selected.name}
+          username={selected.user?.username}
+          password={generatedPassword}
+          onSend={handleSendSMS}
+          onGenerate={handleGeneratePassword}
+          loading={smsLoading}
+          generating={passwordLoading}
+        />
+      )}
     </div>
   );
 };
