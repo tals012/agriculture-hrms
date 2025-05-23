@@ -271,6 +271,20 @@ $gray-500: #6b7280;
   }
 }
 
+.inputSmall {
+  width: 60px;
+  padding: 0.25rem;
+  border: 1px solid $gray-200;
+  border-radius: 0.25rem;
+  text-align: center;
+}
+
+.dateInput {
+  padding: 0.25rem 0.5rem;
+  border: 1px solid $gray-200;
+  border-radius: 0.25rem;
+}
+
 // Status indicators
 .status {
   display: inline-flex;
