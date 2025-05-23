@@ -305,6 +305,10 @@ export default function AttendanceRequestsPage() {
   
   // Calculate pending requests count
   const pendingRequestsCount = attendanceRequests.length || 0;
+  const totalContainers = attendanceRequests.reduce(
+    (sum, r) => sum + (r.totalContainersFilled || 0),
+    0
+  );
   
   return (
     <div className={styles.container}>
@@ -316,6 +320,10 @@ export default function AttendanceRequestsPage() {
             {
               value: pendingRequestsCount,
               text: "בקשות ממתינות"
+            },
+            {
+              value: totalContainers,
+              text: "סה\"כ קונטיינרים"
             }
           ]}
           actions={[

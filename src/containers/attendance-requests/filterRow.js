@@ -31,13 +31,15 @@ const getMonthOptions = () => {
 };
 
 
-// Helper to generate day options (1-31)
+// Helper to generate day options ("ALL" or 1-31)
 const getDayOptions = () => {
-  return Array.from({ length: 31 }, (_, i) => ({
-    value: i + 1,
-    label: String(i + 1),
-  }));
-
+  return [
+    { value: "ALL", label: "כל הימים" },
+    ...Array.from({ length: 31 }, (_, i) => ({
+      value: i + 1,
+      label: String(i + 1),
+    })),
+  ];
 };
 
 // Helper to generate year options (current year and 2 previous years)
@@ -139,7 +141,9 @@ export default function AttendanceRequestsFilter({
         },
 
     day: initialFilters?.day
-      ? { value: initialFilters.day, label: String(initialFilters.day) }
+      ? initialFilters.day === "ALL"
+        ? { value: "ALL", label: "כל הימים" }
+        : { value: initialFilters.day, label: String(initialFilters.day) }
       : { value: new Date().getDate(), label: String(new Date().getDate()) },
 
     workerId: initialFilters?.workerId || null,
@@ -248,7 +252,6 @@ export default function AttendanceRequestsFilter({
     const formattedFilters = {
       year: filters.year.value,
       month: filters.month.value,
-      day: filters.day.value,
       workerId: filters.workerId?.value,
       groupId: filters.groupId?.value,
       approvalStatus: "PENDING",
