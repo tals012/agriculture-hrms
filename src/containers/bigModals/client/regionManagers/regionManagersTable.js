@@ -5,9 +5,12 @@ import { useCallback, useEffect, useState } from "react";
 import Spinner from "@/components/spinner";
 import { toast } from "react-toastify";
 import { Trash } from "@/svgs/trash";
+import { FaSms } from "react-icons/fa";
 import { debounce } from "@/lib/debounce";
 import getRegionManagers from "@/app/(backend)/actions/regionManagers/getRegionManagers";
 import deleteRegionManager from "@/app/(backend)/actions/regionManagers/deleteRegionManager";
+import sendRegionManagerCredentialsSMS from "@/app/(backend)/actions/regionManagers/sendRegionManagerCredentialsSMS";
+import CredentialsSmsModal from "@/components/credentialsSmsModal";
 import styles from "@/styles/containers/bigModals/client/managers/managersTable.module.scss";
 
 const RegionManagersTable = ({
@@ -19,6 +22,8 @@ const RegionManagersTable = ({
   const [data, setData] = useState([]);
   const [loading, setLoading] = useState(true);
   const [search, setSearch] = useState("");
+  const [selected, setSelected] = useState(null);
+  const [smsLoading, setSmsLoading] = useState(false);
 
   const fetchData = async (searchQuery) => {
     try {
@@ -102,6 +107,26 @@ const RegionManagersTable = ({
     }
   };
 
+  const handleSendSMS = async () => {
+    if (!selected) return;
+    try {
+      setSmsLoading(true);
+      const res = await sendRegionManagerCredentialsSMS({
+        regionManagerId: selected.id,
+      });
+      if (res?.status === 200) {
+        toast.success(res.message, { position: "top-center" });
+      } else {
+        toast.error(res?.message || "שליחת ה-SMS נכשלה", { position: "top-center" });
+      }
+    } catch (error) {
+      console.error("Error sending SMS:", error);
+      toast.error("שליחת ה-SMS נכשלה", { position: "top-center" });
+    } finally {
+      setSmsLoading(false);
+    }
+  };
+
   return (
     <div className={styles.container}>
       <div className={styles.search}>
@@ -160,6 +185,14 @@ const RegionManagersTable = ({
                 <td>
                   <div className={styles.icons}>
                     <div
+                      onClick={() => {
+                        setSelected(manager);
+                      }}
+                      style={{ cursor: "pointer" }}
+                    >
+                      <FaSms />
+                    </div>
+                    <div
                       onClick={() => handleDelete(manager.id)}
                       style={{ cursor: "pointer" }}
                     >
@@ -172,6 +205,16 @@ const RegionManagersTable = ({
           </tbody>
         </table>
       </div>
+      {selected && (
+        <CredentialsSmsModal
+          isOpen={!!selected}
+          onClose={() => setSelected(null)}
+          name={selected.name}
+          username={selected.user?.username}
+          onSend={handleSendSMS}
+          loading={smsLoading}
+        />
+      )}
     </div>
   );
 };
