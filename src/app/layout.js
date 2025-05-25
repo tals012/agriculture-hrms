@@ -19,7 +19,11 @@ const ibm = IBM_Plex_Sans_Hebrew({
 
 export default function RootLayout({ children }) {
   return (
-    <html lang="he" className={`${ibm.className} ${ibm.variable}`}>
+    <html
+      lang="he"
+      className={`${ibm.className} ${ibm.variable}`}
+      suppressHydrationWarning={true}
+    >
       <body>
         <Toaster position="top-center" />
         {children}
